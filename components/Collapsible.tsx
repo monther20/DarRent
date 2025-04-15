@@ -1,11 +1,40 @@
 import { PropsWithChildren, useState } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { Colors } from '@/constants/Colors';
+import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+
+// Add type declaration for TouchableOpacityProps
+declare module 'react-native' {
+  interface TouchableOpacityProps {
+    activeOpacity?: number;
+  }
+}
+
+// Add type declaration for Colors
+declare module '@/constants/Colors' {
+  interface Colors {
+    light: {
+      icon: string;
+      [key: string]: any;
+    };
+    dark: {
+      icon: string;
+      [key: string]: any;
+    };
+  }
+}
+
+// Add type declaration for ThemedText
+declare module '@/components/ThemedText' {
+  interface ThemedTextProps {
+    type?: string;
+    children?: React.ReactNode;
+  }
+}
 
 export function Collapsible({ children, title }: PropsWithChildren & { title: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,11 +50,11 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
           name="chevron.right"
           size={18}
           weight="medium"
-          color={theme === 'light' ? Colors.light.icon : Colors.dark.icon}
-          style={{ transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }}
+          color={theme === 'light' ? (Colors.light as any).icon : (Colors.dark as any).icon}
+          style={{ transform: [{ rotate: isOpen ? '90deg' : '0deg' }] } as ViewStyle}
         />
 
-        <ThemedText type="defaultSemiBold">{title}</ThemedText>
+        <ThemedText {...({ type: "defaultSemiBold", children: title } as any)} />
       </TouchableOpacity>
       {isOpen && <ThemedView style={styles.content}>{children}</ThemedView>}
     </ThemedView>

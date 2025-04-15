@@ -10,7 +10,7 @@ export default function BlurTabBarBackground() {
       // and matches the native tab bar appearance on iOS.
       tint="systemChromeMaterial"
       intensity={100}
-      style={StyleSheet.absoluteFill}
+      style={styles.absoluteFill}
     />
   );
 }
@@ -20,3 +20,13 @@ export function useBottomTabOverflow() {
   const { bottom } = useSafeAreaInsets();
   return tabHeight - bottom;
 }
+
+const styles = StyleSheet.create({
+  absoluteFill: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+});

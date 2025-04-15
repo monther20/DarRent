@@ -1,50 +1,106 @@
-# Welcome to your Expo app 👋
+# Darrent
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern React Native application built with Expo.
 
-## Get started
+## Features
 
-1. Install dependencies
+- Cross-platform support (iOS, Android, Web)
+- TypeScript support
+- Tailwind CSS for styling
+- Internationalization support
+- Push notifications
+- Error boundary implementation
+- Comprehensive logging system
+- CI/CD pipeline
 
-   ```bash
-   npm install
-   ```
+## Prerequisites
 
-2. Start the app
+- Node.js (v18 or higher)
+- npm or yarn
+- Expo CLI
+- iOS Simulator (for iOS development)
+- Android Studio (for Android development)
 
-   ```bash
-    npx expo start
-   ```
+## Installation
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+1. Clone the repository:
 ```bash
-npm run reset-project
+git clone https://github.com/yourusername/darrent.git
+cd darrent
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Install dependencies:
+```bash
+npm install
+```
 
-## Learn more
+3. Create a `.env` file in the root directory and add your environment variables:
+```env
+API_URL=your_api_url_here
+API_KEY=your_api_key_here
+APP_NAME=darrent
+APP_ENV=development
+ANALYTICS_KEY=your_analytics_key_here
+ENABLE_ANALYTICS=true
+ENABLE_LOGGING=true
+ENCRYPTION_KEY=your_encryption_key_here
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## Development
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Start the development server:
+```bash
+npm start
+```
 
-## Join the community
+Run on specific platforms:
+```bash
+npm run ios     # iOS
+npm run android # Android
+npm run web     # Web
+```
 
-Join our community of developers creating universal apps.
+## Testing
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Run tests:
+```bash
+npm test
+```
+
+Run linting:
+```bash
+npm run lint
+```
+
+## Project Structure
+
+```
+darrent/
+├── app/              # App routes and screens
+├── assets/           # Static assets
+├── components/       # Reusable components
+├── contexts/         # React contexts
+├── hooks/            # Custom hooks
+├── lib/              # Utility libraries
+├── navigation/       # Navigation configuration
+├── services/         # API and other services
+├── types/            # TypeScript type definitions
+├── utils/            # Utility functions
+└── __tests__/        # Test files
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## Security
+
+Please report any security issues to security@yourdomain.com
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

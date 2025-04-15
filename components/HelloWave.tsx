@@ -1,37 +1,47 @@
-import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withRepeat,
-  withSequence,
-} from 'react-native-reanimated';
+import { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 
 export function HelloWave() {
-  const rotationAnimation = useSharedValue(0);
+  const [rotation, setRotation] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    rotationAnimation.value = withRepeat(
-      withSequence(withTiming(25, { duration: 150 }), withTiming(0, { duration: 150 })),
-      4 // Run the animation 4 times
-    );
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotationAnimation.value}deg` }],
-  }));
+    if (!isAnimating) {
+      setIsAnimating(true);
+      
+      // Simple animation using setInterval
+      let count = 0;
+      const interval = setInterval(() => {
+        if (count % 2 === 0) {
+          setRotation(25);
+        } else {
+          setRotation(0);
+        }
+        count++;
+        
+        if (count >= 8) { // 4 complete cycles (2 steps per cycle)
+          clearInterval(interval);
+          setIsAnimating(false);
+        }
+      }, 150);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isAnimating]);
 
   return (
-    <Animated.View style={animatedStyle}>
-      <ThemedText style={styles.text}>👋</ThemedText>
-    </Animated.View>
+    <View style={[styles.container, { transform: [{ rotate: `${rotation}deg` }] }]}>
+      <ThemedText style={styles.text} children="👋" />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    // Add any container styles here
+  },
   text: {
     fontSize: 28,
     lineHeight: 32,
