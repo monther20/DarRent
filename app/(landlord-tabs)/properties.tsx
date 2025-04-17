@@ -1,102 +1,103 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text } from '@/components/Text';
-import { useAuth } from '@/contexts/AuthContext';
-import Colors from '@/constants/Colors';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { ThemedText } from '@/components/ThemedText';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { PropertyCard } from '@/components/PropertyCard';
+import { router } from 'expo-router';
+
+interface Property {
+  id: string;
+  title: string;
+  price: number;
+  beds: number;
+  baths: number;
+  status: 'Available' | 'Rented';
+  image: any; // We'll use require() for local images
+  views: number;
+  inquiries: number;
+  daysListed: number;
+}
+
+const mockProperties: Property[] = [
+  {
+    id: '1',
+    title: 'Garden Apartment',
+    price: 250,
+    beds: 2,
+    baths: 1,
+    status: 'Available',
+    image: require('@/assets/images/property-placeholder.jpg'),
+    views: 245,
+    inquiries: 12,
+    daysListed: 15,
+  },
+  {
+    id: '2',
+    title: 'City View Condo',
+    price: 275,
+    beds: 3,
+    baths: 2,
+    status: 'Rented',
+    image: require('@/assets/images/property-placeholder.jpg'),
+    views: 180,
+    inquiries: 8,
+    daysListed: 30,
+  },
+];
 
 export default function PropertiesScreen() {
-  const { user } = useAuth();
-
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Properties</Text>
-        <TouchableOpacity style={styles.addButton}>
-          <FontAwesome name="plus" size={20} color="#fff" />
-          <Text style={styles.addButtonText}>Add Property</Text>
+    <View style={styles.container}>
+      <ScreenHeader title="Property" />
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+      >
+        <TouchableOpacity style={styles.addButton} onPress={() => router.push('/add-property')}>
+          <ThemedText style={styles.addButtonText}>+ Add New Property</ThemedText>
         </TouchableOpacity>
-      </View>
 
-      <View style={styles.content}>
-        {user?.properties?.length ? (
-          user.properties.map((propertyId, index) => (
-            <View key={propertyId} style={styles.propertyCard}>
-              <Text style={styles.propertyTitle}>Property {index + 1}</Text>
-              <Text style={styles.propertyDetails}>Details coming soon</Text>
-            </View>
-          ))
-        ) : (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>No properties added yet</Text>
-          </View>
-        )}
-      </View>
-    </ScrollView>
+        <View style={styles.sectionHeader}>
+          <ThemedText style={styles.sectionTitle}>Your Properties (2)</ThemedText>
+        </View>
+
+        {mockProperties.map((property) => (
+          <PropertyCard key={property.id} {...property} />
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
-  },
-  header: {
-    backgroundColor: Colors.light.primary,
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.light.secondary,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  addButtonText: {
-    color: '#fff',
-    marginLeft: 8,
+    backgroundColor: '#F5F6F8',
   },
   content: {
+    flex: 1,
+  },
+  contentContainer: {
     padding: 16,
   },
-  propertyCard: {
-    backgroundColor: '#fff',
+  addButton: {
+    backgroundColor: '#E67E22',
     borderRadius: 8,
     padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  propertyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: Colors.light.text,
-  },
-  propertyDetails: {
-    color: Colors.light.text,
-  },
-  emptyState: {
     alignItems: 'center',
-    padding: 32,
+    marginBottom: 16,
   },
-  emptyStateText: {
+  addButtonText: {
+    color: '#FFFFFF',
     fontSize: 16,
-    color: Colors.light.grey,
+    fontWeight: '600',
+  },
+  sectionHeader: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2C3E50',
   },
 }); 

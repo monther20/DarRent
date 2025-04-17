@@ -83,8 +83,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    fontWeight: '500',
-    color: '#374151',
+    fontSize: 16,
+    color: '#34568B',
     marginBottom: 8,
   },
   inputContainer: {

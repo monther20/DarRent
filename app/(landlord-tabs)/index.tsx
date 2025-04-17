@@ -1,90 +1,101 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { Text } from '@/components/Text';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { ThemedText } from '@/components/ThemedText';
 import { useAuth } from '@/contexts/AuthContext';
-import Colors from '@/constants/Colors';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { router } from 'expo-router';
 
-export default function LandlordDashboard() {
+export default function DashboardScreen() {
   const { user } = useAuth();
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Welcome, {user?.fullName}</Text>
-      </View>
+    <View style={styles.container}>
+      <ScreenHeader
+        title={`Hello, ${user?.fullName}`}
+      />
 
-      {/* Quick Stats */}
+      {/* Stats Cards */}
       <View style={styles.statsContainer}>
-        <View style={[styles.statBox, styles.statBoxLeft]}>
-          <Text style={styles.statValue}>{user?.properties?.length || 0}</Text>
-          <Text style={styles.statLabel}>Properties</Text>
+        <View style={styles.statsCard}>
+          <ThemedText style={styles.statsLabel}>Active Listings</ThemedText>
+          <ThemedText style={styles.statsNumber}>12</ThemedText>
         </View>
-        <View style={[styles.statBox, styles.statBoxMiddle]}>
-          <Text style={styles.statValue}>0</Text>
-          <Text style={styles.statLabel}>Active Rentals</Text>
+
+        <View style={styles.statsCard}>
+          <ThemedText style={styles.statsLabel}>Applications</ThemedText>
+          <ThemedText style={styles.statsNumber}>5</ThemedText>
         </View>
-        <View style={[styles.statBox, styles.statBoxRight]}>
-          <Text style={styles.statValue}>$0</Text>
-          <Text style={styles.statLabel}>Monthly Income</Text>
+
+        <View style={styles.statsCard}>
+          <ThemedText style={styles.statsLabel}>Revenue</ThemedText>
+          <ThemedText style={styles.statsNumber}>$5.2K</ThemedText>
         </View>
       </View>
 
-      {/* Content Sections */}
+      {/* Quick Actions */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Activity</Text>
-        <View style={styles.card}>
-          <Text>No recent activity</Text>
+        <ThemedText style={styles.sectionTitle}>Quick Actions</ThemedText>
+        <View style={styles.quickActions}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => router.push('/properties/add')}
+          >
+            <ThemedText style={styles.actionButtonText}>Add Property</ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => router.push('/applications')}
+          >
+            <ThemedText style={styles.actionButtonText}>View Applications</ThemedText>
+          </TouchableOpacity>
         </View>
       </View>
-    </ScrollView>
+
+      {/* Recent Activity */}
+      <View style={styles.section}>
+        <ThemedText style={styles.sectionTitle}>Recent Activity</ThemedText>
+        <View style={styles.activityList}>
+          <View style={styles.activityItem}>
+            <ThemedText style={styles.activityText}>New application - Garden Apartment</ThemedText>
+          </View>
+          <View style={styles.activityItem}>
+            <ThemedText style={styles.activityText}>Payment received - City View Condo</ThemedText>
+          </View>
+          <View style={styles.activityItem}>
+            <ThemedText style={styles.activityText}>Maintenance - Mountain View Villa</ThemedText>
+          </View>
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
-  },
-  header: {
-    backgroundColor: Colors.light.primary,
-    padding: 16,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    backgroundColor: '#F5F6F8',
   },
   statsContainer: {
     flexDirection: 'row',
     padding: 16,
-    justifyContent: 'space-between',
+    gap: 12,
   },
-  statBox: {
-    backgroundColor: Colors.light.primary,
+  statsCard: {
+    flex: 1,
+    backgroundColor: '#34568B',
     borderRadius: 8,
     padding: 16,
-    flex: 1,
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
-  statBoxLeft: {
-    marginRight: 8,
+  statsLabel: {
+    fontSize: 14,
+    color: 'white',
+    marginBottom: 8,
   },
-  statBoxMiddle: {
-    marginHorizontal: 4,
-  },
-  statBoxRight: {
-    marginLeft: 8,
-  },
-  statValue: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    color: '#fff',
-    fontSize: 12,
-    marginTop: 4,
+  statsNumber: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: 'white',
   },
   section: {
     padding: 16,
@@ -92,20 +103,38 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 8,
-    color: Colors.light.text,
+    color: '#34568B',
+    marginBottom: 12,
   },
-  card: {
-    backgroundColor: '#fff',
+  quickActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionButton: {
+    backgroundColor: '#E67E22',
     borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    flex: 1,
+  },
+  actionButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  activityList: {
+    backgroundColor: '#F0F2F5',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  activityItem: {
+    backgroundColor: '#34568B',
     padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    marginBottom: 1,
+  },
+  activityText: {
+    color: 'white',
+    fontSize: 14,
   },
 }); 

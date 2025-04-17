@@ -3,115 +3,151 @@ import { View, TouchableOpacity, ActivityIndicator, ScrollView, StyleSheet } fro
 import { StatusBar } from 'expo-status-bar';
 import { ThemedText } from '@/components/ThemedText';
 import { InputField } from '@/components/InputField';
-import { useTranslation } from 'react-i18next';
-import { router } from 'expo-router';
+import { router, Link } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Ionicons } from '@expo/vector-icons';
+import Checkbox from '@/app/components/Checkbox';
+
+type UserRole = 'landlord' | 'renter';
 
 // Define validation schema with zod
 const registerSchema = z.object({
-  fullName: z.string().min(2, { message: 'Name must be at least 2 characters' }),
+  fullName: z.string().min(1, { message: 'Full name is required' }),
   email: z
     .string()
     .min(1, { message: 'Email is required' })
     .email({ message: 'Invalid email address' }),
-  phone: z.string().min(8, { message: 'Phone number must be at least 8 characters' }),
+  phoneNumber: z.string().min(1, { message: 'Phone number is required' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-  role: z.enum(['landlord', 'renter']),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterScreen() {
-  const { t, i18n } = useTranslation();
   const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>('landlord');
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-    setValue,
-    watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: '',
       email: '',
-      phone: '',
+      phoneNumber: '',
       password: '',
-      role: 'renter',
+      confirmPassword: '',
     },
   });
 
-  const currentRole = watch('role');
-
   const onSubmit = async (data: RegisterFormData) => {
+    if (!agreeToTerms) {
+      setErrorMessage('Please agree to the Terms and Conditions');
+      return;
+    }
+
     try {
       setIsLoading(true);
       setErrorMessage('');
-
-      const success = await register(data);
+      const success = await register({
+        name: data.fullName,
+        email: data.email,
+        phone: data.phoneNumber,
+        password: data.password,
+        role: selectedRole,
+      });
       
       if (success) {
-        // Navigate to home on successful registration
         router.replace('/(tabs)');
       } else {
-        setErrorMessage(t('auth.registrationFailed'));
+        setErrorMessage('Failed to create account');
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setErrorMessage(t('common.somethingWentWrong'));
+      setErrorMessage('Something went wrong');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setPasswordVisible(!passwordVisible);
-  };
-
-  const handleLogin = () => {
-    router.push('/auth/login');
-  };
-
-  const isRTL = i18n.language === 'ar';
-
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
       
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => router.back()}
+        >
+          <Ionicons name="chevron-back" size={24} color="white" />
+        </TouchableOpacity>
+        <ThemedText style={styles.headerTitle}>Create Account</ThemedText>
+      </View>
+
       <ScrollView style={styles.scrollView}>
-        {/* Register Form */}
         <View style={styles.formContainer}>
-          <ThemedText style={styles.title}>
-            {t('auth.createAccount')}
-          </ThemedText>
-          
-          <ThemedText style={styles.description}>
-            {t('auth.registerDescription')}
-          </ThemedText>
-          
+          {/* User Type Selection */}
+          <ThemedText style={styles.sectionTitle}>I am a...</ThemedText>
+          <View style={styles.userTypeContainer}>
+            <TouchableOpacity
+              style={[
+                styles.userTypeButton,
+                selectedRole === 'landlord' && styles.userTypeButtonActive,
+                { marginRight: 8 }
+              ]}
+              onPress={() => setSelectedRole('landlord')}
+            >
+              <ThemedText style={[
+                styles.userTypeText,
+                selectedRole === 'landlord' && styles.userTypeTextActive
+              ]}>
+                Landlord
+              </ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.userTypeButton,
+                selectedRole === 'renter' && styles.userTypeButtonActive
+              ]}
+              onPress={() => setSelectedRole('renter')}
+            >
+              <ThemedText style={[
+                styles.userTypeText,
+                selectedRole === 'renter' && styles.userTypeTextActive
+              ]}>
+                Renter
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+
           {/* Full Name Input */}
           <Controller
             control={control}
             name="fullName"
             render={({ field: { onChange, onBlur, value } }) => (
-              <InputField
-                label={t('auth.fullName')}
-                placeholder={t('auth.fullNamePlaceholder')}
-                autoCapitalize="words"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                icon="user"
-                error={errors.fullName ? t(errors.fullName.message || 'auth.invalidName') : undefined}
-                isRTL={isRTL}
-              />
+              <View style={styles.inputContainer}>
+                <InputField
+                  placeholder="Enter your full name"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.fullName?.message}
+                  label="Full Name"
+                />
+              </View>
             )}
           />
 
@@ -120,38 +156,38 @@ export default function RegisterScreen() {
             control={control}
             name="email"
             render={({ field: { onChange, onBlur, value } }) => (
-              <InputField
-                label={t('auth.email')}
-                placeholder={t('auth.emailPlaceholder')}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                icon="envelope-o"
-                error={errors.email ? t(errors.email.message || 'auth.invalidEmail') : undefined}
-                isRTL={isRTL}
-              />
+              <View style={styles.inputContainer}>
+                <InputField
+                  placeholder="Enter your email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.email?.message}
+                  label="Email"
+                />
+              </View>
             )}
           />
 
-          {/* Phone Input */}
+          {/* Phone Number Input */}
           <Controller
             control={control}
-            name="phone"
+            name="phoneNumber"
             render={({ field: { onChange, onBlur, value } }) => (
-              <InputField
-                label={t('auth.phone')}
-                placeholder={t('auth.phonePlaceholder')}
-                keyboardType="phone-pad"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                icon="phone"
-                error={errors.phone ? t(errors.phone.message || 'auth.invalidPhone') : undefined}
-                isRTL={isRTL}
-              />
+              <View style={styles.inputContainer}>
+                <InputField
+                  placeholder="Enter your phone number"
+                  keyboardType="phone-pad"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.phoneNumber?.message}
+                  label="Phone Number"
+                />
+              </View>
             )}
           />
 
@@ -160,80 +196,69 @@ export default function RegisterScreen() {
             control={control}
             name="password"
             render={({ field: { onChange, onBlur, value } }) => (
-              <InputField
-                label={t('auth.password')}
-                placeholder={t('auth.passwordPlaceholder')}
-                secureTextEntry={!passwordVisible}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                icon="lock"
-                iconRight={passwordVisible ? "eye-slash" : "eye"}
-                onIconRightPress={togglePasswordVisibility}
-                error={errors.password ? t(errors.password.message || 'auth.invalidPassword') : undefined}
-                isRTL={isRTL}
-              />
+              <View style={styles.inputContainer}>
+                <InputField
+                  placeholder="Enter your password"
+                  secureTextEntry
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.password?.message}
+                  label="Password"
+                />
+              </View>
             )}
           />
 
-          {/* User Type Selection */}
-          <View style={styles.roleContainer}>
-            <ThemedText style={styles.roleLabel}>
-              {t('auth.accountType')}
+          {/* Confirm Password Input */}
+          <Controller
+            control={control}
+            name="confirmPassword"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <View style={styles.inputContainer}>
+                <InputField
+                  placeholder="Confirm your password"
+                  secureTextEntry
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.confirmPassword?.message}
+                  label="Confirm Password"
+                />
+              </View>
+            )}
+          />
+
+          {/* Terms and Conditions */}
+          <View style={styles.termsContainer}>
+            <Checkbox
+              checked={agreeToTerms}
+              onPress={() => setAgreeToTerms(!agreeToTerms)}
+            />
+            <ThemedText style={styles.termsText}>
+              I agree to the{' '}
+              <Link href="/terms" style={styles.termsLink}>
+                Terms And Conditions
+              </Link>
             </ThemedText>
-            
-            <View style={styles.roleSelector}>
-              <TouchableOpacity 
-                style={[
-                  styles.roleButton,
-                  currentRole === 'renter' && styles.roleButtonActive
-                ]}
-                onPress={() => setValue('role', 'renter')}
-              >
-                <ThemedText style={[
-                  styles.roleButtonText,
-                  currentRole === 'renter' && styles.roleButtonTextActive
-                ]}>
-                  {t('auth.renter')}
-                </ThemedText>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[
-                  styles.roleButton,
-                  currentRole === 'landlord' && styles.roleButtonActive
-                ]}
-                onPress={() => setValue('role', 'landlord')}
-              >
-                <ThemedText style={[
-                  styles.roleButtonText,
-                  currentRole === 'landlord' && styles.roleButtonTextActive
-                ]}>
-                  {t('auth.landlord')}
-                </ThemedText>
-              </TouchableOpacity>
-            </View>
           </View>
 
           {/* Error Message */}
           {errorMessage ? (
-            <View style={styles.errorContainer}>
-              <ThemedText style={styles.errorText}>
-                {errorMessage}
-              </ThemedText>
-            </View>
+            <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>
           ) : null}
 
-          {/* Register Button */}
+          {/* Create Account Button */}
           <TouchableOpacity
-            style={styles.registerButton}
+            style={styles.createButton}
             onPress={handleSubmit(onSubmit)}
+            disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="white" />
             ) : (
-              <ThemedText style={styles.registerButtonText}>
-                {t('auth.register')}
+              <ThemedText style={styles.createButtonText}>
+                Create Account
               </ThemedText>
             )}
           </TouchableOpacity>
@@ -241,13 +266,11 @@ export default function RegisterScreen() {
           {/* Login Link */}
           <View style={styles.loginContainer}>
             <ThemedText style={styles.loginText}>
-              {t('auth.alreadyHaveAccount')}
+              Already have an account?{' '}
+              <Link href="/auth/login" style={styles.loginLink}>
+                Login
+              </Link>
             </ThemedText>
-            <TouchableOpacity onPress={handleLogin}>
-              <ThemedText style={styles.loginLink}>
-                {t('auth.login')}
-              </ThemedText>
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -260,84 +283,99 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
+  header: {
+    backgroundColor: '#34568B',
+    paddingTop: 40,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: '600',
+  },
   scrollView: {
     flex: 1,
   },
   formContainer: {
-    paddingHorizontal: 24,
-    paddingTop: 40,
+    padding: 24,
   },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
+  sectionTitle: {
+    fontSize: 16,
     color: '#34568B',
-    marginBottom: 24,
+    marginBottom: 12,
   },
-  description: {
-    color: '#666',
-    marginBottom: 32,
-  },
-  roleContainer: {
-    marginBottom: 24,
-  },
-  roleLabel: {
-    fontWeight: '500',
-    color: '#374151',
-    marginBottom: 8,
-  },
-  roleSelector: {
+  userTypeContainer: {
     flexDirection: 'row',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 8,
-    overflow: 'hidden',
+    marginBottom: 24,
   },
-  roleButton: {
+  userTypeButton: {
     flex: 1,
+    backgroundColor: '#F3F4F6',
     paddingVertical: 12,
+    borderRadius: 8,
     alignItems: 'center',
   },
-  roleButtonActive: {
-    backgroundColor: '#34568B',
+  userTypeButtonActive: {
+    backgroundColor: '#E67E22',
   },
-  roleButtonText: {
-    color: '#374151',
+  userTypeText: {
+    fontSize: 16,
+    color: '#6B7280',
+    fontWeight: '500',
   },
-  roleButtonTextActive: {
+  userTypeTextActive: {
     color: 'white',
-    fontWeight: 'bold',
   },
-  errorContainer: {
-    backgroundColor: '#FEE2E2',
-    padding: 12,
-    borderRadius: 8,
+  inputContainer: {
+    // marginBottom: 20,
+  },
+  
+  termsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 24,
   },
-  errorText: {
-    color: '#EF4444',
+  termsText: {
+    marginLeft: 8,
+    color: '#34568B',
   },
-  registerButton: {
+  termsLink: {
+    color: '#E67E22',
+    textDecorationLine: 'none',
+  },
+  errorText: {
+    color: '#dc2626',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  createButton: {
     backgroundColor: '#34568B',
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 24,
   },
-  registerButtonText: {
+  createButtonText: {
     color: 'white',
-    fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: '600',
   },
   loginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 24,
+    alignItems: 'center',
   },
   loginText: {
-    color: '#4B5563',
+    color: '#6B7280',
   },
   loginLink: {
-    color: '#34568B',
-    fontWeight: 'bold',
-    marginLeft: 4,
+    color: '#E67E22',
+    fontWeight: '600',
+    textDecorationLine: 'none',
   },
 }); 
