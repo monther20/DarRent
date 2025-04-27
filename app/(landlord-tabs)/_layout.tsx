@@ -7,7 +7,7 @@ import { RoleGuard } from '../../components/RoleGuard';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { MenuButton } from '../../components/MenuButton';
 import Colors from '../../constants/Colors';
-import { Slot } from 'expo-router';
+import { Slot, usePathname } from 'expo-router';
 import { View, StyleSheet } from 'react-native';
 import { BottomNavBar } from '../components/BottomNavBar';
 
@@ -23,13 +23,15 @@ export default function LandlordLayout() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const isRTL = language === 'ar';
+  const pathname = usePathname();
+  const hideTabBar = pathname?.includes('/settings') || pathname?.includes('/help');
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         <Slot />
       </View>
-      <BottomNavBar />
+      {!hideTabBar && <BottomNavBar />}
     </View>
   );
 }

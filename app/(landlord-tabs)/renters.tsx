@@ -15,13 +15,13 @@ export default function RentersScreen() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [activeTab]);
 
   const loadData = async () => {
     setLoading(true);
     try {
       const [tenantsData, applicationsData, statsData] = await Promise.all([
-        mockApi.getTenants('active'),
+        mockApi.getTenants(activeTab === 'active' ? 'active' : undefined),
         mockApi.getApplications(),
         mockApi.getStats(),
       ]);
@@ -35,6 +35,14 @@ export default function RentersScreen() {
     }
   };
 
+  const getAvatarSource = (avatar: string) => {
+    if (!avatar) return require('../../assets/images/avatar-placeholder.jpg');
+    if (avatar.startsWith('http')) return { uri: avatar };
+    if (avatar.startsWith('/assets')) return require('../../assets/images/avatar-placeholder.jpg');
+    return { uri: avatar }; // fallback, but probably never reached
+  };
+
+
   const calculateMonthsRemaining = (endDate: string) => {
     const end = new Date(endDate);
     const now = new Date();
@@ -42,13 +50,12 @@ export default function RentersScreen() {
                   (end.getMonth() - now.getMonth());
     return months;
   };
-
   const renderTenantCards = () => {
     return tenants.map((tenant) => (
       <View key={tenant.id} style={styles.tenantCard}>
         <View style={styles.tenantInfo}>
           <Image
-            source={require('@/assets/images/avatar-placeholder.jpg')}
+            source={getAvatarSource(tenant.avatar)}
             style={styles.avatar}
           />
           <View>

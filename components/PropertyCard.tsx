@@ -28,13 +28,19 @@ export function PropertyCard({
   inquiries,
   daysListed,
 }: PropertyCardProps) {
+  const getImageSource = (avatar: string) => {
+    if (!avatar) return require('../assets/images/property-placeholder.jpg');
+    if (avatar.startsWith('http')) return { uri: avatar };
+    if (avatar.startsWith('/assets')) return require('../assets/images/property-placeholder.jpg');
+    return { uri: avatar }; // fallback, but probably never reached
+  };
   return (
     <TouchableOpacity
       style={styles.container}
       onPress={() => router.push(`/property/${id}`)}
     >
       <View style={styles.contentContainer}>
-        <Image source={image} style={styles.image} />
+        <Image source={getImageSource(image)} style={styles.image} />
         <View style={styles.details}>
           <ThemedText style={styles.title}>{title}</ThemedText>
           <ThemedText style={styles.price}>{price} JOD/month</ThemedText>

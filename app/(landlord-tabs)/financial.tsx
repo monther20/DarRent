@@ -1,16 +1,41 @@
-import React from 'react';
-import { View, ScrollView, StyleSheet, Image } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, ScrollView, StyleSheet, Image, Dimensions, LayoutChangeEvent } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { LineChart } from 'react-native-chart-kit';
+
+// Mock function to generate user-specific data
+function getUserRevenueData(userId: string) {
+  // For demonstration, use userId to seed different data
+  const base = userId ? userId.length * 1000 : 5000;
+  return [
+    base + Math.floor(Math.random() * 200),
+    base + 400 + Math.floor(Math.random() * 200),
+    base + 800 + Math.floor(Math.random() * 200),
+    base + 1200 + Math.floor(Math.random() * 200),
+    base + 1800 + Math.floor(Math.random() * 200),
+    base + 2025 + Math.floor(Math.random() * 200),
+  ];
+}
+
+const userId = 'user123'; // Replace with actual user id from context/auth
+const revenueData = getUserRevenueData(userId);
 
 export default function FinancialScreen() {
+  const [cardWidth, setCardWidth] = useState(Dimensions.get('window').width - 32);
+
+  const handleCardLayout = (event: LayoutChangeEvent) => {
+    const { width } = event.nativeEvent.layout;
+    setCardWidth(width);
+  };
+
   return (
     <View style={styles.container}>
       <ScreenHeader title="Financial" />
       <ScrollView style={styles.content}>
         {/* Monthly Overview */}
         <ThemedText style={styles.sectionTitle}>Monthly Overview</ThemedText>
-        <View style={styles.overviewCard}>
+        <View style={styles.overviewCard} onLayout={handleCardLayout}>
           <View style={styles.revenueContainer}>
             <View>
               <ThemedText style={styles.revenueLabel}>Total Revenue</ThemedText>
@@ -20,9 +45,36 @@ export default function FinancialScreen() {
               <ThemedText style={styles.percentageText}>+12%</ThemedText>
             </View>
           </View>
-          <View style={styles.graphContainer}>
-            {/* Simple line representation */}
-            <View style={styles.graph} />
+          <View style={styles.chartWrapper}>
+            <LineChart
+              data={{
+                labels: ['', '', '', '', '', ''],
+                datasets: [
+                  {
+                    data: revenueData,
+                    color: (opacity = 1) => `rgba(255,255,255,${opacity})`,
+                    strokeWidth: 2,
+                  },
+                ],
+              }}
+              width={Math.max(cardWidth - 0, 0)}
+              height={100}
+              withDots={false}
+              withInnerLines={false}
+              withOuterLines={false}
+              withVerticalLabels={false}
+              withHorizontalLabels={false}
+              chartConfig={{
+                backgroundGradientFrom: '#34568B',
+                backgroundGradientTo: '#34568B',
+                color: (opacity = 1) => `rgba(255,255,255,${opacity})`,
+                strokeWidth: 2,
+                propsForBackgroundLines: {
+                  stroke: 'transparent',
+                },
+              }}
+              bezier
+            />
           </View>
         </View>
 
@@ -112,6 +164,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginBottom: 24,
+    overflow: 'hidden',
   },
   revenueContainer: {
     flexDirection: 'row',
@@ -140,14 +193,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  graphContainer: {
-    height: 60,
-    justifyContent: 'center',
+  chartWrapper: {
+    width: '100%',
+    height: 80,
+    overflow: 'hidden',
+    borderRadius: 8,
+    backgroundColor: 'transparent',
+    padding: 0,
+    margin: 0,
   },
-  graph: {
-    height: 2,
-    backgroundColor: 'white',
-    opacity: 0.5,
+  chart: {
+    marginTop: 0,
+    marginBottom: -8,
+    borderRadius: 8,
+    // backgroundColor: '#34568B',
   },
   statusContainer: {
     flexDirection: 'row',

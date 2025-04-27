@@ -111,6 +111,18 @@ function RootLayoutNav() {
           title: 'Settings'
         }}
       />
+      <Stack.Screen 
+        name="help"
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen 
+        name="terms"
+        options={{
+          headerShown: false
+        }}
+      />
     </Stack>
   );
 }

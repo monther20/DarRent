@@ -25,7 +25,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
   const { t } = useTranslation();
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -48,7 +48,11 @@ export default function LoginScreen() {
       setErrorMessage('');
       const success = await login(data.email, data.password, rememberMe);
       if (success) {
-        router.replace('/(tabs)');
+        if (user?.role === 'landlord') {
+          router.replace('/(landlord-tabs)/profile');
+        } else {
+          router.replace('/(renter-tabs)/profile');
+        }
       } else {
         setErrorMessage('Invalid email or password');
       }

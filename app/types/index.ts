@@ -13,20 +13,46 @@ export interface Tenant {
 export interface Property {
   id: string;
   title: string;
+  description: string;
   price: number;
-  image: string;
-  status: 'active' | 'inactive';
-  tenantId?: string;
+  currency: string;
+  location: {
+    city: string;
+    area: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+  };
+  features: {
+    bedrooms: number;
+    bathrooms: number;
+    area: number;
+    amenities: string[];
+  };
+  images: string[];
+  status: 'available' | 'rented' | 'pending';
+  ownerId: string;
+  renterId?: string;
+  createdAt: string;
+  updatedAt: string;
+  views: number;
+  inquiries: number;
+  daysListed: number;
 }
 
 export interface Transaction {
   id: string;
-  tenantId: string;
   propertyId: string;
+  renterId: string;
+  landlordId: string;
   amount: number;
-  date: string;
-  type: 'rent' | 'deposit' | 'maintenance';
-  status: 'completed' | 'pending' | 'overdue';
+  currency: string;
+  type: 'rent' | 'deposit' | 'utility';
+  status: 'paid' | 'pending' | 'overdue';
+  dueDate: string;
+  paidDate?: string;
+  description: string;
 }
 
 export interface Application {
@@ -36,6 +62,23 @@ export interface Application {
   propertyName: string;
   applicationDate: string;
   status: 'pending' | 'approved' | 'rejected';
+}
+
+export interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  profileImage?: string;
+  role: 'landlord' | 'renter';
+  location: {
+    city: string;
+    country: string;
+  };
+  createdAt: string;
+  properties?: string[];
+  rentedProperties?: string[];
+  renters?: string[];
 }
 
 export interface Stats {

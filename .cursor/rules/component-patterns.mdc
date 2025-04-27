@@ -1,0 +1,34 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Component Patterns and Structure
+
+## Navigation Components
+The main navigation component is [BottomNavBar.tsx](mdc:components/BottomNavBar.tsx), which handles both landlord and renter navigation. It accepts a `userType` prop to determine which navigation tabs to display:
+
+```typescript
+<BottomNavBar userType="landlord" /> // For landlord view
+<BottomNavBar userType="renter" />   // For renter view
+```
+
+## Text Components
+There are two main text components with distinct purposes:
+
+1. [ThemedText.tsx](mdc:components/ThemedText.tsx) - Theme-aware text component that:
+   - Inherits theme colors from the app's color scheme
+   - Supports text variants (default, heading, subheading, caption)
+   - Should be used when theme consistency is required
+
+2. Text.tsx - Base text component with variant support
+   - Used for non-themed text elements
+   - Provides consistent typography across the app
+   - Supports the same variants as ThemedText
+
+## Component Guidelines
+1. Use the unified BottomNavBar component for navigation, specifying the appropriate userType
+2. Use ThemedText when the text needs to respond to theme changes
+3. Keep component styles consistent by using the established color scheme and typography patterns
+4. Follow the variant pattern for components that need different visual styles
+
