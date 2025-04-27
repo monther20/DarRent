@@ -7,15 +7,7 @@ export default function AuthLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: {
-          backgroundColor: '#34568B',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-        headerBackTitleVisible: false,
-        headerShadowVisible: false,
+        headerShown: false,
       }}
     >
       <Stack.Screen
@@ -28,6 +20,7 @@ export default function AuthLayout() {
         name="login"
         options={{
           title: t('auth.login'),
+          headerShown: false,
           animation: 'slide_from_right',
         }}
       />
@@ -35,6 +28,7 @@ export default function AuthLayout() {
         name="register"
         options={{
           title: t('auth.createAccount'),
+          headerShown: false,
           animation: 'slide_from_right',
         }}
       />
@@ -42,6 +36,7 @@ export default function AuthLayout() {
         name="forgot-password"
         options={{
           title: t('auth.forgotPassword'),
+          headerShown: false,
           animation: 'slide_from_right',
         }}
       />
@@ -49,6 +44,7 @@ export default function AuthLayout() {
         name="reset-password"
         options={{
           title: t('auth.resetPassword'),
+          headerShown: false,
           animation: 'slide_from_right',
         }}
       />

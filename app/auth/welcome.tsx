@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { changeLanguage } from '../../localization/i18n';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { Link } from 'expo-router';
 
 export default function WelcomeScreen() {
   const { t, i18n } = useTranslation();
@@ -16,108 +16,93 @@ export default function WelcomeScreen() {
     await changeLanguage(lang);
   };
 
-  const handleContinue = () => {
-    router.push('/auth/login');
+  const handleGetStarted = () => {
+    router.push('/auth/register');
   };
 
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
       
-      {/* Logo and Header */}
-      <View style={styles.headerContainer}>
-        <Image 
-          source={require('@/assets/images/logo.png')} 
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <ThemedText style={styles.title}>
-          DarRent
-        </ThemedText>
-        <ThemedText style={styles.tagline}>
-          {t('welcome.tagline')}
-        </ThemedText>
-      </View>
-      
-      {/* Language Selection */}
-      <View style={styles.languageContainer}>
-        <ThemedText style={styles.languageTitle}>
-          {t('welcome.selectLanguage')}
-        </ThemedText>
-        
-        <View style={styles.languageOptionsContainer}>
+      <View style={styles.content}>
+        {/* Logo and Header */}
+        <View style={styles.headerContainer}>
+          <Image 
+            source={require('@/assets/images/logo.png')} 
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <ThemedText style={styles.title}>
+            Welcome to DarRent
+          </ThemedText>
+          <ThemedText style={styles.subtitle}>
+            Find your perfect home in Jordan
+          </ThemedText>
+        </View>
+
+        {/* Language Toggle */}
+        <View style={styles.languageToggleContainer}>
           <TouchableOpacity 
             style={[
               styles.languageOption,
-              selectedLanguage === 'en' && styles.selectedLanguageOption
+              selectedLanguage === 'en' && styles.activeLanguage,
+              { borderTopLeftRadius: 20, borderBottomLeftRadius: 20 }
             ]}
             onPress={() => handleLanguageChange('en')}
           >
-            <View style={styles.languageIconContainer}>
-              <FontAwesome 
-                name="globe" 
-                size={20} 
-                color={selectedLanguage === 'en' ? 'white' : '#34568B'} 
-              />
-            </View>
-            <ThemedText 
-              style={[
-                styles.languageText,
-                selectedLanguage === 'en' && styles.selectedLanguageText
-              ]}
-            >
-              English
+            <ThemedText style={[
+              styles.languageText,
+              selectedLanguage === 'en' && styles.activeLanguageText
+            ]}>
+              EN
             </ThemedText>
-            {selectedLanguage === 'en' && (
-              <View style={styles.checkmarkContainer}>
-                <FontAwesome name="check" size={18} color="white" />
-              </View>
-            )}
           </TouchableOpacity>
-          
-          <View style={styles.divider} />
-          
+
           <TouchableOpacity 
             style={[
               styles.languageOption,
-              selectedLanguage === 'ar' && styles.selectedLanguageOption
+              selectedLanguage === 'ar' && styles.activeLanguage,
+              { borderTopRightRadius: 20, borderBottomRightRadius: 20 }
             ]}
             onPress={() => handleLanguageChange('ar')}
           >
-            <View style={styles.languageIconContainer}>
-              <FontAwesome 
-                name="globe" 
-                size={20} 
-                color={selectedLanguage === 'ar' ? 'white' : '#34568B'} 
-              />
-            </View>
-            <ThemedText 
-              style={[
-                styles.languageText,
-                selectedLanguage === 'ar' && styles.selectedLanguageText
-              ]}
-            >
-              العربية
+            <ThemedText style={[
+              styles.languageText,
+              selectedLanguage === 'ar' && styles.activeLanguageText
+            ]}>
+              عربي
             </ThemedText>
-            {selectedLanguage === 'ar' && (
-              <View style={styles.checkmarkContainer}>
-                <FontAwesome name="check" size={18} color="white" />
-              </View>
-            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* Buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.getStartedButton}
+            onPress={handleGetStarted}
+          >
+            <ThemedText style={styles.getStartedButtonText}>
+              Get Started
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => router.push('/auth/login')}
+          >
+            <ThemedText style={styles.loginButtonText}>
+              Login
+            </ThemedText>
           </TouchableOpacity>
         </View>
       </View>
-      
-      {/* Continue Button */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.continueButton}
-          onPress={handleContinue}
-        >
-          <ThemedText style={styles.continueButtonText}>
-            {t('welcome.continue')}
-          </ThemedText>
-        </TouchableOpacity>
+
+      {/* Terms and Privacy */}
+      <View style={styles.footer}>
+        <ThemedText style={styles.footerText}>
+          By continuing, you agree to our{' '}
+          <Link href="/terms" style={styles.link}>Terms of Service And Privacy Policy</Link>
+        </ThemedText>
       </View>
     </View>
   );
@@ -128,89 +113,104 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 60,
+  },
   headerContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 64,
-    marginBottom: 48,
+    marginBottom: 32,
   },
   logo: {
-    width: 128,
-    height: 128,
+    width: 250,
+    height: 250,
+    marginBottom: 24,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#34568B',
-    marginTop: 16,
-  },
-  tagline: {
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 8,
-  },
-  languageContainer: {
-    paddingHorizontal: 32,
-    marginTop: 16,
-  },
-  languageTitle: {
-    fontSize: 18,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 16,
+    color: '#34568B',
+    marginBottom: 8,
   },
-  languageOptionsContainer: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    overflow: 'hidden',
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+  },
+  languageToggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F5F6F8',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#eee',
     marginBottom: 32,
+    overflow: 'hidden',
   },
   languageOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-  },
-  selectedLanguageOption: {
-    backgroundColor: '#34568B',
-  },
-  languageIconContainer: {
-    width: 32,
-    height: 32,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  activeLanguage: {
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
   languageText: {
-    marginLeft: 12,
     fontSize: 16,
-    color: '#333',
+    color: '#666',
   },
-  selectedLanguageText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  checkmarkContainer: {
-    marginLeft: 'auto',
-  },
-  divider: {
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+  activeLanguageText: {
+    color: '#34568B',
+    fontWeight: '600',
   },
   buttonContainer: {
-    paddingHorizontal: 32,
-    marginTop: 'auto',
-    marginBottom: 48,
+    width: '100%',
+    paddingHorizontal: 20,
   },
-  continueButton: {
+  getStartedButton: {
     backgroundColor: '#E67E22',
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
+    marginBottom: 12,
   },
-  continueButtonText: {
+  getStartedButtonText: {
     color: 'white',
-    fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  loginButton: {
+    backgroundColor: '#34568B',
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  loginButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  footer: {
+    paddingHorizontal: 40,
+    paddingBottom: 24,
+  },
+  footerText: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+  },
+  link: {
+    color: '#E67E22',
+    textDecorationLine: 'none',
   },
 }); 

@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   TouchableOpacity,
   View,
   Text,
   StyleSheet,
   ScrollView,
+  Modal,
+  Dimensions,
+  Animated,
+  Image,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -17,6 +21,8 @@ interface MenuButtonProps {
   position: 'left' | 'right';
 }
 
+const { width } = Dimensions.get('window');
+
 export function MenuButton({ position }: MenuButtonProps) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -24,11 +30,49 @@ export function MenuButton({ position }: MenuButtonProps) {
   const { user, logout } = useAuth();
   const [menuVisible, setMenuVisible] = useState(false);
   const isRTL = language === 'ar';
+  
+  // Animation value
+  const slideAnim = useRef(new Animated.Value(100)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  // Handle animation when menu visibility changes
+  useEffect(() => {
+    if (menuVisible) {
+      // Reset position before animation starts if menu is becoming visible
+      slideAnim.setValue(isRTL ? -100 : 100);
+      
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: isRTL ? -100 : 100,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [menuVisible, isRTL]);
 
   const handleLogout = async () => {
     try {
       setMenuVisible(false);
-      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+      await new Promise(resolve => setTimeout(resolve, 100));
       await logout();
       router.replace('/auth/welcome');
     } catch (error) {
@@ -38,106 +82,117 @@ export function MenuButton({ position }: MenuButtonProps) {
 
   const menuItems = [
     {
-      title: t('menu.messages'),
-      icon: 'comments',
-      route: '/chat',
-    },
-    {
-      title: t('menu.profile'),
+      title: 'Profile',
       icon: 'user',
-      route: '/settings/profile',
+      route: '/profile',
     },
     {
-      title: t('menu.settings'),
+      title: 'Home',
+      icon: 'home',
+      route: '/',
+    },
+    {
+      title: 'Help & Support',
+      icon: 'plus',
+      route: '/help',
+    },
+    {
+      title: 'Settings',
       icon: 'cog',
       route: '/settings',
     },
     {
-      title: t('menu.language'),
-      icon: 'language',
-      route: '/settings/language',
-    },
-    {
-      title: t('menu.theme'),
-      icon: 'paint-brush',
-      route: '/settings/theme',
-    },
-    {
-      title: t('menu.signOut'),
-      icon: 'sign-out',
-      onPress: handleLogout,
+      title: 'Terms & Conditions',
+      icon: 'bars',
+      route: '/terms',
     },
   ];
 
-  const handlePress = async (item: typeof menuItems[0]) => {
+  const handlePress = (route: string) => {
     setMenuVisible(false);
-    await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
-    if (item.onPress) {
-      await item.onPress();
-    } else {
-      router.push(item.route);
-    }
+    setTimeout(() => {
+      router.push(route);
+    }, 300);
   };
 
   return (
-    <>
+    <View style={styles.container}>
       <TouchableOpacity
         onPress={() => setMenuVisible(true)}
-        style={styles.menuButton}>
+        style={styles.menuButton}
+      >
         <FontAwesome name="bars" size={24} color="#fff" />
       </TouchableOpacity>
 
-      {menuVisible && (
-        <View style={styles.overlay}>
-          <TouchableOpacity 
-            style={styles.backdrop} 
-            onPress={() => setMenuVisible(false)} 
+      <Modal
+        visible={menuVisible}
+        transparent={true}
+        animationType="none"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <Animated.View 
+          style={[
+            styles.modalContainer,
+            { opacity: fadeAnim }
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.backdrop}
             activeOpacity={1}
+            onPress={() => setMenuVisible(false)}
           />
-          <View 
+          <Animated.View
             style={[
               styles.menuContainer,
-              isRTL ? styles.menuRTL : styles.menuLTR
-            ]}>
-            <View style={styles.header}>
-              <Text style={styles.headerText}>{t('menu.title')}</Text>
-              <TouchableOpacity 
-                onPress={() => setMenuVisible(false)} 
-                style={styles.closeButton}
-              >
-                <FontAwesome name="times" size={24} color="#fff" />
-              </TouchableOpacity>
+              isRTL ? styles.menuRTL : styles.menuLTR,
+              { 
+                transform: [{ translateX: slideAnim }] 
+              }
+            ]}
+          >
+            <View style={styles.profileSection}>
+              <View style={styles.profileInfo}>
+                <Image
+                  source={{ uri: user?.photoURL || 'https://via.placeholder.com/100' }}
+                  style={styles.profileImage}
+                />
+                <Text style={styles.profileName}>{user?.displayName || 'John Doe'}</Text>
+                <Text style={styles.profileEmail}>{user?.email || 'john.doe@email.com'}</Text>
+              </View>
             </View>
-            <ScrollView style={styles.menuItems}>
+
+            <ScrollView style={styles.menuItems} showsVerticalScrollIndicator={false}>
               {menuItems.map((item, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.menuItem}
-                  onPress={() => handlePress(item)}>
-                  <FontAwesome name={item.icon as any} size={20} color={Colors.light.text} />
+                  onPress={() => handlePress(item.route)}
+                >
+                  <View style={styles.menuItemIconContainer}>
+                    <FontAwesome name={item.icon as any} size={20} color={Colors.light.text} />
+                  </View>
                   <Text style={styles.menuItemText}>{item.title}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
-          </View>
-        </View>
-      )}
-    </>
+          </Animated.View>
+        </Animated.View>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+    zIndex: 999,
+  },
   menuButton: {
     padding: 8,
   },
-  overlay: {
-    position: 'absolute',
-    top: -50,
-    left: 0,
-    right: 0,
-    bottom: -50,
-    zIndex: 1000,
-    elevation: 1000,
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'transparent',
   },
   backdrop: {
     position: 'absolute',
@@ -151,13 +206,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     bottom: 0,
-    width: '80%',
+    width: '85%',
+    maxWidth: 400,
     backgroundColor: '#fff',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
   },
   menuLTR: {
     right: 0,
@@ -165,34 +216,52 @@ const styles = StyleSheet.create({
   menuRTL: {
     left: 0,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
+  profileSection: {
     backgroundColor: Colors.light.tint,
+    paddingTop: 40,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
   },
-  headerText: {
+  profileInfo: {
+    alignItems: 'center',
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 10,
+    borderWidth: 3,
+    borderColor: '#fff',
+  },
+  profileName: {
+    color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    marginBottom: 5,
   },
-  closeButton: {
-    padding: 8,
+  profileEmail: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 14,
   },
   menuItems: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    padding: 15,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    marginBottom: 1,
+  },
+  menuItemIconContainer: {
+    width: 30,
+    alignItems: 'center',
   },
   menuItemText: {
-    marginLeft: 16,
+    marginLeft: 15,
     fontSize: 16,
     color: Colors.light.text,
   },
-}); 
+});

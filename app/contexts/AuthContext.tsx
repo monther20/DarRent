@@ -1,20 +1,23 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+type UserRole = 'landlord' | 'renter';
+
 interface User {
   id: string;
   name: string;
   email: string;
   phone: string;
   profileImage: string | null;
+  role: UserRole;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
-  register: (userData: Omit<User, 'id'> & { password: string }) => Promise<void>;
+  register: (userData: Omit<User, 'id' | 'profileImage'> & { password: string }) => Promise<boolean>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   updateProfile: (profileData: Partial<User>) => Promise<void>;
 }
@@ -42,17 +45,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const login = async (email: string, password: string) => {
-    // TODO: Implement actual login logic with your backend
-    const mockUser: User = {
-      id: '1',
-      name: 'John Doe',
-      email,
-      phone: '+1234567890',
-      profileImage: null,
-    };
-    await AsyncStorage.setItem('user', JSON.stringify(mockUser));
-    setUser(mockUser);
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      // TODO: Implement actual login logic with your backend
+      const mockUser: User = {
+        id: '1',
+        name: 'John Doe',
+        email,
+        phone: '+1234567890',
+        profileImage: null,
+        role: 'renter',
+      };
+      await AsyncStorage.setItem('user', JSON.stringify(mockUser));
+      setUser(mockUser);
+      return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
   };
 
   const logout = async () => {
@@ -60,17 +70,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
-  const register = async (userData: Omit<User, 'id'> & { password: string }) => {
-    // TODO: Implement actual registration logic with your backend
-    const newUser: User = {
-      id: '1',
-      name: userData.name,
-      email: userData.email,
-      phone: userData.phone,
-      profileImage: null,
-    };
-    await AsyncStorage.setItem('user', JSON.stringify(newUser));
-    setUser(newUser);
+  const register = async (userData: Omit<User, 'id' | 'profileImage'> & { password: string }): Promise<boolean> => {
+    try {
+      // TODO: Implement actual registration logic with your backend
+      const newUser: User = {
+        id: '1',
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        profileImage: null,
+        role: userData.role,
+      };
+      await AsyncStorage.setItem('user', JSON.stringify(newUser));
+      setUser(newUser);
+      return true;
+    } catch (error) {
+      console.error('Registration error:', error);
+      return false;
+    }
   };
 
   const changePassword = async (currentPassword: string, newPassword: string) => {

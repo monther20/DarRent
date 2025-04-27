@@ -4,11 +4,13 @@ import { StatusBar } from 'expo-status-bar';
 import { ThemedText } from '@/components/ThemedText';
 import { InputField } from '@/components/InputField';
 import { useTranslation } from 'react-i18next';
-import { router } from 'expo-router';
+import { router, Link } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Ionicons } from '@expo/vector-icons';
+import Checkbox from '@/app/components/Checkbox';
 
 // Define validation schema with zod
 const loginSchema = z.object({
@@ -22,11 +24,11 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
-  const { t, i18n } = useTranslation();
-  const { login } = useAuth();
+  const { t } = useTranslation();
+  const { login, loginWithGoogle, user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const {
     control,
@@ -44,70 +46,75 @@ export default function LoginScreen() {
     try {
       setIsLoading(true);
       setErrorMessage('');
-
-      const success = await login(data.email, data.password);
-      
+      const success = await login(data.email, data.password, rememberMe);
       if (success) {
-        // Navigate to home on successful login
-        router.replace('/(tabs)');
+        if (user?.role === 'landlord') {
+          router.replace('/(landlord-tabs)/profile');
+        } else {
+          router.replace('/(renter-tabs)/profile');
+        }
       } else {
-        setErrorMessage(t('auth.invalidCredentials'));
+        setErrorMessage('Invalid email or password');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setErrorMessage(t('common.somethingWentWrong'));
+      setErrorMessage('Something went wrong');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setPasswordVisible(!passwordVisible);
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true);
+      const success = await loginWithGoogle();
+      if (success) {
+        router.replace('/(tabs)');
+      }
+    } catch (error) {
+      console.error('Google login error:', error);
+      setErrorMessage('Failed to login with Google');
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  const handleRegister = () => {
-    router.push('/auth/register');
-  };
-
-  const handleForgotPassword = () => {
-    router.push('/auth/forgot-password');
-  };
-
-  const isRTL = i18n.language === 'ar';
 
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
       
-      <ScrollView style={styles.scrollView}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => router.back()}
+        >
+          <Ionicons name="chevron-back" size={24} color="white" />
+        </TouchableOpacity>
+        <ThemedText style={styles.headerTitle}>Login</ThemedText>
+      </View>
+
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Login Form */}
         <View style={styles.formContainer}>
-          <ThemedText style={styles.title}>
-            {t('auth.welcomeBack')}
-          </ThemedText>
-          
-          <ThemedText style={styles.description}>
-            {t('auth.loginDescription')}
-          </ThemedText>
-          
           {/* Email Input */}
           <Controller
             control={control}
             name="email"
             render={({ field: { onChange, onBlur, value } }) => (
-              <InputField
-                label={t('auth.email')}
-                placeholder={t('auth.emailPlaceholder')}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                icon="envelope-o"
-                error={errors.email ? t(errors.email.message || 'auth.invalidEmail') : undefined}
-                isRTL={isRTL}
-              />
+              <View style={styles.inputContainer}>
+                <InputField
+                  placeholder="Enter your email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  label="Email"
+                  value={value}
+                  error={errors.email?.message}
+                />
+              </View>
             )}
           />
 
@@ -116,65 +123,76 @@ export default function LoginScreen() {
             control={control}
             name="password"
             render={({ field: { onChange, onBlur, value } }) => (
-              <InputField
-                label={t('auth.password')}
-                placeholder={t('auth.passwordPlaceholder')}
-                secureTextEntry={!passwordVisible}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                icon="lock"
-                iconRight={passwordVisible ? "eye-slash" : "eye"}
-                onIconRightPress={togglePasswordVisibility}
-                error={errors.password ? t(errors.password.message || 'auth.invalidPassword') : undefined}
-                isRTL={isRTL}
-              />
+              <View style={styles.inputContainer}>
+                <InputField
+                  placeholder="Enter your password"
+                  secureTextEntry
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.password?.message}
+                  label="Password"
+                />
+              </View>
             )}
           />
 
-          {/* Forgot Password */}
-          <TouchableOpacity 
-            style={styles.forgotPasswordButton} 
-            onPress={handleForgotPassword}
-          >
-            <ThemedText style={styles.forgotPasswordText}>
-              {t('auth.forgotPassword')}
-            </ThemedText>
-          </TouchableOpacity>
+          {/* Remember Me and Forgot Password */}
+          <View style={styles.rememberForgotContainer}>
+            <View style={styles.rememberContainer}>
+              <Checkbox
+                checked={rememberMe}
+                onPress={() => setRememberMe(!rememberMe)}
+              />
+              <ThemedText style={styles.rememberText}>Remember me</ThemedText>
+            </View>
+            <Link href="/auth/forgot-password" style={styles.forgotText}>
+              Forgot Password?
+            </Link>
+          </View>
 
           {/* Error Message */}
           {errorMessage ? (
-            <View style={styles.errorContainer}>
-              <ThemedText style={styles.errorText}>
-                {errorMessage}
-              </ThemedText>
-            </View>
+            <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>
           ) : null}
 
           {/* Login Button */}
           <TouchableOpacity
             style={styles.loginButton}
             onPress={handleSubmit(onSubmit)}
+            disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="white" />
             ) : (
-              <ThemedText style={styles.loginButtonText}>
-                {t('auth.login')}
-              </ThemedText>
+              <ThemedText style={styles.loginButtonText}>Login</ThemedText>
             )}
           </TouchableOpacity>
 
-          {/* Signup Link */}
-          <View style={styles.signupContainer}>
-            <ThemedText style={styles.signupText}>
-              {t('auth.noAccount')}
+          {/* Or continue with */}
+          <View style={styles.orContainer}>
+            <View style={styles.orLine} />
+            <ThemedText style={styles.orText}>Or continue with</ThemedText>
+            <View style={styles.orLine} />
+          </View>
+
+          {/* Google Sign In */}
+          <TouchableOpacity
+            style={styles.googleButton}
+            onPress={handleGoogleLogin}
+          >
+            <Ionicons name="logo-google" size={20} color="#34568B" />
+            <ThemedText style={styles.googleButtonText}>Google</ThemedText>
+          </TouchableOpacity>
+
+          {/* Sign Up Link */}
+          <View style={styles.signUpContainer}>
+            <ThemedText style={styles.signUpText}>
+              Don't have an account?{' '}
+              <Link href="/auth/register" style={styles.signUpLink}>
+                Sign up
+              </Link>
             </ThemedText>
-            <TouchableOpacity onPress={handleRegister}>
-              <ThemedText style={styles.signupLink}>
-                {t('auth.register')}
-              </ThemedText>
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -187,37 +205,62 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
+  header: {
+    backgroundColor: '#34568B',
+    paddingTop: 40,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: '600',
+  },
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   formContainer: {
-    paddingHorizontal: 24,
-    paddingTop: 40,
+    padding: 24,
   },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
+  inputContainer: {
+    // marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
     color: '#34568B',
+    marginBottom: 8,
+  },
+  rememberForgotContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 24,
   },
-  description: {
-    color: '#4B5563',
-    marginBottom: 32,
+  rememberContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  forgotPasswordButton: {
-    marginBottom: 24,
-  },
-  forgotPasswordText: {
+  rememberText: {
+    marginLeft: 8,
     color: '#34568B',
   },
-  errorContainer: {
-    backgroundColor: '#FEE2E2',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 24,
+  forgotText: {
+    color: '#E67E22',
+    textDecorationLine: 'none',
   },
   errorText: {
-    color: '#EF4444',
+    color: '#dc2626',
+    marginBottom: 16,
+    textAlign: 'center',
   },
   loginButton: {
     backgroundColor: '#34568B',
@@ -228,20 +271,48 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     color: 'white',
-    fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: '600',
   },
-  signupContainer: {
+  orContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 24,
   },
-  signupText: {
-    color: '#4B5563',
+  orLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E7EB',
   },
-  signupLink: {
+  orText: {
+    marginHorizontal: 16,
+    color: '#6B7280',
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginBottom: 24,
+  },
+  googleButtonText: {
+    marginLeft: 12,
+    fontSize: 16,
     color: '#34568B',
-    fontWeight: 'bold',
-    marginLeft: 4,
+    fontWeight: '500',
+  },
+  signUpContainer: {
+    alignItems: 'center',
+  },
+  signUpText: {
+    color: '#6B7280',
+  },
+  signUpLink: {
+    color: '#E67E22',
+    fontWeight: '600',
+    textDecorationLine: 'none',
   },
 }); 

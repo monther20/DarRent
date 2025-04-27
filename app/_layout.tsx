@@ -58,17 +58,71 @@ function RootLayoutNav() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      {user?.role === 'landlord' && (
-        <Stack.Screen name="(landlord-tabs)" options={{ headerShown: false }} />
+    <Stack
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#34568B',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: '600',
+        },
+      }}
+    >
+      {!user ? (
+        <Stack.Screen 
+          name="auth" 
+          options={{
+            headerShown: false
+          }}
+        />
+      ) : user.role === 'landlord' ? (
+        <Stack.Screen 
+          name="(landlord-tabs)"
+          options={{
+            headerShown: false
+          }}
+        />
+      ) : (
+        <Stack.Screen 
+          name="(renter-tabs)"
+          options={{
+            headerShown: false
+          }}
+        />
       )}
-      {user?.role === 'renter' && (
-        <Stack.Screen name="(renter-tabs)" options={{ headerShown: false }} />
-      )}
-      <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
-      <Stack.Screen name="settings" options={{ headerShown: false }} />
+      <Stack.Screen 
+        name="modal" 
+        options={{ 
+          presentation: 'modal',
+          headerShown: true
+        }} 
+      />
+      <Stack.Screen 
+        name="chat/[id]"
+        options={{
+          headerShown: true
+        }}
+      />
+      <Stack.Screen 
+        name="settings"
+        options={{
+          headerShown: true,
+          title: 'Settings'
+        }}
+      />
+      <Stack.Screen 
+        name="help"
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen 
+        name="terms"
+        options={{
+          headerShown: false
+        }}
+      />
     </Stack>
   );
 }

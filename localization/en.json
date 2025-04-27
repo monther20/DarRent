@@ -241,5 +241,27 @@
     "language": "Language",
     "theme": "Theme",
     "signOut": "Sign Out"
+  },
+  "help": {
+    "title": "Help & Support",
+    "faqTitle": "Frequently Asked Questions",
+    "faq1": {
+      "question": "How do I reset my password?",
+      "answer": "Go to settings and select 'Reset Password'."
+    },
+    "faq2": {
+      "question": "How can I contact support?",
+      "answer": "You can email us at support@darrent.com or use the chat below."
+    },
+    "faq3": {
+      "question": "Where can I find my rental agreements?",
+      "answer": "Rental agreements are available in your profile under 'My Rentals'."
+    },
+    "contactTitle": "Contact Us",
+    "contact": {
+      "email": "Email Support",
+      "phone": "Call Support",
+      "chat": "Live Chat"
+    }
   }
 } 
