@@ -3,17 +3,12 @@ import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/Text';
 import Colors from '@/constants/Colors';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { ScreenHeader } from '@/components/ScreenHeader';
 
 export default function MaintenanceScreen() {
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Maintenance</Text>
-        <TouchableOpacity style={styles.addButton}>
-          <FontAwesome name="plus" size={20} color="#fff" />
-          <Text style={styles.addButtonText}>New Request</Text>
-        </TouchableOpacity>
-      </View>
+      <ScreenHeader title="Maintenance" />
 
       <View style={styles.content}>
         <View style={styles.card}>
@@ -96,4 +91,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.light.grey,
   },
-}); 
+});

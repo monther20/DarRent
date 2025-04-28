@@ -1,4 +1,10 @@
-import { ScrollView, TouchableOpacity, TextInput, ScrollViewProps, TextInputProps } from 'react-native';
+import {
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  ScrollViewProps,
+  TextInputProps,
+} from 'react-native';
 import React from 'react';
 
 type StyledScrollViewProps = ScrollViewProps;
@@ -13,4 +19,4 @@ export const Pressable = TouchableOpacity;
 
 export const StyledTextInput: React.FC<StyledTextInputProps> = (props) => {
   return <TextInput {...props} />;
-}; 
+};

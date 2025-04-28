@@ -76,11 +76,7 @@ export default function HelpScreen() {
         <ThemedView style={styles.section}>
           <ThemedText style={styles.sectionTitle}>{t('help.contactTitle')}</ThemedText>
           {contactOptions.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.contactItem}
-              onPress={option.action}
-            >
+            <TouchableOpacity key={index} style={styles.contactItem} onPress={option.action}>
               <FontAwesome name={option.icon} size={24} color="#34568B" />
               <ThemedText style={styles.contactText}>{option.title}</ThemedText>
             </TouchableOpacity>
@@ -174,4 +170,4 @@ const styles = StyleSheet.create({
     color: '#2C3E50',
     marginLeft: 16,
   },
-}); 
+});

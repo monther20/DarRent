@@ -11,13 +11,15 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 // Define validation schema with zod
-const resetPasswordSchema = z.object({
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-  confirmPassword: z.string(),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const resetPasswordSchema = z
+  .object({
+    password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
@@ -26,7 +28,7 @@ export default function ResetPasswordScreen() {
   const { resetPassword } = useAuth();
   const params = useLocalSearchParams();
   const token = params.token as string;
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -59,7 +61,7 @@ export default function ResetPasswordScreen() {
       setIsSuccess(false);
 
       const success = await resetPassword(token, data.password);
-      
+
       if (success) {
         setIsSuccess(true);
       } else {
@@ -94,24 +96,18 @@ export default function ResetPasswordScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      
+
       <ScrollView style={styles.scrollView}>
         {/* Reset Password Form */}
         <View style={styles.formContainer}>
-          <ThemedText style={styles.title}>
-            {t('auth.resetPassword')}
-          </ThemedText>
-          
-          <ThemedText style={styles.description}>
-            {t('auth.newPasswordDescription')}
-          </ThemedText>
-          
+          <ThemedText style={styles.title}>{t('auth.resetPassword')}</ThemedText>
+
+          <ThemedText style={styles.description}>{t('auth.newPasswordDescription')}</ThemedText>
+
           {isSuccess ? (
             // Success Message
             <View style={styles.successContainer}>
-              <ThemedText style={styles.successText}>
-                {t('auth.passwordResetSuccess')}
-              </ThemedText>
+              <ThemedText style={styles.successText}>{t('auth.passwordResetSuccess')}</ThemedText>
               <ThemedText style={styles.successSubText}>
                 {t('auth.canLoginWithNewPassword')}
               </ThemedText>
@@ -132,9 +128,13 @@ export default function ResetPasswordScreen() {
                     onChangeText={onChange}
                     value={value}
                     icon="lock"
-                    iconRight={passwordVisible ? "eye-slash" : "eye"}
+                    iconRight={passwordVisible ? 'eye-slash' : 'eye'}
                     onIconRightPress={togglePasswordVisibility}
-                    error={errors.password ? t(errors.password.message || 'auth.invalidPassword') : undefined}
+                    error={
+                      errors.password
+                        ? t(errors.password.message || 'auth.invalidPassword')
+                        : undefined
+                    }
                     isRTL={isRTL}
                   />
                 )}
@@ -153,9 +153,13 @@ export default function ResetPasswordScreen() {
                     onChangeText={onChange}
                     value={value}
                     icon="lock"
-                    iconRight={confirmPasswordVisible ? "eye-slash" : "eye"}
+                    iconRight={confirmPasswordVisible ? 'eye-slash' : 'eye'}
                     onIconRightPress={toggleConfirmPasswordVisibility}
-                    error={errors.confirmPassword ? t(errors.confirmPassword.message || 'auth.passwordsDontMatch') : undefined}
+                    error={
+                      errors.confirmPassword
+                        ? t(errors.confirmPassword.message || 'auth.passwordsDontMatch')
+                        : undefined
+                    }
                     isRTL={isRTL}
                   />
                 )}
@@ -164,36 +168,24 @@ export default function ResetPasswordScreen() {
               {/* Error Message */}
               {errorMessage ? (
                 <View style={styles.errorContainer}>
-                  <ThemedText style={styles.errorText}>
-                    {errorMessage}
-                  </ThemedText>
+                  <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>
                 </View>
               ) : null}
 
               {/* Submit Button */}
-              <TouchableOpacity
-                style={styles.submitButton}
-                onPress={handleSubmit(onSubmit)}
-              >
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmit)}>
                 {isLoading ? (
                   <ActivityIndicator color="white" />
                 ) : (
-                  <ThemedText style={styles.submitButtonText}>
-                    {t('auth.resetPassword')}
-                  </ThemedText>
+                  <ThemedText style={styles.submitButtonText}>{t('auth.resetPassword')}</ThemedText>
                 )}
               </TouchableOpacity>
             </>
           )}
 
           {/* Back to Login */}
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={handleBackToLogin}
-          >
-            <ThemedText style={styles.backButtonText}>
-              {t('auth.backToLogin')}
-            </ThemedText>
+          <TouchableOpacity style={styles.backButton} onPress={handleBackToLogin}>
+            <ThemedText style={styles.backButtonText}>{t('auth.backToLogin')}</ThemedText>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -270,4 +262,4 @@ const styles = StyleSheet.create({
     color: '#34568B',
     fontWeight: '500',
   },
-}); 
+});

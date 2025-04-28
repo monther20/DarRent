@@ -10,7 +10,7 @@ export function HelloWave() {
   useEffect(() => {
     if (!isAnimating) {
       setIsAnimating(true);
-      
+
       // Simple animation using setInterval
       let count = 0;
       const interval = setInterval(() => {
@@ -20,13 +20,14 @@ export function HelloWave() {
           setRotation(0);
         }
         count++;
-        
-        if (count >= 8) { // 4 complete cycles (2 steps per cycle)
+
+        if (count >= 8) {
+          // 4 complete cycles (2 steps per cycle)
           clearInterval(interval);
           setIsAnimating(false);
         }
       }, 150);
-      
+
       return () => clearInterval(interval);
     }
   }, [isAnimating]);

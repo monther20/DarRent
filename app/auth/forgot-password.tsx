@@ -45,7 +45,7 @@ export default function ForgotPasswordScreen() {
       setIsSuccess(false);
 
       const success = await forgotPassword(data.email);
-      
+
       if (success) {
         setIsSuccess(true);
       } else {
@@ -68,19 +68,21 @@ export default function ForgotPasswordScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      
+
       <ScrollView style={styles.scrollView}>
         {/* Forgot Password Form */}
         <View style={styles.formContainer}>
           <ThemedText style={styles.title}>{t('auth.forgotPassword')}</ThemedText>
-          
+
           <ThemedText style={styles.description}>{t('auth.resetPasswordDescription')}</ThemedText>
-          
+
           {isSuccess ? (
             // Success Message
             <View style={styles.successContainer}>
               <ThemedText style={styles.successText}>{t('auth.resetPasswordSuccess')}</ThemedText>
-              <ThemedText style={styles.successSubText}>{t('auth.resetPasswordCheckEmail')}</ThemedText>
+              <ThemedText style={styles.successSubText}>
+                {t('auth.resetPasswordCheckEmail')}
+              </ThemedText>
             </View>
           ) : (
             // Email Input
@@ -98,7 +100,9 @@ export default function ForgotPasswordScreen() {
                     onChangeText={onChange}
                     value={value}
                     icon="envelope-o"
-                    error={errors.email ? t(errors.email.message || 'auth.invalidEmail') : undefined}
+                    error={
+                      errors.email ? t(errors.email.message || 'auth.invalidEmail') : undefined
+                    }
                     isRTL={isRTL}
                   />
                 )}
@@ -112,10 +116,7 @@ export default function ForgotPasswordScreen() {
               ) : null}
 
               {/* Submit Button */}
-              <TouchableOpacity
-                style={styles.submitButton}
-                onPress={handleSubmit(onSubmit)}
-              >
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmit)}>
                 {isLoading ? (
                   <ActivityIndicator color="white" />
                 ) : (
@@ -126,10 +127,7 @@ export default function ForgotPasswordScreen() {
           )}
 
           {/* Back to Login */}
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={handleBackToLogin}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={handleBackToLogin}>
             <ThemedText style={styles.backButtonText}>{t('auth.backToLogin')}</ThemedText>
           </TouchableOpacity>
         </View>
@@ -207,4 +205,4 @@ const styles = StyleSheet.create({
     color: '#34568B',
     fontWeight: '500',
   },
-}); 
+});

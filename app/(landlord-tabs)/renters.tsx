@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { mockApi } from '../services/mockApi';
@@ -42,22 +49,17 @@ export default function RentersScreen() {
     return { uri: avatar }; // fallback, but probably never reached
   };
 
-
   const calculateMonthsRemaining = (endDate: string) => {
     const end = new Date(endDate);
     const now = new Date();
-    const months = (end.getFullYear() - now.getFullYear()) * 12 + 
-                  (end.getMonth() - now.getMonth());
+    const months = (end.getFullYear() - now.getFullYear()) * 12 + (end.getMonth() - now.getMonth());
     return months;
   };
   const renderTenantCards = () => {
     return tenants.map((tenant) => (
       <View key={tenant.id} style={styles.tenantCard}>
         <View style={styles.tenantInfo}>
-          <Image
-            source={getAvatarSource(tenant.avatar)}
-            style={styles.avatar}
-          />
+          <Image source={getAvatarSource(tenant.avatar)} style={styles.avatar} />
           <View>
             <ThemedText style={styles.tenantName}>{tenant.fullName}</ThemedText>
             <ThemedText style={styles.propertyName}>{tenant.propertyName}</ThemedText>
@@ -67,13 +69,13 @@ export default function RentersScreen() {
           </View>
         </View>
         <View style={styles.actionButtons}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.messageButton}
             onPress={() => router.push(`/messages/${tenant.id}`)}
           >
             <ThemedText style={styles.buttonText}>Message</ThemedText>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.detailsButton}
             onPress={() => router.push(`/tenants/${tenant.id}`)}
           >
@@ -132,7 +134,7 @@ export default function RentersScreen() {
                     Applied on {new Date(application.applicationDate).toLocaleDateString()}
                   </ThemedText>
                 </View>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.detailsButton}
                   onPress={() => router.push(`/applications/${application.id}`)}
                 >
@@ -152,10 +154,10 @@ export default function RentersScreen() {
   return (
     <View style={styles.container}>
       <ScreenHeader title="Renters" />
-      
+
       {/* Tab Navigation */}
       <View style={styles.tabContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.tab, activeTab === 'active' && styles.activeTab]}
           onPress={() => setActiveTab('active')}
         >
@@ -163,15 +165,17 @@ export default function RentersScreen() {
             Active ({tenants.length})
           </ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.tab, activeTab === 'applications' && styles.activeTab]}
           onPress={() => setActiveTab('applications')}
         >
-          <ThemedText style={[styles.tabText, activeTab === 'applications' && styles.activeTabText]}>
+          <ThemedText
+            style={[styles.tabText, activeTab === 'applications' && styles.activeTabText]}
+          >
             Applications ({applications.length})
           </ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.tab, activeTab === 'history' && styles.activeTab]}
           onPress={() => setActiveTab('history')}
         >
@@ -181,9 +185,7 @@ export default function RentersScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
-        {renderTabContent()}
-      </ScrollView>
+      <ScrollView style={styles.content}>{renderTabContent()}</ScrollView>
     </View>
   );
 }
@@ -331,4 +333,4 @@ const styles = StyleSheet.create({
     padding: 16,
     color: '#34568B',
   },
-}); 
+});

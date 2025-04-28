@@ -3,7 +3,15 @@ import { TextInput, View, TextInputProps, TouchableOpacity, StyleSheet } from 'r
 import { ThemedText } from './ThemedText';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-type KeyboardType = 'default' | 'email-address' | 'numeric' | 'phone-pad' | 'number-pad' | 'decimal-pad' | 'url' | 'web-search';
+type KeyboardType =
+  | 'default'
+  | 'email-address'
+  | 'numeric'
+  | 'phone-pad'
+  | 'number-pad'
+  | 'decimal-pad'
+  | 'url'
+  | 'web-search';
 type AutoCapitalize = 'none' | 'sentences' | 'words' | 'characters';
 type AutoComplete = 'email' | 'password' | 'username' | 'off';
 
@@ -44,36 +52,28 @@ export function InputField({
               borderColor: error ? '#EF4444' : '#D1D5DB',
               textAlign: isRTL ? 'right' : 'left',
             },
-            style
+            style,
           ]}
           {...props}
         />
-        
+
         {icon && (
-          <View style={[
-            styles.iconContainer,
-            isRTL ? styles.iconRight : styles.iconLeft
-          ]}>
+          <View style={[styles.iconContainer, isRTL ? styles.iconRight : styles.iconLeft]}>
             <FontAwesome name={icon as any} size={18} color="#7F8C8D" />
           </View>
         )}
-        
+
         {iconRight && onIconRightPress && (
-          <TouchableOpacity 
-            style={[
-              styles.iconContainer,
-              isRTL ? styles.iconLeft : styles.iconRight
-            ]}
+          <TouchableOpacity
+            style={[styles.iconContainer, isRTL ? styles.iconLeft : styles.iconRight]}
             onPress={onIconRightPress}
           >
             <FontAwesome name={iconRight as any} size={18} color="#7F8C8D" />
           </TouchableOpacity>
         )}
       </View>
-      
-      {error && (
-        <ThemedText style={styles.error}>{error}</ThemedText>
-      )}
+
+      {error && <ThemedText style={styles.error}>{error}</ThemedText>}
     </View>
   );
 }
@@ -113,4 +113,4 @@ const styles = StyleSheet.create({
     color: '#EF4444',
     marginTop: 4,
   },
-}); 
+});

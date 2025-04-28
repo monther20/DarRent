@@ -24,7 +24,7 @@ export function FilterModal({
   onClose,
   onApplyFilter,
 }: FilterModalProps) {
-  const selectedFilterOption = filterOptions.find(f => f.id === selectedFilter);
+  const selectedFilterOption = filterOptions.find((f) => f.id === selectedFilter);
 
   if (!visible || !selectedFilterOption) return null;
 
@@ -32,13 +32,8 @@ export function FilterModal({
     <View style={styles.modalOverlay}>
       <View style={styles.modalContent}>
         <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>
-            {selectedFilterOption.label} Options
-          </Text>
-          <TouchableOpacity 
-            onPress={onClose}
-            style={styles.modalCloseButton}
-          >
+          <Text style={styles.modalTitle}>{selectedFilterOption.label} Options</Text>
+          <TouchableOpacity onPress={onClose} style={styles.modalCloseButton}>
             <Ionicons name="close" size={24} color="#666" />
           </TouchableOpacity>
         </View>
@@ -48,14 +43,16 @@ export function FilterModal({
             <TouchableOpacity
               style={[
                 styles.modalOption,
-                activeFilters[selectedFilter] === item && styles.modalOptionActive
+                activeFilters[selectedFilter] === item && styles.modalOptionActive,
               ]}
               onPress={() => onApplyFilter(selectedFilter, item)}
             >
-              <Text style={[
-                styles.modalOptionText,
-                activeFilters[selectedFilter] === item && styles.modalOptionTextActive
-              ]}>
+              <Text
+                style={[
+                  styles.modalOptionText,
+                  activeFilters[selectedFilter] === item && styles.modalOptionTextActive,
+                ]}
+              >
                 {item}
               </Text>
               {activeFilters[selectedFilter] === item && (
@@ -121,4 +118,4 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '500',
   },
-}); 
+});

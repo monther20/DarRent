@@ -21,8 +21,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // Temporary mock for missing assets
 const ASSETS = {
   avatars: {
-    owner: 'https://example.com/avatar.jpg'
-  }
+    owner: 'https://example.com/avatar.jpg',
+  },
 };
 
 type Message = {
@@ -125,28 +125,19 @@ export default function ChatScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <MaterialCommunityIcons 
-            name={isRTL ? 'chevron-right' : 'chevron-left'} 
-            size={28} 
-            color="white" 
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <MaterialCommunityIcons
+            name={isRTL ? 'chevron-right' : 'chevron-left'}
+            size={28}
+            color="white"
           />
         </TouchableOpacity>
-        <Image
-          source={{ uri: ASSETS.avatars.owner }}
-          style={styles.avatar}
-          contentFit="cover"
-        />
-        <Text style={styles.headerTitle}>
-          Garden Apartment Owner
-        </Text>
+        <Image source={{ uri: ASSETS.avatars.owner }} style={styles.avatar} contentFit="cover" />
+        <Text style={styles.headerTitle}>Garden Apartment Owner</Text>
       </View>
 
       {/* Messages */}
-      <ScrollView 
+      <ScrollView
         // @ts-ignore
         ref={scrollViewRef}
         style={styles.messagesContainer}
@@ -157,13 +148,13 @@ export default function ChatScreen() {
             key={message.id}
             style={[
               styles.messageRow,
-              message.isSent ? styles.sentMessageRow : styles.receivedMessageRow
+              message.isSent ? styles.sentMessageRow : styles.receivedMessageRow,
             ]}
           >
             <View
               style={[
                 styles.messageBubble,
-                message.isSent ? styles.sentMessageBubble : styles.receivedMessageBubble
+                message.isSent ? styles.sentMessageBubble : styles.receivedMessageBubble,
               ]}
             >
               {message.image ? (
@@ -173,9 +164,7 @@ export default function ChatScreen() {
                   contentFit="cover"
                 />
               ) : (
-                <Text
-                  style={message.isSent ? styles.sentMessageText : styles.receivedMessageText}
-                >
+                <Text style={message.isSent ? styles.sentMessageText : styles.receivedMessageText}>
                   {message.text}
                 </Text>
               )}
@@ -183,7 +172,7 @@ export default function ChatScreen() {
                 <Text
                   style={[
                     styles.messageTimestamp,
-                    message.isSent ? styles.sentMessageTimestamp : styles.receivedMessageTimestamp
+                    message.isSent ? styles.sentMessageTimestamp : styles.receivedMessageTimestamp,
                   ]}
                 >
                   {formatDistanceToNow(message.timestamp, {
@@ -201,15 +190,8 @@ export default function ChatScreen() {
       {/* Message Input */}
       <View style={styles.inputContainer}>
         <View style={styles.inputRow}>
-          <TouchableOpacity
-            style={styles.imageButton}
-            onPress={handleImagePick}
-          >
-            <MaterialCommunityIcons 
-              name="image-plus" 
-              size={24} 
-              color="#1e40af" 
-            />
+          <TouchableOpacity style={styles.imageButton} onPress={handleImagePick}>
+            <MaterialCommunityIcons name="image-plus" size={24} color="#1e40af" />
           </TouchableOpacity>
           <View style={styles.textInputContainer}>
             <TextInput
@@ -219,14 +201,11 @@ export default function ChatScreen() {
               style={styles.textInput}
             />
           </View>
-          <TouchableOpacity
-            style={styles.sendButton}
-            onPress={handleSend}
-          >
-            <MaterialCommunityIcons 
-              name="send" 
-              size={24} 
-              color={newMessage.trim() ? '#1e40af' : '#9CA3AF'} 
+          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+            <MaterialCommunityIcons
+              name="send"
+              size={24}
+              color={newMessage.trim() ? '#1e40af' : '#9CA3AF'}
             />
           </TouchableOpacity>
         </View>
@@ -347,4 +326,4 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     marginBottom: 8,
   },
-}); 
+});

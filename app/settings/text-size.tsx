@@ -29,11 +29,7 @@ const TextSizeScreen = () => {
       </View>
 
       <View className="flex-row items-center justify-between mb-4">
-        <MaterialIcons
-          name="format-size"
-          size={24}
-          className="text-gray-600 dark:text-gray-300"
-        />
+        <MaterialIcons name="format-size" size={24} className="text-gray-600 dark:text-gray-300" />
         <Slider
           style={{ flex: 1, marginHorizontal: 16 }}
           minimumValue={0.8}
@@ -55,10 +51,7 @@ const TextSizeScreen = () => {
           {t('settings.preview')}
         </Text>
         <View className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-          <Text
-            style={{ fontSize: 16 * textSize }}
-            className="text-gray-800 dark:text-gray-100"
-          >
+          <Text style={{ fontSize: 16 * textSize }} className="text-gray-800 dark:text-gray-100">
             {t('settings.previewText')}
           </Text>
         </View>
@@ -67,4 +60,4 @@ const TextSizeScreen = () => {
   );
 };
 
-export default TextSizeScreen; 
+export default TextSizeScreen;

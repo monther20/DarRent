@@ -66,19 +66,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      
+
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // In a real app, you would call an API endpoint here
       // For this mock version, we'll find a matching user by email
-      const matchedUser = await api.users.getLandlords().then(landlords => {
-        return landlords.find(u => u.email.toLowerCase() === email.toLowerCase());
+      const matchedUser = await api.users.getLandlords().then((landlords) => {
+        return landlords.find((u) => u.email.toLowerCase() === email.toLowerCase());
       });
 
       if (!matchedUser) {
         const renters = await api.users.getRenters();
-        const renterUser = renters.find(u => u.email.toLowerCase() === email.toLowerCase());
+        const renterUser = renters.find((u) => u.email.toLowerCase() === email.toLowerCase());
         if (renterUser) {
           // Store token and user data
           const mockToken = `mock_token_${Date.now()}`;
@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setIsLoggedIn(true);
           return true;
         }
-        
+
         return false;
       }
 
@@ -116,13 +116,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: RegisterData): Promise<boolean> => {
     try {
       setIsLoading(true);
-      
+
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       // In a real app, you would call an API endpoint here to create a new user
       // For this mock version, we'll just pretend to create a user
-      
+
       // Create a mock new user
       const newUser: User = {
         id: `user_${Date.now()}`,
@@ -159,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      
+
       // Remove stored auth data
       await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
       await SecureStore.deleteItemAsync(USER_DATA_KEY);
@@ -181,13 +181,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const forgotPassword = async (email: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      
+
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // In a real app, you would call an API endpoint here to initiate password reset
       // For this mock version, we'll just pretend it worked
-      
+
       return true;
     } catch (error) {
       console.error('Forgot password error:', error);
@@ -201,13 +201,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPassword = async (token: string, newPassword: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      
+
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // In a real app, you would call an API endpoint here to reset password
       // For this mock version, we'll just pretend it worked
-      
+
       return true;
     } catch (error) {
       console.error('Reset password error:', error);
@@ -221,7 +221,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       return true;
     } catch (error) {
       console.error('Error changing password:', error);
@@ -235,8 +235,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setUser(prevUser => ({ ...prevUser, ...userData } as User));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setUser((prevUser) => ({ ...prevUser, ...userData }) as User);
       return true;
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -271,4 +271,4 @@ export const useAuth = (): AuthContextType => {
   return context;
 };
 
-export default AuthContext; 
+export default AuthContext;

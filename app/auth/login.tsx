@@ -82,13 +82,10 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color="white" />
         </TouchableOpacity>
         <ThemedText style={styles.headerTitle}>Login</ThemedText>
@@ -140,10 +137,7 @@ export default function LoginScreen() {
           {/* Remember Me and Forgot Password */}
           <View style={styles.rememberForgotContainer}>
             <View style={styles.rememberContainer}>
-              <Checkbox
-                checked={rememberMe}
-                onPress={() => setRememberMe(!rememberMe)}
-              />
+              <Checkbox checked={rememberMe} onPress={() => setRememberMe(!rememberMe)} />
               <ThemedText style={styles.rememberText}>Remember me</ThemedText>
             </View>
             <Link href="/auth/forgot-password" style={styles.forgotText}>
@@ -152,9 +146,7 @@ export default function LoginScreen() {
           </View>
 
           {/* Error Message */}
-          {errorMessage ? (
-            <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>
-          ) : null}
+          {errorMessage ? <ThemedText style={styles.errorText}>{errorMessage}</ThemedText> : null}
 
           {/* Login Button */}
           <TouchableOpacity
@@ -177,10 +169,7 @@ export default function LoginScreen() {
           </View>
 
           {/* Google Sign In */}
-          <TouchableOpacity
-            style={styles.googleButton}
-            onPress={handleGoogleLogin}
-          >
+          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
             <Ionicons name="logo-google" size={20} color="#34568B" />
             <ThemedText style={styles.googleButtonText}>Google</ThemedText>
           </TouchableOpacity>
@@ -315,4 +304,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textDecorationLine: 'none',
   },
-}); 
+});

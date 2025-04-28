@@ -14,14 +14,14 @@ type ThemedInputProps = TextInputProps & {
   borderColorName?: ColorKey;
 };
 
-export function ThemedInput({ 
-  style, 
-  lightColor, 
-  darkColor, 
+export function ThemedInput({
+  style,
+  lightColor,
+  darkColor,
   colorName = 'card',
   placeholderColorName = 'grey',
   borderColorName = 'border',
-  ...otherProps 
+  ...otherProps
 }: ThemedInputProps) {
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, colorName);
   const placeholderColor = useThemeColor({}, placeholderColorName);
@@ -29,16 +29,16 @@ export function ThemedInput({
   const textColor = useThemeColor({}, 'text');
 
   return (
-    <TextInput 
+    <TextInput
       style={[
-        styles.input, 
-        { 
-          backgroundColor, 
+        styles.input,
+        {
+          backgroundColor,
           borderColor,
           color: textColor,
         },
-        style
-      ]} 
+        style,
+      ]}
       placeholderTextColor={placeholderColor}
       {...otherProps}
     />
@@ -52,4 +52,4 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     fontSize: 16,
   },
-}); 
+});

@@ -85,4 +85,4 @@ export interface Stats {
   activeLeases: number;
   expiringSoon: number;
   averageRating: number;
-} 
+}

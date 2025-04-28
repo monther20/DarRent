@@ -1,6 +1,8 @@
 {
   "common": {
     "welcome": "Welcome to DarRent",
+    "welcomeBack": "Welcome Back",
+    "hello": "Hello",
     "findHome": "Find your perfect home in Jordan",
     "login": "Login",
     "signup": "Sign up",
@@ -90,6 +92,7 @@
   },
   "property": {
     "yourProperties": "Your Properties",
+    "savedProperties": "Saved Properties",
     "addNewProperty": "Add New Property",
     "views": "Views",
     "inquiries": "Inquiries",
@@ -264,4 +267,4 @@
       "chat": "Live Chat"
     }
   }
-} 
+}

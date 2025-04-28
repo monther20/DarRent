@@ -28,17 +28,14 @@ export function PropertyCard({
   inquiries,
   daysListed,
 }: PropertyCardProps) {
-  const getImageSource = (avatar: string) => {
-    if (!avatar) return require('../assets/images/property-placeholder.jpg');
-    if (avatar.startsWith('http')) return { uri: avatar };
-    if (avatar.startsWith('/assets')) return require('../assets/images/property-placeholder.jpg');
-    return { uri: avatar }; // fallback, but probably never reached
+  const getImageSource = (image: string) => {
+    if (!image) return require('../assets/images/property-placeholder.jpg');
+    if (image.startsWith('http')) return { uri: image };
+    if (image.startsWith('/assets')) return require('../assets/images/property-placeholder.jpg');
+    return { uri: image }; // fallback, but probably never reached
   };
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={() => router.push(`/property/${id}`)}
-    >
+    <TouchableOpacity style={styles.container} onPress={() => router.push(`/property/${id}`)}>
       <View style={styles.contentContainer}>
         <Image source={getImageSource(image)} style={styles.image} />
         <View style={styles.details}>
@@ -131,4 +128,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
   },
-}); 
+});

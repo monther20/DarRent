@@ -53,7 +53,7 @@ export function Menu({ visible, onClose }: MenuProps) {
     },
   ];
 
-  const handlePress = (item: typeof menuItems[0]) => {
+  const handlePress = (item: (typeof menuItems)[0]) => {
     if (item.onPress) {
       item.onPress();
     } else {
@@ -63,11 +63,7 @@ export function Menu({ visible, onClose }: MenuProps) {
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={[styles.menuContainer, isRTL ? styles.menuRTL : styles.menuLTR]}>
           <View style={styles.header}>
@@ -81,7 +77,8 @@ export function Menu({ visible, onClose }: MenuProps) {
               <TouchableOpacity
                 key={index}
                 style={styles.menuItem}
-                onPress={() => handlePress(item)}>
+                onPress={() => handlePress(item)}
+              >
                 <FontAwesome name={item.icon as any} size={20} color={Colors.light.text} />
                 <Text style={styles.menuItemText}>{item.title}</Text>
               </TouchableOpacity>
@@ -146,4 +143,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.light.text,
   },
-}); 
+});

@@ -36,10 +36,18 @@ const AddPropertyScreen: React.FC = () => {
     property.description.trim().length > 0 &&
     property.city.trim().length > 0 &&
     property.area.trim().length > 0 &&
-    !!property.price && !isNaN(Number(property.price)) && Number(property.price) > 0 &&
-    !!property.areaSize && !isNaN(Number(property.areaSize)) && Number(property.areaSize) > 0 &&
-    !!property.bedrooms && !isNaN(Number(property.bedrooms)) && Number(property.bedrooms) > 0 &&
-    !!property.bathrooms && !isNaN(Number(property.bathrooms)) && Number(property.bathrooms) > 0 &&
+    !!property.price &&
+    !isNaN(Number(property.price)) &&
+    Number(property.price) > 0 &&
+    !!property.areaSize &&
+    !isNaN(Number(property.areaSize)) &&
+    Number(property.areaSize) > 0 &&
+    !!property.bedrooms &&
+    !isNaN(Number(property.bedrooms)) &&
+    Number(property.bedrooms) > 0 &&
+    !!property.bathrooms &&
+    !isNaN(Number(property.bathrooms)) &&
+    Number(property.bathrooms) > 0 &&
     property.currency.trim().length > 0 &&
     property.status.trim().length > 0;
 
@@ -82,20 +90,14 @@ const AddPropertyScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader 
-        title="Add New Property"
-        showAddButton={false}
-      />
+      <ScreenHeader title="Add New Property" showAddButton={false} />
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
         <View style={styles.formCard}>
           {/* Image Upload Section */}
           <View style={styles.section}>
             <ThemedText style={styles.sectionTitle}>Property Images</ThemedText>
             <View style={styles.imageUploadContainer}>
-              <TouchableOpacity 
-                style={styles.imageUploadButton}
-                onPress={handleAddImage}
-              >
+              <TouchableOpacity style={styles.imageUploadButton} onPress={handleAddImage}>
                 <MaterialIcons name="add-a-photo" size={32} color="#34568B" />
                 <ThemedText style={styles.imageUploadText}>Add Images</ThemedText>
               </TouchableOpacity>
@@ -108,14 +110,14 @@ const AddPropertyScreen: React.FC = () => {
             <InputField
               label="Property Title"
               value={property.title}
-              onChangeText={(text) => setProperty({...property, title: text})}
+              onChangeText={(text) => setProperty({ ...property, title: text })}
               placeholder="Enter property title"
               style={styles.inputFull}
             />
             <InputField
               label="Description"
               value={property.description}
-              onChangeText={(text) => setProperty({...property, description: text})}
+              onChangeText={(text) => setProperty({ ...property, description: text })}
               placeholder="Enter property description"
               style={[styles.inputFull, styles.multilineInput]}
             />
@@ -127,19 +129,23 @@ const AddPropertyScreen: React.FC = () => {
             <InputField
               label="City"
               value={property.city}
-              onChangeText={(text) => setProperty({...property, city: text})}
+              onChangeText={(text) => setProperty({ ...property, city: text })}
               placeholder="Enter city"
               style={styles.inputFull}
             />
             <InputField
               label="Area / Neighborhood"
               value={property.area}
-              onChangeText={(text) => setProperty({...property, area: text})}
+              onChangeText={(text) => setProperty({ ...property, area: text })}
               placeholder="Enter area/neighborhood"
               style={styles.inputFull}
             />
-            <TouchableOpacity style={styles.locationButton} onPress={handleGetLocation} disabled={locLoading}>
-              <MaterialIcons name="my-location" size={22} color="#fff" style={{marginRight: 8}} />
+            <TouchableOpacity
+              style={styles.locationButton}
+              onPress={handleGetLocation}
+              disabled={locLoading}
+            >
+              <MaterialIcons name="my-location" size={22} color="#fff" style={{ marginRight: 8 }} />
               <ThemedText style={styles.locationButtonText}>
                 {locLoading ? 'Getting Location...' : 'Use My Current Location'}
               </ThemedText>
@@ -149,9 +155,7 @@ const AddPropertyScreen: React.FC = () => {
                 Location set: {coords.latitude.toFixed(5)}, {coords.longitude.toFixed(5)}
               </ThemedText>
             )}
-            {locError && (
-              <ThemedText style={styles.coordsError}>{locError}</ThemedText>
-            )}
+            {locError && <ThemedText style={styles.coordsError}>{locError}</ThemedText>}
           </View>
 
           {/* Property Details */}
@@ -161,7 +165,7 @@ const AddPropertyScreen: React.FC = () => {
               <InputField
                 label="Price"
                 value={property.price}
-                onChangeText={(text) => setProperty({...property, price: text})}
+                onChangeText={(text) => setProperty({ ...property, price: text })}
                 placeholder="Enter price"
                 keyboardType="numeric"
                 style={styles.inputFull}
@@ -172,7 +176,7 @@ const AddPropertyScreen: React.FC = () => {
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={property.currency}
-                  onValueChange={(itemValue) => setProperty({...property, currency: itemValue})}
+                  onValueChange={(itemValue) => setProperty({ ...property, currency: itemValue })}
                   style={styles.picker}
                   dropdownIconColor="#34568B"
                 >
@@ -186,7 +190,7 @@ const AddPropertyScreen: React.FC = () => {
               <InputField
                 label="Area (m²)"
                 value={property.areaSize}
-                onChangeText={(text) => setProperty({...property, areaSize: text})}
+                onChangeText={(text) => setProperty({ ...property, areaSize: text })}
                 placeholder="Enter area"
                 keyboardType="numeric"
                 style={styles.inputFull}
@@ -196,7 +200,7 @@ const AddPropertyScreen: React.FC = () => {
               <InputField
                 label="Bedrooms"
                 value={property.bedrooms}
-                onChangeText={(text) => setProperty({...property, bedrooms: text})}
+                onChangeText={(text) => setProperty({ ...property, bedrooms: text })}
                 placeholder="Enter number"
                 keyboardType="numeric"
                 style={styles.inputFull}
@@ -206,7 +210,7 @@ const AddPropertyScreen: React.FC = () => {
               <InputField
                 label="Bathrooms"
                 value={property.bathrooms}
-                onChangeText={(text) => setProperty({...property, bathrooms: text})}
+                onChangeText={(text) => setProperty({ ...property, bathrooms: text })}
                 placeholder="Enter number"
                 keyboardType="numeric"
                 style={styles.inputFull}
@@ -217,7 +221,7 @@ const AddPropertyScreen: React.FC = () => {
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={property.status}
-                  onValueChange={(itemValue) => setProperty({...property, status: itemValue})}
+                  onValueChange={(itemValue) => setProperty({ ...property, status: itemValue })}
                   style={styles.picker}
                   dropdownIconColor="#34568B"
                 >
@@ -242,7 +246,7 @@ const AddPropertyScreen: React.FC = () => {
               <InputField
                 label="Amenities (comma separated)"
                 value={property.amenities}
-                onChangeText={(text) => setProperty({...property, amenities: text})}
+                onChangeText={(text) => setProperty({ ...property, amenities: text })}
                 placeholder="e.g. Parking, Balcony, Air Conditioning"
                 style={[styles.inputFull, property.furnished && { opacity: 0.5 }]}
                 editable={!property.furnished}
@@ -438,4 +442,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddPropertyScreen; 
+export default AddPropertyScreen;

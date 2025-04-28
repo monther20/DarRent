@@ -16,15 +16,15 @@ const SettingsScreen = () => {
     textSize,
     setTextSize,
     initialPreferences,
-    isLoading
+    isLoading,
   } = useSettings();
-  
+
   // Default values for push and email notifications using initialPreferences
   const [pushNotifications, setPushNotifications] = useState(
-    initialPreferences?.notifications ?? true
+    initialPreferences?.notifications ?? true,
   );
   const [emailNotifications, setEmailNotifications] = useState(
-    initialPreferences?.emailUpdates ?? true
+    initialPreferences?.emailUpdates ?? true,
   );
 
   if (isLoading) {
@@ -36,49 +36,40 @@ const SettingsScreen = () => {
     );
   }
 
-  const SettingItem = ({ 
-    title, 
-    value, 
-    onPress, 
-    icon, 
-    showArrow = true 
-  }: { 
-    title: string; 
-    value?: string; 
-    onPress: () => void; 
+  const SettingItem = ({
+    title,
+    value,
+    onPress,
+    icon,
+    showArrow = true,
+  }: {
+    title: string;
+    value?: string;
+    onPress: () => void;
     icon: keyof typeof MaterialIcons.glyphMap;
     showArrow?: boolean;
   }) => (
-    <TouchableOpacity
-      onPress={onPress}
-      style={styles.settingItem}
-    >
+    <TouchableOpacity onPress={onPress} style={styles.settingItem}>
       <View style={styles.settingItemLeft}>
         <MaterialIcons name={icon} size={24} style={styles.settingIcon} />
         <Text style={styles.settingText}>{title}</Text>
       </View>
       <View style={styles.settingItemRight}>
         {value && <Text style={styles.settingValue}>{value}</Text>}
-        {showArrow && (
-          <MaterialIcons 
-            name="chevron-right" 
-            size={24} 
-            style={styles.settingArrow} 
-          />
-        )}
+        {showArrow && <MaterialIcons name="chevron-right" size={24} style={styles.settingArrow} />}
       </View>
     </TouchableOpacity>
   );
 
-  const SettingToggle = ({ 
-    title, 
-    value, 
-    onValueChange, 
-    icon 
-  }: { 
-    title: string; 
-    value: boolean; 
-    onValueChange: (value: boolean) => void; 
+  const SettingToggle = ({
+    title,
+    value,
+    onValueChange,
+    icon,
+  }: {
+    title: string;
+    value: boolean;
+    onValueChange: (value: boolean) => void;
     icon: keyof typeof MaterialIcons.glyphMap;
   }) => (
     <View style={styles.settingItem}>
@@ -99,9 +90,7 @@ const SettingsScreen = () => {
     <ScrollView style={styles.container}>
       {/* Account Settings */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          {t('settings.account')}
-        </Text>
+        <Text style={styles.sectionTitle}>{t('settings.account')}</Text>
         <SettingItem
           title={t('settings.changePassword')}
           onPress={() => router.push('/settings/change-password')}
@@ -117,9 +106,7 @@ const SettingsScreen = () => {
 
       {/* Notification Settings */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          {t('settings.notifications')}
-        </Text>
+        <Text style={styles.sectionTitle}>{t('settings.notifications')}</Text>
         <SettingToggle
           title={t('settings.pushNotifications')}
           value={pushNotifications}
@@ -136,12 +123,16 @@ const SettingsScreen = () => {
 
       {/* Display Settings */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          {t('settings.display')}
-        </Text>
+        <Text style={styles.sectionTitle}>{t('settings.display')}</Text>
         <SettingItem
           title={t('settings.theme')}
-          value={theme === 'system' ? t('settings.system') : theme === 'dark' ? t('settings.dark') : t('settings.light')}
+          value={
+            theme === 'system'
+              ? t('settings.system')
+              : theme === 'dark'
+                ? t('settings.dark')
+                : t('settings.light')
+          }
           onPress={() => router.push('/settings/theme')}
           icon="brightness-6"
         />
@@ -155,9 +146,7 @@ const SettingsScreen = () => {
 
       {/* Privacy Settings */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          {t('settings.privacy')}
-        </Text>
+        <Text style={styles.sectionTitle}>{t('settings.privacy')}</Text>
         <SettingItem
           title={t('settings.privacyPolicy')}
           onPress={() => router.push('/settings/privacy-policy')}
@@ -230,4 +219,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SettingsScreen; 
+export default SettingsScreen;

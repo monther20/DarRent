@@ -70,60 +70,59 @@ function RootLayoutNav() {
       }}
     >
       {!user ? (
-        <Stack.Screen 
-          name="auth" 
+        <Stack.Screen
+          name="auth"
           options={{
-            headerShown: false
+            headerShown: false,
           }}
         />
       ) : user.role === 'landlord' ? (
-        <Stack.Screen 
+        <Stack.Screen
           name="(landlord-tabs)"
           options={{
-            headerShown: false
+            headerShown: false,
           }}
         />
       ) : (
-        <Stack.Screen 
+        <Stack.Screen
           name="(renter-tabs)"
           options={{
-            headerShown: false
+            headerShown: false,
           }}
         />
       )}
-      <Stack.Screen 
-        name="modal" 
-        options={{ 
-          presentation: 'modal',
-          headerShown: true
-        }} 
-      />
-      <Stack.Screen 
-        name="chat/[id]"
+      <Stack.Screen
+        name="modal"
         options={{
-          headerShown: true
+          presentation: 'modal',
+          headerShown: true,
         }}
       />
-      <Stack.Screen 
+      <Stack.Screen
+        name="chat/[id]"
+        options={{
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
         name="settings"
         options={{
           headerShown: true,
-          title: 'Settings'
+          title: 'Settings',
         }}
       />
-      <Stack.Screen 
+      <Stack.Screen
         name="help"
         options={{
-          headerShown: false
+          headerShown: false,
         }}
       />
-      <Stack.Screen 
+      <Stack.Screen
         name="terms"
         options={{
-          headerShown: false
+          headerShown: false,
         }}
       />
     </Stack>
   );
 }
-

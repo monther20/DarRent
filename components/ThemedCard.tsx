@@ -14,27 +14,20 @@ type ThemedCardProps = ViewProps & {
   borderColorName?: ColorKey;
 };
 
-export function ThemedCard({ 
-  style, 
-  lightColor, 
-  darkColor, 
-  children, 
+export function ThemedCard({
+  style,
+  lightColor,
+  darkColor,
+  children,
   colorName = 'card',
   borderColorName = 'border',
-  ...otherProps 
+  ...otherProps
 }: ThemedCardProps) {
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, colorName);
   const borderColor = useThemeColor({}, borderColorName);
 
   return (
-    <View 
-      style={[
-        styles.card, 
-        { backgroundColor, borderColor },
-        style
-      ]} 
-      {...otherProps}
-    >
+    <View style={[styles.card, { backgroundColor, borderColor }, style]} {...otherProps}>
       {children}
     </View>
   );
@@ -54,4 +47,4 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-}); 
+});

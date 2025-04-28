@@ -135,32 +135,28 @@ export default function ContractDetailsScreen() {
   }, [id, t]);
 
   const handleTerminateContract = async () => {
-    Alert.alert(
-      t('contracts.terminateTitle'),
-      t('contracts.terminateMessage'),
-      [
-        {
-          text: t('common.cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('common.confirm'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const result = await api.contracts.terminateContract(id as string);
-              if (result) {
-                setContract(result);
-                Alert.alert(t('contracts.success'), t('contracts.contractTerminated'));
-              }
-            } catch (error) {
-              console.error('Error terminating contract:', error);
-              Alert.alert(t('contracts.error'), t('contracts.errorTerminating'));
+    Alert.alert(t('contracts.terminateTitle'), t('contracts.terminateMessage'), [
+      {
+        text: t('common.cancel'),
+        style: 'cancel',
+      },
+      {
+        text: t('common.confirm'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const result = await api.contracts.terminateContract(id as string);
+            if (result) {
+              setContract(result);
+              Alert.alert(t('contracts.success'), t('contracts.contractTerminated'));
             }
-          },
+          } catch (error) {
+            console.error('Error terminating contract:', error);
+            Alert.alert(t('contracts.error'), t('contracts.errorTerminating'));
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleShowDatePicker = () => {
@@ -176,10 +172,7 @@ export default function ContractDetailsScreen() {
 
   const handleExtendContract = async () => {
     try {
-      const result = await api.contracts.extendContract(
-        id as string,
-        newEndDate.toISOString()
-      );
+      const result = await api.contracts.extendContract(id as string, newEndDate.toISOString());
       if (result) {
         setContract(result);
         setShowDatePicker(false);
@@ -215,8 +208,14 @@ export default function ContractDetailsScreen() {
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <ThemedText style={styles.backButtonText} children={`← ${t('common.back')}`} />
           </TouchableOpacity>
-          <ThemedText style={styles.headerTitle} children={t('contracts.contractTitle', { property: property.title })} />
-          <ThemedText style={styles.headerStatus} children={t(`contracts.status.${contract.status}`)} />
+          <ThemedText
+            style={styles.headerTitle}
+            children={t('contracts.contractTitle', { property: property.title })}
+          />
+          <ThemedText
+            style={styles.headerStatus}
+            children={t(`contracts.status.${contract.status}`)}
+          />
         </View>
 
         <View style={styles.card}>
@@ -228,7 +227,10 @@ export default function ContractDetailsScreen() {
             </View>
             <View style={styles.infoRow}>
               <ThemedText style={styles.infoLabel} children={t('contracts.location')} />
-              <ThemedText style={styles.infoValue} children={`${property.location.area}, ${property.location.city}`} />
+              <ThemedText
+                style={styles.infoValue}
+                children={`${property.location.area}, ${property.location.city}`}
+              />
             </View>
             <View style={styles.infoRow}>
               <ThemedText style={styles.infoLabel} children={t('contracts.renter')} />
@@ -248,25 +250,36 @@ export default function ContractDetailsScreen() {
             </View>
             <View style={styles.infoRow}>
               <ThemedText style={styles.infoLabel} children={t('contracts.status')} />
-              <ThemedText 
+              <ThemedText
                 style={[
-                  styles.infoValue, 
-                  { 
-                    color: contract.status === 'active' ? '#27AE60' : 
-                           contract.status === 'terminated' ? '#E74C3C' : 
-                           contract.status === 'pending' ? '#F39C12' : '#7F8C8D' 
-                  }
+                  styles.infoValue,
+                  {
+                    color:
+                      contract.status === 'active'
+                        ? '#27AE60'
+                        : contract.status === 'terminated'
+                          ? '#E74C3C'
+                          : contract.status === 'pending'
+                            ? '#F39C12'
+                            : '#7F8C8D',
+                  },
                 ]}
                 children={t(`contracts.status.${contract.status}`)}
               />
             </View>
             <View style={styles.infoRow}>
               <ThemedText style={styles.infoLabel} children={t('contracts.securityDeposit')} />
-              <ThemedText style={styles.infoValue} children={`${contract.securityDeposit} ${property.currency}`} />
+              <ThemedText
+                style={styles.infoValue}
+                children={`${contract.securityDeposit} ${property.currency}`}
+              />
             </View>
             <View style={styles.infoRow}>
               <ThemedText style={styles.infoLabel} children={t('contracts.rentAmount')} />
-              <ThemedText style={styles.infoValue} children={`${property.price} ${property.currency}/month`} />
+              <ThemedText
+                style={styles.infoValue}
+                children={`${property.price} ${property.currency}/month`}
+              />
             </View>
             <View style={styles.infoRow}>
               <ThemedText style={styles.infoLabel} children={t('contracts.createdAt')} />
@@ -277,15 +290,12 @@ export default function ContractDetailsScreen() {
           {contract.status === 'active' && (
             <View style={styles.section}>
               <ThemedText style={styles.sectionTitle} children={t('contracts.actions')} />
-              
-              <TouchableOpacity 
-                style={styles.button}
-                onPress={handleShowDatePicker}
-              >
+
+              <TouchableOpacity style={styles.button} onPress={handleShowDatePicker}>
                 <ThemedText style={styles.buttonText} children={t('contracts.extendContract')} />
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={[styles.button, styles.terminateButton]}
                 onPress={handleTerminateContract}
               >
@@ -306,10 +316,7 @@ export default function ContractDetailsScreen() {
                 }}
                 minimumDate={new Date()}
               />
-              <TouchableOpacity 
-                style={styles.button}
-                onPress={handleExtendContract}
-              >
+              <TouchableOpacity style={styles.button} onPress={handleExtendContract}>
                 <ThemedText style={styles.buttonText} children={t('contracts.confirm')} />
               </TouchableOpacity>
             </View>
@@ -318,4 +325,4 @@ export default function ContractDetailsScreen() {
       </ScrollView>
     </>
   );
-} 
+}

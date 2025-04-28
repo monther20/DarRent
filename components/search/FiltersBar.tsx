@@ -34,31 +34,22 @@ export function FiltersBar({
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[
-              styles.filterButton,
-              activeFilters[item.id] ? styles.filterButtonActive : null,
-            ]}
+            style={[styles.filterButton, activeFilters[item.id] ? styles.filterButtonActive : null]}
             onPress={() => onFilterPress(item.id)}
           >
-            <Ionicons 
-              name={item.icon} 
-              size={18} 
-              color={activeFilters[item.id] ? '#fff' : '#34568B'} 
+            <Ionicons
+              name={item.icon}
+              size={18}
+              color={activeFilters[item.id] ? '#fff' : '#34568B'}
             />
-            <Text style={[
-              styles.filterText,
-              activeFilters[item.id] && styles.filterTextActive,
-            ]}>
+            <Text style={[styles.filterText, activeFilters[item.id] && styles.filterTextActive]}>
               {item.label}
             </Text>
           </TouchableOpacity>
         )}
       />
       {Object.keys(activeFilters).length > 0 && (
-        <TouchableOpacity 
-          style={styles.clearFiltersButton}
-          onPress={onClearFilters}
-        >
+        <TouchableOpacity style={styles.clearFiltersButton} onPress={onClearFilters}>
           <Ionicons name="close-circle" size={20} color="#FF6B6B" />
           <Text style={styles.clearFiltersText}>Clear</Text>
         </TouchableOpacity>
@@ -116,4 +107,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-}); 
+});

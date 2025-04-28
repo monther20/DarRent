@@ -27,11 +27,7 @@ export function ScreenHeader({ title, showAddButton, onAddPress }: ScreenHeaderP
               </TouchableOpacity>
             )}
             <View style={styles.menuButtonContainer}>
-              {isRTL ? (
-                <MenuButton position="left" />
-              ) : (
-                <MenuButton position="right" />
-              )}
+              {isRTL ? <MenuButton position="left" /> : <MenuButton position="right" />}
             </View>
           </View>
         </View>
@@ -99,4 +95,4 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.05)',
     marginTop: -1, // Overlap with the header to hide any gap
   },
-}); 
+});

@@ -1,9 +1,11 @@
 # Supabase API Development Guide
 
 ## Overview
+
 This document outlines the API development for the DarRent property rental application using Supabase. The API services will handle all backend operations with support for Arabic language.
 
 ## Prerequisites
+
 - Supabase project set up by the database developer
 - Basic understanding of TypeScript
 - Knowledge of Arabic language requirements
@@ -17,10 +19,7 @@ This document outlines the API development for the DarRent property rental appli
 import { createClient } from '@supabase/supabase-js';
 import { User, UserRole } from '@/types';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-);
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
 
 export const authService = {
   // Login with email and password
@@ -59,15 +58,15 @@ export const authService = {
       if (authError) throw authError;
 
       // Create user profile
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert([{
+      const { error: profileError } = await supabase.from('users').insert([
+        {
           id: authData.user?.id,
           email,
           full_name: userData.full_name,
           phone: userData.phone,
           role: userData.role,
-        }]);
+        },
+      ]);
 
       if (profileError) throw profileError;
 
@@ -81,8 +80,11 @@ export const authService = {
   // Get current user
   getCurrentUser: async () => {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
       if (error) throw error;
       if (!user) return { success: false, error: 'No user found' };
 
@@ -105,10 +107,7 @@ export const authService = {
   // Update user profile
   updateProfile: async (userId: string, userData: Partial<User>) => {
     try {
-      const { error } = await supabase
-        .from('users')
-        .update(userData)
-        .eq('id', userId);
+      const { error } = await supabase.from('users').update(userData).eq('id', userId);
 
       if (error) throw error;
 
@@ -140,10 +139,7 @@ export const authService = {
 import { createClient } from '@supabase/supabase-js';
 import { Property } from '@/types';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-);
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
 
 export const propertyService = {
   // Create new property
@@ -203,15 +199,11 @@ export const propertyService = {
   // Search properties with Arabic support
   searchProperties: async (query: string, filters = {}) => {
     try {
-      let supabaseQuery = supabase
-        .from('properties')
-        .select('*');
+      let supabaseQuery = supabase.from('properties').select('*');
 
       // Add Arabic text search support
       if (query) {
-        supabaseQuery = supabaseQuery.or(
-          `title.ilike.%${query}%,description.ilike.%${query}%`
-        );
+        supabaseQuery = supabaseQuery.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
         // For more advanced search using text search capabilities:
         // .or(`to_tsvector('arabic', title) @@ to_tsquery('arabic', '${query}')`)
       }
@@ -263,10 +255,7 @@ export const propertyService = {
   // Delete property
   deleteProperty: async (propertyId: string) => {
     try {
-      const { error } = await supabase
-        .from('properties')
-        .delete()
-        .eq('id', propertyId);
+      const { error } = await supabase.from('properties').delete().eq('id', propertyId);
 
       if (error) throw error;
 
@@ -286,10 +275,7 @@ export const propertyService = {
 import { createClient } from '@supabase/supabase-js';
 import { Application } from '@/types';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-);
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
 
 export const applicationService = {
   // Create new application
@@ -333,7 +319,8 @@ export const applicationService = {
     try {
       const { data, error } = await supabase
         .from('applications')
-        .select(`
+        .select(
+          `
           *,
           properties (
             id,
@@ -343,7 +330,8 @@ export const applicationService = {
             location_city,
             location_area
           )
-        `)
+        `,
+        )
         .eq('renter_id', renterId)
         .order('created_at', { ascending: false });
 
@@ -361,7 +349,8 @@ export const applicationService = {
     try {
       const { data, error } = await supabase
         .from('applications')
-        .select(`
+        .select(
+          `
           *,
           users (
             id,
@@ -369,7 +358,8 @@ export const applicationService = {
             email,
             phone
           )
-        `)
+        `,
+        )
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
 
@@ -410,10 +400,7 @@ export const applicationService = {
 import { createClient } from '@supabase/supabase-js';
 import { Message } from '@/types';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-);
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
 
 export const messageService = {
   // Send message
@@ -421,11 +408,13 @@ export const messageService = {
     try {
       const { data, error } = await supabase
         .from('messages')
-        .insert([{
-          sender_id: senderId,
-          receiver_id: receiverId,
-          content,
-        }])
+        .insert([
+          {
+            sender_id: senderId,
+            receiver_id: receiverId,
+            content,
+          },
+        ])
         .select()
         .single();
 
@@ -443,7 +432,8 @@ export const messageService = {
     try {
       const { data, error } = await supabase
         .from('messages')
-        .select(`
+        .select(
+          `
           *,
           sender:sender_id (
             id,
@@ -455,8 +445,11 @@ export const messageService = {
             full_name,
             profile_image
           )
-        `)
-        .or(`and(sender_id.eq.${userId1},receiver_id.eq.${userId2}),and(sender_id.eq.${userId2},receiver_id.eq.${userId1})`)
+        `,
+        )
+        .or(
+          `and(sender_id.eq.${userId1},receiver_id.eq.${userId2}),and(sender_id.eq.${userId2},receiver_id.eq.${userId1})`,
+        )
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -499,7 +492,7 @@ export const messageService = {
         },
         (payload) => {
           callback(payload.new as Message);
-        }
+        },
       )
       .subscribe();
   },
@@ -512,10 +505,7 @@ export const messageService = {
 // services/storageService.ts
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-);
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
 
 export const storageService = {
   // Upload profile image
@@ -525,18 +515,16 @@ export const storageService = {
       const blob = await response.blob();
       const fileName = `${userId}/${Date.now()}.jpg`;
 
-      const { data, error } = await supabase.storage
-        .from('profile-images')
-        .upload(fileName, blob, {
-          contentType: 'image/jpeg',
-          upsert: true,
-        });
+      const { data, error } = await supabase.storage.from('profile-images').upload(fileName, blob, {
+        contentType: 'image/jpeg',
+        upsert: true,
+      });
 
       if (error) throw error;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-images')
-        .getPublicUrl(fileName);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('profile-images').getPublicUrl(fileName);
 
       return { success: true, url: publicUrl };
     } catch (error) {
@@ -549,7 +537,7 @@ export const storageService = {
   uploadPropertyImages: async (propertyId: string, fileUris: string[]) => {
     try {
       const urls = [];
-      
+
       for (const fileUri of fileUris) {
         const response = await fetch(fileUri);
         const blob = await response.blob();
@@ -564,9 +552,9 @@ export const storageService = {
 
         if (error) throw error;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('property-images')
-          .getPublicUrl(fileName);
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from('property-images').getPublicUrl(fileName);
 
         urls.push(publicUrl);
       }
@@ -594,9 +582,9 @@ export const storageService = {
 
       if (error) throw error;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('application-documents')
-        .getPublicUrl(fileName);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('application-documents').getPublicUrl(fileName);
 
       return { success: true, url: publicUrl };
     } catch (error) {
@@ -629,4 +617,4 @@ export const storageService = {
 - Day 1: Authentication and property services
 - Day 2: Application and message services
 - Day 3: Storage service and testing
-- Day 4: Final testing and refinements 
+- Day 4: Final testing and refinements

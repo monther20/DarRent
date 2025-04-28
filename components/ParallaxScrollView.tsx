@@ -26,15 +26,14 @@ export default function ParallaxScrollView({
         <View
           style={[
             styles.header,
-            { 
+            {
               backgroundColor: headerBackgroundColor[colorScheme as 'light' | 'dark'],
             },
-          ]}>
+          ]}
+        >
           {headerImage}
         </View>
-        <ThemedView style={[styles.content, { paddingBottom: bottom }]}>
-          {children}
-        </ThemedView>
+        <ThemedView style={[styles.content, { paddingBottom: bottom }]}>{children}</ThemedView>
       </ScrollView>
     </ThemedView>
   );

@@ -24,17 +24,20 @@ A modern React Native application built with Expo.
 ## Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/yourusername/darrent.git
 cd darrent
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Create a `.env` file in the root directory and add your environment variables:
+
 ```env
 API_URL=your_api_url_here
 API_KEY=your_api_key_here
@@ -49,11 +52,13 @@ ENCRYPTION_KEY=your_encryption_key_here
 ## Development
 
 Start the development server:
+
 ```bash
 npm start
 ```
 
 Run on specific platforms:
+
 ```bash
 npm run ios     # iOS
 npm run android # Android
@@ -63,11 +68,13 @@ npm run web     # Web
 ## Testing
 
 Run tests:
+
 ```bash
 npm test
 ```
 
 Run linting:
+
 ```bash
 npm run lint
 ```

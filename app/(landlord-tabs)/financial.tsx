@@ -100,7 +100,7 @@ export default function FinancialScreen() {
         <View style={styles.transactionsList}>
           <View style={styles.transactionItem}>
             <View style={styles.transactionLeft}>
-              <Image 
+              <Image
                 source={require('@/assets/images/property-placeholder.jpg')}
                 style={styles.propertyImage}
               />
@@ -114,7 +114,7 @@ export default function FinancialScreen() {
 
           <View style={styles.transactionItem}>
             <View style={styles.transactionLeft}>
-              <Image 
+              <Image
                 source={require('@/assets/images/property-placeholder.jpg')}
                 style={styles.propertyImage}
               />
@@ -128,7 +128,7 @@ export default function FinancialScreen() {
 
           <View style={styles.transactionItem}>
             <View style={styles.transactionLeft}>
-              <Image 
+              <Image
                 source={require('@/assets/images/property-placeholder.jpg')}
                 style={styles.propertyImage}
               />
@@ -268,4 +268,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: 'white',
   },
-}); 
+});

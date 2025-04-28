@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Appearance, ColorSchemeName } from 'react-native-appearance';
 
-
 export const useColorScheme = (): ColorSchemeName => {
   const [colorScheme, setColorScheme] = useState<ColorSchemeName>(Appearance.getColorScheme());
 
@@ -18,4 +17,4 @@ export const useColorScheme = (): ColorSchemeName => {
   return colorScheme;
 };
 
-export default useColorScheme; 
+export default useColorScheme;

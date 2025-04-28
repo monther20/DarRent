@@ -1,9 +1,11 @@
 # Supabase API Development Steps
 
 ## Overview
+
 This document outlines the step-by-step process for developing the API services for the DarRent property rental application using Supabase, with support for Arabic language.
 
 ## Prerequisites
+
 - Supabase project set up
 - Basic understanding of TypeScript
 - Knowledge of Arabic language requirements
@@ -11,6 +13,7 @@ This document outlines the step-by-step process for developing the API services 
 ## Implementation Steps
 
 ### 1. Authentication Service
+
 1. Set up Supabase client
 2. Implement user authentication functions:
    - Login
@@ -23,6 +26,7 @@ This document outlines the step-by-step process for developing the API services 
    - Validation
 
 ### 2. Property Service
+
 1. Create property management functions:
    - Property creation
    - Property retrieval
@@ -39,6 +43,7 @@ This document outlines the step-by-step process for developing the API services 
    - Amenities
 
 ### 3. Application Service
+
 1. Develop application handling functions:
    - Application submission
    - Status updates
@@ -51,6 +56,7 @@ This document outlines the step-by-step process for developing the API services 
 3. Add notification system
 
 ### 4. Message Service
+
 1. Create messaging functions:
    - Message sending
    - Conversation retrieval
@@ -62,6 +68,7 @@ This document outlines the step-by-step process for developing the API services 
 3. Add Arabic content support
 
 ### 5. Storage Service
+
 1. Set up file handling functions:
    - Image upload
    - Document upload
@@ -73,6 +80,7 @@ This document outlines the step-by-step process for developing the API services 
 3. Add Arabic filename support
 
 ## Testing Steps
+
 1. Test authentication with Arabic data
 2. Verify property search functionality
 3. Test application submission process
@@ -80,6 +88,7 @@ This document outlines the step-by-step process for developing the API services 
 5. Check file upload capabilities
 
 ## Deliverables
+
 - [ ] Authentication service with Arabic support
 - [ ] Property service with search functionality
 - [ ] Application service with document handling
@@ -87,7 +96,8 @@ This document outlines the step-by-step process for developing the API services 
 - [ ] Storage service with file management
 
 ## Timeline
+
 - Day 1: Authentication and property services
 - Day 2: Application and message services
 - Day 3: Storage service and testing
-- Day 4: Final testing and refinements 
+- Day 4: Final testing and refinements

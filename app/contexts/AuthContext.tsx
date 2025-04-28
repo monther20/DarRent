@@ -17,7 +17,9 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
-  register: (userData: Omit<User, 'id' | 'profileImage'> & { password: string }) => Promise<boolean>;
+  register: (
+    userData: Omit<User, 'id' | 'profileImage'> & { password: string },
+  ) => Promise<boolean>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   updateProfile: (profileData: Partial<User>) => Promise<void>;
 }
@@ -70,7 +72,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
-  const register = async (userData: Omit<User, 'id' | 'profileImage'> & { password: string }): Promise<boolean> => {
+  const register = async (
+    userData: Omit<User, 'id' | 'profileImage'> & { password: string },
+  ): Promise<boolean> => {
     try {
       // TODO: Implement actual registration logic with your backend
       const newUser: User = {
@@ -94,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // TODO: Implement actual password change logic with your backend
     if (!user) throw new Error('User not logged in');
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   };
 
   const updateProfile = async (profileData: Partial<User>) => {
@@ -129,4 +133,4 @@ export const useAuth = () => {
   return context;
 };
 
-export default AuthContext; 
+export default AuthContext;

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  TextInput,
+} from 'react-native';
 // @ts-ignore
 import { Alert, Platform } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
@@ -17,7 +24,7 @@ declare module 'react-native' {
   interface TextInputProps {
     keyboardType?: string;
   }
-  
+
   interface TouchableOpacityProps {
     disabled?: boolean;
   }
@@ -122,11 +129,13 @@ export default function CreateContractScreen() {
   const [selectedProperty, setSelectedProperty] = useState<string>('');
   const [selectedRenter, setSelectedRenter] = useState<string>('');
   const [startDate, setStartDate] = useState<Date>(new Date());
-  const [endDate, setEndDate] = useState<Date>((() => {
-    const date = new Date();
-    date.setFullYear(date.getFullYear() + 1);
-    return date;
-  })());
+  const [endDate, setEndDate] = useState<Date>(
+    (() => {
+      const date = new Date();
+      date.setFullYear(date.getFullYear() + 1);
+      return date;
+    })(),
+  );
   const [securityDeposit, setSecurityDeposit] = useState<string>('');
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
@@ -140,17 +149,17 @@ export default function CreateContractScreen() {
           api.properties.getByOwner((await api.users.getCurrentUser()).id),
           api.users.getRenters(),
         ]);
-        
+
         // Filter to only available properties
-        const availableProperties = propertiesData.filter(p => p.status === 'available');
+        const availableProperties = propertiesData.filter((p) => p.status === 'available');
         setProperties(availableProperties);
         setRenters(rentersData);
-        
+
         if (availableProperties.length > 0) {
           setSelectedProperty(availableProperties[0].id);
           setSecurityDeposit(availableProperties[0].price.toString());
         }
-        
+
         if (rentersData.length > 0) {
           setSelectedRenter(rentersData[0].id);
         }
@@ -167,7 +176,7 @@ export default function CreateContractScreen() {
 
   const handlePropertyChange = (propertyId: string) => {
     setSelectedProperty(propertyId);
-    const property = properties.find(p => p.id === propertyId);
+    const property = properties.find((p) => p.id === propertyId);
     if (property) {
       setSecurityDeposit(property.price.toString());
     }
@@ -208,20 +217,16 @@ export default function CreateContractScreen() {
         status: 'pending',
         securityDeposit: parseFloat(securityDeposit),
         documents: {
-          signed: false
-        }
+          signed: false,
+        },
       });
 
-      Alert.alert(
-        t('contracts.success'),
-        t('contracts.contractCreated'),
-        [
-          {
-            text: t('common.ok'),
-            onPress: () => router.push('/contracts'),
-          },
-        ]
-      );
+      Alert.alert(t('contracts.success'), t('contracts.contractCreated'), [
+        {
+          text: t('common.ok'),
+          onPress: () => router.push('/contracts'),
+        },
+      ]);
     } catch (error) {
       console.error('Error creating contract:', error);
       Alert.alert(t('contracts.error'), t('contracts.errorCreatingContract'));
@@ -240,12 +245,14 @@ export default function CreateContractScreen() {
 
   if (properties.length === 0) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 20 }]}>
-        <ThemedText style={{ textAlign: 'center', marginBottom: 16 }} children={t('contracts.noPropertiesAvailable')} />
-        <TouchableOpacity 
-          style={styles.button}
-          onPress={() => router.push('/properties')}
-        >
+      <View
+        style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 20 }]}
+      >
+        <ThemedText
+          style={{ textAlign: 'center', marginBottom: 16 }}
+          children={t('contracts.noPropertiesAvailable')}
+        />
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/properties')}>
           <ThemedText style={styles.buttonText} children={t('contracts.goToProperties')} />
         </TouchableOpacity>
       </View>
@@ -253,133 +260,133 @@ export default function CreateContractScreen() {
   }
 
   return (
-    <RoleGuard allowedRoles={['landlord']} children={
-      <>
-        <StatusBar style="light" />
-        <ScrollView style={styles.container}>
-          <View style={styles.header}>
-            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-              <ThemedText style={styles.backButtonText} children={`← ${t('common.back')}`} />
-            </TouchableOpacity>
-            <ThemedText style={styles.headerTitle} children={t('contracts.createNew')} />
-          </View>
+    <RoleGuard
+      allowedRoles={['landlord']}
+      children={
+        <>
+          <StatusBar style="light" />
+          <ScrollView style={styles.container}>
+            <View style={styles.header}>
+              <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                <ThemedText style={styles.backButtonText} children={`← ${t('common.back')}`} />
+              </TouchableOpacity>
+              <ThemedText style={styles.headerTitle} children={t('contracts.createNew')} />
+            </View>
 
-          <View style={styles.card}>
-            <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle} children={t('contracts.propertyDetails')} />
-              
-              <View style={styles.inputContainer}>
-                <ThemedText style={styles.label} children={t('contracts.selectProperty')} />
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={selectedProperty}
-                    onValueChange={(itemValue) => handlePropertyChange(itemValue)}
-                  >
-                    {properties.map((property) => (
-                      <Picker.Item 
-                        label={`${property.title} - ${property.price} ${property.currency}/month`} 
-                        value={property.id} 
-                      />
-                    ))}
-                  </Picker>
+            <View style={styles.card}>
+              <View style={styles.section}>
+                <ThemedText style={styles.sectionTitle} children={t('contracts.propertyDetails')} />
+
+                <View style={styles.inputContainer}>
+                  <ThemedText style={styles.label} children={t('contracts.selectProperty')} />
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={selectedProperty}
+                      onValueChange={(itemValue) => handlePropertyChange(itemValue)}
+                    >
+                      {properties.map((property) => (
+                        <Picker.Item
+                          label={`${property.title} - ${property.price} ${property.currency}/month`}
+                          value={property.id}
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <ThemedText style={styles.label} children={t('contracts.selectRenter')} />
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={selectedRenter}
+                      onValueChange={(itemValue) => setSelectedRenter(itemValue)}
+                    >
+                      {renters.map((renter) => (
+                        <Picker.Item label={renter.fullName} value={renter.id} />
+                      ))}
+                    </Picker>
+                  </View>
                 </View>
               </View>
 
-              <View style={styles.inputContainer}>
-                <ThemedText style={styles.label} children={t('contracts.selectRenter')} />
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={selectedRenter}
-                    onValueChange={(itemValue) => setSelectedRenter(itemValue)}
+              <View style={styles.section}>
+                <ThemedText style={styles.sectionTitle} children={t('contracts.contractTerms')} />
+
+                <View style={styles.inputContainer}>
+                  <ThemedText style={styles.label} children={t('contracts.startDate')} />
+                  <TouchableOpacity
+                    style={styles.datePickerButton}
+                    onPress={() => setShowStartDatePicker(true)}
                   >
-                    {renters.map((renter) => (
-                      <Picker.Item 
-                        label={renter.fullName} 
-                        value={renter.id} 
-                      />
-                    ))}
-                  </Picker>
+                    <ThemedText style={styles.dateText} children={formatDate(startDate)} />
+                  </TouchableOpacity>
+                  {showStartDatePicker && (
+                    <DateTimePicker
+                      value={startDate}
+                      mode="date"
+                      display="default"
+                      onChange={(event, selectedDate) => {
+                        setShowStartDatePicker(Platform.OS === 'ios');
+                        if (selectedDate) {
+                          setStartDate(selectedDate);
+                        }
+                      }}
+                      minimumDate={new Date()}
+                    />
+                  )}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <ThemedText style={styles.label} children={t('contracts.endDate')} />
+                  <TouchableOpacity
+                    style={styles.datePickerButton}
+                    onPress={() => setShowEndDatePicker(true)}
+                  >
+                    <ThemedText style={styles.dateText} children={formatDate(endDate)} />
+                  </TouchableOpacity>
+                  {showEndDatePicker && (
+                    <DateTimePicker
+                      value={endDate}
+                      mode="date"
+                      display="default"
+                      onChange={(event, selectedDate) => {
+                        setShowEndDatePicker(Platform.OS === 'ios');
+                        if (selectedDate) {
+                          setEndDate(selectedDate);
+                        }
+                      }}
+                      minimumDate={new Date(startDate.getTime() + 86400000)} // 1 day after start date
+                    />
+                  )}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <ThemedText style={styles.label} children={t('contracts.securityDeposit')} />
+                  <TextInput
+                    style={styles.input}
+                    value={securityDeposit}
+                    onChangeText={setSecurityDeposit}
+                    keyboardType={'numeric' as any}
+                    placeholder={t('contracts.enterAmount')}
+                  />
                 </View>
               </View>
-            </View>
 
-            <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle} children={t('contracts.contractTerms')} />
-              
-              <View style={styles.inputContainer}>
-                <ThemedText style={styles.label} children={t('contracts.startDate')} />
-                <TouchableOpacity 
-                  style={styles.datePickerButton}
-                  onPress={() => setShowStartDatePicker(true)}
-                >
-                  <ThemedText style={styles.dateText} children={formatDate(startDate)} />
-                </TouchableOpacity>
-                {showStartDatePicker && (
-                  <DateTimePicker
-                    value={startDate}
-                    mode="date"
-                    display="default"
-                    onChange={(event, selectedDate) => {
-                      setShowStartDatePicker(Platform.OS === 'ios');
-                      if (selectedDate) {
-                        setStartDate(selectedDate);
-                      }
-                    }}
-                    minimumDate={new Date()}
-                  />
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleCreateContract}
+                disabled={submitting as any}
+              >
+                {submitting ? (
+                  <ActivityIndicator color="white" size="small" />
+                ) : (
+                  <ThemedText style={styles.buttonText} children={t('contracts.createContract')} />
                 )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <ThemedText style={styles.label} children={t('contracts.endDate')} />
-                <TouchableOpacity 
-                  style={styles.datePickerButton}
-                  onPress={() => setShowEndDatePicker(true)}
-                >
-                  <ThemedText style={styles.dateText} children={formatDate(endDate)} />
-                </TouchableOpacity>
-                {showEndDatePicker && (
-                  <DateTimePicker
-                    value={endDate}
-                    mode="date"
-                    display="default"
-                    onChange={(event, selectedDate) => {
-                      setShowEndDatePicker(Platform.OS === 'ios');
-                      if (selectedDate) {
-                        setEndDate(selectedDate);
-                      }
-                    }}
-                    minimumDate={new Date(startDate.getTime() + 86400000)} // 1 day after start date
-                  />
-                )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <ThemedText style={styles.label} children={t('contracts.securityDeposit')} />
-                <TextInput
-                  style={styles.input}
-                  value={securityDeposit}
-                  onChangeText={setSecurityDeposit}
-                  keyboardType={"numeric" as any}
-                  placeholder={t('contracts.enterAmount')}
-                />
-              </View>
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity 
-              style={styles.button}
-              onPress={handleCreateContract}
-              disabled={submitting as any}
-            >
-              {submitting ? (
-                <ActivityIndicator color="white" size="small" />
-              ) : (
-                <ThemedText style={styles.buttonText} children={t('contracts.createContract')} />
-              )}
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </>
-    } />
+          </ScrollView>
+        </>
+      }
+    />
   );
-} 
+}

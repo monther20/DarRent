@@ -11,12 +11,7 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export type NotificationType = 
-  | 'payment'
-  | 'lease'
-  | 'maintenance'
-  | 'application'
-  | 'message';
+export type NotificationType = 'payment' | 'lease' | 'maintenance' | 'application' | 'message';
 
 export interface NotificationPreferences {
   payments: boolean;
@@ -88,20 +83,13 @@ class NotificationService {
   public async updatePreference(key: keyof NotificationPreferences, value: boolean) {
     this.preferences[key] = value;
     try {
-      await AsyncStorage.setItem(
-        'notification_preferences',
-        JSON.stringify(this.preferences)
-      );
+      await AsyncStorage.setItem('notification_preferences', JSON.stringify(this.preferences));
     } catch (error) {
       console.error('Error saving notification preferences:', error);
     }
   }
 
-  public async schedulePaymentReminder(
-    amount: number,
-    dueDate: Date,
-    type: 'rent' | 'utility'
-  ) {
+  public async schedulePaymentReminder(amount: number, dueDate: Date, type: 'rent' | 'utility') {
     if (!this.preferences.payments) return;
 
     const trigger = new Date(dueDate);
@@ -120,11 +108,7 @@ class NotificationService {
     });
   }
 
-  public async sendMaintenanceUpdate(
-    requestId: string,
-    status: string,
-    details: string
-  ) {
+  public async sendMaintenanceUpdate(requestId: string, status: string, details: string) {
     if (!this.preferences.maintenance) return;
 
     await Notifications.scheduleNotificationAsync({
@@ -137,11 +121,7 @@ class NotificationService {
     });
   }
 
-  public async sendApplicationUpdate(
-    applicationId: string,
-    status: string,
-    propertyName: string
-  ) {
+  public async sendApplicationUpdate(applicationId: string, status: string, propertyName: string) {
     if (!this.preferences.applications) return;
 
     await Notifications.scheduleNotificationAsync({
@@ -154,11 +134,7 @@ class NotificationService {
     });
   }
 
-  public async sendLeaseReminder(
-    propertyName: string,
-    expiryDate: Date,
-    daysRemaining: number
-  ) {
+  public async sendLeaseReminder(propertyName: string, expiryDate: Date, daysRemaining: number) {
     if (!this.preferences.lease) return;
 
     await Notifications.scheduleNotificationAsync({
@@ -171,11 +147,7 @@ class NotificationService {
     });
   }
 
-  public async sendMessageNotification(
-    senderId: string,
-    senderName: string,
-    message: string
-  ) {
+  public async sendMessageNotification(senderId: string, senderName: string, message: string) {
     if (!this.preferences.messages) return;
 
     await Notifications.scheduleNotificationAsync({
@@ -195,4 +167,4 @@ class NotificationService {
 
 export const notificationService = NotificationService.getInstance();
 
-export default notificationService; 
+export default notificationService;

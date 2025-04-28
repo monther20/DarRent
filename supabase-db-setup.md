@@ -1,9 +1,11 @@
 ئ# Supabase Database Setup Guide
 
 ## Overview
+
 This document outlines the database setup for the DarRent property rental application using Supabase. The setup includes tables, authentication, and security policies with support for Arabic language.
 
 ## Prerequisites
+
 - Supabase account
 - Basic understanding of SQL
 - Knowledge of Arabic language requirements
@@ -129,7 +131,7 @@ CREATE POLICY "Anyone can view properties" ON properties
   FOR SELECT USING (true);
 
 CREATE POLICY "Landlords can create properties" ON properties
-  FOR INSERT WITH CHECK (auth.uid() = owner_id AND 
+  FOR INSERT WITH CHECK (auth.uid() = owner_id AND
     (SELECT role FROM users WHERE id = auth.uid()) = 'landlord');
 
 CREATE POLICY "Landlords can update their own properties" ON properties
@@ -142,8 +144,8 @@ CREATE POLICY "Landlords can delete their own properties" ON properties
 CREATE POLICY "Landlords can view applications for their properties" ON applications
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM properties 
-      WHERE properties.id = applications.property_id 
+      SELECT 1 FROM properties
+      WHERE properties.id = applications.property_id
       AND properties.owner_id = auth.uid()
     )
   );
@@ -153,7 +155,7 @@ CREATE POLICY "Renters can view their own applications" ON applications
 
 CREATE POLICY "Renters can create applications" ON applications
   FOR INSERT WITH CHECK (
-    auth.uid() = renter_id AND 
+    auth.uid() = renter_id AND
     (SELECT role FROM users WHERE id = auth.uid()) = 'renter'
   );
 
@@ -199,7 +201,7 @@ CREATE TRIGGER update_applications_updated_at
 ```sql
 -- Create storage buckets
 INSERT INTO storage.buckets (id, name, public)
-VALUES 
+VALUES
   ('profile-images', 'profile-images', true),
   ('property-images', 'property-images', true),
   ('application-documents', 'application-documents', false);
@@ -261,4 +263,4 @@ CREATE POLICY "Users can upload their own application documents"
 - Day 1: Database setup and Arabic configuration
 - Day 2: Authentication and RLS implementation
 - Day 3: Storage setup and testing
-- Day 4: Final testing and refinements 
+- Day 4: Final testing and refinements

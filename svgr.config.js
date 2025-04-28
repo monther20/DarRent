@@ -4,4 +4,4 @@ module.exports = {
     width: '{width}',
     height: '{height}',
   },
-}; 
+};

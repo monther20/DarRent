@@ -51,13 +51,7 @@ const ThemeScreen = () => {
               {themeOption.name}
             </Text>
           </View>
-          {theme === themeOption.id && (
-            <MaterialIcons
-              name="check"
-              size={24}
-              color="#3B82F6"
-            />
-          )}
+          {theme === themeOption.id && <MaterialIcons name="check" size={24} color="#3B82F6" />}
         </TouchableOpacity>
       ))}
     </View>
@@ -103,4 +97,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ThemeScreen; 
+export default ThemeScreen;

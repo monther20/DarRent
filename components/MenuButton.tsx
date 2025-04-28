@@ -30,7 +30,7 @@ export function MenuButton({ position }: MenuButtonProps) {
   const { user, logout } = useAuth();
   const [menuVisible, setMenuVisible] = useState(false);
   const isRTL = language === 'ar';
-  
+
   // Animation value
   const slideAnim = useRef(new Animated.Value(100)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -40,7 +40,7 @@ export function MenuButton({ position }: MenuButtonProps) {
     if (menuVisible) {
       // Reset position before animation starts if menu is becoming visible
       slideAnim.setValue(isRTL ? -100 : 100);
-      
+
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: 0,
@@ -72,7 +72,7 @@ export function MenuButton({ position }: MenuButtonProps) {
   const handleLogout = async () => {
     try {
       setMenuVisible(false);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       await logout();
       router.replace('/auth/welcome');
     } catch (error) {
@@ -119,7 +119,10 @@ export function MenuButton({ position }: MenuButtonProps) {
     <View style={styles.container}>
       <TouchableOpacity
         onPress={() => setMenuVisible(true)}
-        style={styles.menuButton}
+        style={[
+          styles.menuButton,
+          position === 'right' ? { alignSelf: 'flex-end' } : { alignSelf: 'flex-start' },
+        ]}
       >
         <FontAwesome name="bars" size={24} color="#fff" />
       </TouchableOpacity>
@@ -130,12 +133,7 @@ export function MenuButton({ position }: MenuButtonProps) {
         animationType="none"
         onRequestClose={() => setMenuVisible(false)}
       >
-        <Animated.View 
-          style={[
-            styles.modalContainer,
-            { opacity: fadeAnim }
-          ]}
-        >
+        <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
           <TouchableOpacity
             style={styles.backdrop}
             activeOpacity={1}
@@ -145,9 +143,9 @@ export function MenuButton({ position }: MenuButtonProps) {
             style={[
               styles.menuContainer,
               isRTL ? styles.menuRTL : styles.menuLTR,
-              { 
-                transform: [{ translateX: slideAnim }] 
-              }
+              {
+                transform: [{ translateX: slideAnim }],
+              },
             ]}
           >
             <View style={styles.profileSection}>
@@ -188,7 +186,13 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   menuButton: {
-    padding: 8,
+    padding: 0,
+    backgroundColor: '#E67E22',
+    borderRadius: 18,
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modalContainer: {
     flex: 1,

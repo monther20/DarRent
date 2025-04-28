@@ -14,19 +14,21 @@ import Checkbox from '@/app/components/Checkbox';
 type UserRole = 'landlord' | 'renter';
 
 // Define validation schema with zod
-const registerSchema = z.object({
-  fullName: z.string().min(1, { message: 'Full name is required' }),
-  email: z
-    .string()
-    .min(1, { message: 'Email is required' })
-    .email({ message: 'Invalid email address' }),
-  phoneNumber: z.string().min(1, { message: 'Phone number is required' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    fullName: z.string().min(1, { message: 'Full name is required' }),
+    email: z
+      .string()
+      .min(1, { message: 'Email is required' })
+      .email({ message: 'Invalid email address' }),
+    phoneNumber: z.string().min(1, { message: 'Phone number is required' }),
+    password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -68,7 +70,7 @@ export default function RegisterScreen() {
         password: data.password,
         role: selectedRole,
       });
-      
+
       if (success) {
         router.replace('/(tabs)');
       } else {
@@ -85,13 +87,10 @@ export default function RegisterScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color="white" />
         </TouchableOpacity>
         <ThemedText style={styles.headerTitle}>Create Account</ThemedText>
@@ -106,28 +105,32 @@ export default function RegisterScreen() {
               style={[
                 styles.userTypeButton,
                 selectedRole === 'landlord' && styles.userTypeButtonActive,
-                { marginRight: 8 }
+                { marginRight: 8 },
               ]}
               onPress={() => setSelectedRole('landlord')}
             >
-              <ThemedText style={[
-                styles.userTypeText,
-                selectedRole === 'landlord' && styles.userTypeTextActive
-              ]}>
+              <ThemedText
+                style={[
+                  styles.userTypeText,
+                  selectedRole === 'landlord' && styles.userTypeTextActive,
+                ]}
+              >
                 Landlord
               </ThemedText>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.userTypeButton,
-                selectedRole === 'renter' && styles.userTypeButtonActive
+                selectedRole === 'renter' && styles.userTypeButtonActive,
               ]}
               onPress={() => setSelectedRole('renter')}
             >
-              <ThemedText style={[
-                styles.userTypeText,
-                selectedRole === 'renter' && styles.userTypeTextActive
-              ]}>
+              <ThemedText
+                style={[
+                  styles.userTypeText,
+                  selectedRole === 'renter' && styles.userTypeTextActive,
+                ]}
+              >
                 Renter
               </ThemedText>
             </TouchableOpacity>
@@ -231,10 +234,7 @@ export default function RegisterScreen() {
 
           {/* Terms and Conditions */}
           <View style={styles.termsContainer}>
-            <Checkbox
-              checked={agreeToTerms}
-              onPress={() => setAgreeToTerms(!agreeToTerms)}
-            />
+            <Checkbox checked={agreeToTerms} onPress={() => setAgreeToTerms(!agreeToTerms)} />
             <ThemedText style={styles.termsText}>
               I agree to the{' '}
               <Link href="/terms" style={styles.termsLink}>
@@ -244,9 +244,7 @@ export default function RegisterScreen() {
           </View>
 
           {/* Error Message */}
-          {errorMessage ? (
-            <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>
-          ) : null}
+          {errorMessage ? <ThemedText style={styles.errorText}>{errorMessage}</ThemedText> : null}
 
           {/* Create Account Button */}
           <TouchableOpacity
@@ -257,9 +255,7 @@ export default function RegisterScreen() {
             {isLoading ? (
               <ActivityIndicator color="white" />
             ) : (
-              <ThemedText style={styles.createButtonText}>
-                Create Account
-              </ThemedText>
+              <ThemedText style={styles.createButtonText}>Create Account</ThemedText>
             )}
           </TouchableOpacity>
 
@@ -336,7 +332,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     // marginBottom: 20,
   },
-  
+
   termsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -378,4 +374,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textDecorationLine: 'none',
   },
-}); 
+});

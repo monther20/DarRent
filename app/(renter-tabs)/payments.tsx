@@ -3,13 +3,12 @@ import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/Text';
 import Colors from '@/constants/Colors';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { ScreenHeader } from '@/components/ScreenHeader';
 
 export default function PaymentsScreen() {
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Payments</Text>
-      </View>
+      <ScreenHeader title="Payments" />
 
       <View style={styles.content}>
         <View style={styles.card}>
@@ -112,4 +111,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.light.grey,
   },
-}); 
+});

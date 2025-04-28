@@ -10,18 +10,12 @@ interface CheckboxProps {
 
 export default function Checkbox({ checked, onPress, size = 20 }: CheckboxProps) {
   return (
-    <TouchableOpacity 
-      style={[
-        styles.container,
-        { width: size, height: size },
-        checked && styles.checked
-      ]} 
+    <TouchableOpacity
+      style={[styles.container, { width: size, height: size }, checked && styles.checked]}
       onPress={onPress}
       activeOpacity={0.7}
     >
-      {checked && (
-        <Ionicons name="checkmark" size={size - 4} color="white" />
-      )}
+      {checked && <Ionicons name="checkmark" size={size - 4} color="white" />}
     </TouchableOpacity>
   );
 }
@@ -37,4 +31,4 @@ const styles = StyleSheet.create({
   checked: {
     backgroundColor: '#34568B',
   },
-}); 
+});

@@ -5,4 +5,4 @@ declare module 'react-native' {
     type?: string;
     placeholderTextColor?: string;
   }
-} 
+}

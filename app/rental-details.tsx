@@ -15,10 +15,7 @@ export default function RentalDetailsScreen() {
           style={styles.propertyImage}
           contentFit="cover"
         />
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <MaterialCommunityIcons name="arrow-left" size={28} color="white" />
         </TouchableOpacity>
       </View>
@@ -39,10 +36,7 @@ export default function RentalDetailsScreen() {
             <Text style={styles.paymentAmount}>850 JOD</Text>
             <Text style={styles.paymentDue}>Due in 5 days</Text>
           </View>
-          <TouchableOpacity 
-            style={styles.payButton}
-            onPress={() => router.push('/payments')}
-          >
+          <TouchableOpacity style={styles.payButton} onPress={() => router.push('/payments')}>
             <Text style={styles.payButtonText}>Pay Now</Text>
           </TouchableOpacity>
         </View>
@@ -74,7 +68,7 @@ export default function RentalDetailsScreen() {
               <Text style={styles.maintenanceTitle}>AC Maintenance</Text>
               <Text style={styles.maintenanceStatus}>Status: Scheduled for tomorrow</Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.trackButton}
               onPress={() => router.push('/maintenance/track')}
             >
@@ -82,7 +76,7 @@ export default function RentalDetailsScreen() {
             </TouchableOpacity>
           </View>
         </View>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.newRequestButton}
           onPress={() => router.push('/maintenance/new')}
         >
@@ -92,24 +86,18 @@ export default function RentalDetailsScreen() {
 
       {/* Quick Actions */}
       <View style={styles.quickActions}>
-        <TouchableOpacity 
-          style={styles.actionButton}
-          onPress={() => router.push('/message-owner')}
-        >
+        <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/message-owner')}>
           <MaterialCommunityIcons name="message" size={24} color="#1e40af" />
           <Text style={styles.actionText}>Message Owner</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.actionButton, styles.actionButtonMiddle]}
           onPress={() => router.push('/report-issue')}
         >
           <MaterialCommunityIcons name="alert" size={24} color="#1e40af" />
           <Text style={styles.actionText}>Report Issue</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.actionButton}
-          onPress={() => router.push('/view-lease')}
-        >
+        <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/view-lease')}>
           <MaterialCommunityIcons name="file-document" size={24} color="#1e40af" />
           <Text style={styles.actionText}>View Lease</Text>
         </TouchableOpacity>
@@ -284,4 +272,4 @@ const styles = StyleSheet.create({
     color: '#1e40af',
     marginTop: 4,
   },
-}); 
+});

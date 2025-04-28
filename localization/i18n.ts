@@ -6,23 +6,21 @@ import enTranslation from './en.json';
 import arTranslation from './ar.json';
 
 // Initialize i18n
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: {
-        translation: enTranslation,
-      },
-      ar: {
-        translation: arTranslation,
-      },
+i18n.use(initReactI18next).init({
+  resources: {
+    en: {
+      translation: enTranslation,
     },
-    lng: 'en',
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false,
+    ar: {
+      translation: arTranslation,
     },
-  });
+  },
+  lng: 'en',
+  fallbackLng: 'en',
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 // Function to change language
 export const changeLanguage = (language: string) => {
@@ -33,4 +31,4 @@ export const changeLanguage = (language: string) => {
   }
 };
 
-export default i18n; 
+export default i18n;

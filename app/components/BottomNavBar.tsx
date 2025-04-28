@@ -4,8 +4,15 @@ import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { usePathname, router } from 'expo-router';
 
-type TabIconName = 'home-outline' | 'home' | 'business-outline' | 'business' | 
-                  'people-outline' | 'people' | 'wallet-outline' | 'wallet';
+type TabIconName =
+  | 'home-outline'
+  | 'home'
+  | 'business-outline'
+  | 'business'
+  | 'people-outline'
+  | 'people'
+  | 'wallet-outline'
+  | 'wallet';
 
 interface TabItem {
   name: string;
@@ -49,20 +56,13 @@ export function BottomNavBar() {
       {tabs.map((tab) => {
         const isActive = pathname === tab.path;
         return (
-          <TouchableOpacity
-            key={tab.name}
-            style={styles.tab}
-            onPress={() => router.push(tab.path)}
-          >
+          <TouchableOpacity key={tab.name} style={styles.tab} onPress={() => router.push(tab.path)}>
             <Ionicons
               name={isActive ? tab.activeIcon : tab.icon}
               size={24}
               color={isActive ? '#E67E22' : 'white'}
             />
-            <ThemedText style={[
-              styles.label,
-              isActive && styles.activeLabel
-            ]}>
+            <ThemedText style={[styles.label, isActive && styles.activeLabel]}>
               {tab.name}
             </ThemedText>
           </TouchableOpacity>
@@ -94,4 +94,4 @@ const styles = StyleSheet.create({
   activeLabel: {
     color: '#E67E22',
   },
-}); 
+});

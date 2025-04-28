@@ -52,84 +52,50 @@ const ChangePasswordScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>
-          {t('settings.changePassword')}
-        </Text>
-        <Text style={styles.headerDescription}>
-          {t('settings.changePasswordDescription')}
-        </Text>
+        <Text style={styles.headerTitle}>{t('settings.changePassword')}</Text>
+        <Text style={styles.headerDescription}>{t('settings.changePasswordDescription')}</Text>
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>
-          {t('settings.currentPassword')}
-        </Text>
+        <Text style={styles.label}>{t('settings.currentPassword')}</Text>
         <TextInput
-          style={[
-            styles.input,
-            errors.currentPassword
-              ? styles.inputError
-              : styles.inputNormal
-          ]}
+          style={[styles.input, errors.currentPassword ? styles.inputError : styles.inputNormal]}
           type="password"
           value={currentPassword}
           onChangeText={setCurrentPassword}
           placeholder={t('settings.currentPassword')}
           placeholderTextColor="#9CA3AF"
         />
-        {errors.currentPassword && (
-          <Text style={styles.errorText}>{errors.currentPassword}</Text>
-        )}
+        {errors.currentPassword && <Text style={styles.errorText}>{errors.currentPassword}</Text>}
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>
-          {t('settings.newPassword')}
-        </Text>
+        <Text style={styles.label}>{t('settings.newPassword')}</Text>
         <TextInput
-          style={[
-            styles.input,
-            errors.newPassword
-              ? styles.inputError
-              : styles.inputNormal
-          ]}
+          style={[styles.input, errors.newPassword ? styles.inputError : styles.inputNormal]}
           type="password"
           value={newPassword}
           onChangeText={setNewPassword}
           placeholder={t('settings.newPassword')}
           placeholderTextColor="#9CA3AF"
         />
-        {errors.newPassword && (
-          <Text style={styles.errorText}>{errors.newPassword}</Text>
-        )}
+        {errors.newPassword && <Text style={styles.errorText}>{errors.newPassword}</Text>}
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>
-          {t('settings.confirmPassword')}
-        </Text>
+        <Text style={styles.label}>{t('settings.confirmPassword')}</Text>
         <TextInput
-          style={[
-            styles.input,
-            errors.confirmPassword
-              ? styles.inputError
-              : styles.inputNormal
-          ]}
+          style={[styles.input, errors.confirmPassword ? styles.inputError : styles.inputNormal]}
           type="password"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           placeholder={t('settings.confirmPassword')}
           placeholderTextColor="#9CA3AF"
         />
-        {errors.confirmPassword && (
-          <Text style={styles.errorText}>{errors.confirmPassword}</Text>
-        )}
+        {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
       </View>
 
-      <TouchableOpacity
-        onPress={handleSubmit}
-        style={styles.submitButton}
-      >
+      <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
         <Text style={styles.submitButtonText}>{t('settings.saveChanges')}</Text>
       </TouchableOpacity>
     </View>
@@ -192,4 +158,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChangePasswordScreen; 
+export default ChangePasswordScreen;

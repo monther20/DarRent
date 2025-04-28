@@ -42,10 +42,7 @@ export default function PropertiesScreen() {
   return (
     <View style={styles.container}>
       <ScreenHeader title="Property" />
-      <ScrollView 
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
-      >
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         <TouchableOpacity style={styles.addButton} onPress={() => router.push('/add-property')}>
           <ThemedText style={styles.addButtonText}>+ Add New Property</ThemedText>
         </TouchableOpacity>
@@ -55,7 +52,7 @@ export default function PropertiesScreen() {
         </View>
 
         {properties.map((property) => (
-          <PropertyCard 
+          <PropertyCard
             key={property.id}
             id={property.id}
             title={property.title}
@@ -110,4 +107,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#2C3E50',
   },
-}); 
+});

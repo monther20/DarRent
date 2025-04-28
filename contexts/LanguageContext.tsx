@@ -42,7 +42,7 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
         setIsLoading(false);
       }
     };
-    
+
     loadLanguage();
   }, []);
 
@@ -62,4 +62,4 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
   );
 };
 
-export default LanguageProvider; 
+export default LanguageProvider;

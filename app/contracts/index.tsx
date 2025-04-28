@@ -162,7 +162,9 @@ export default function ContractsScreen() {
   const [contracts, setContracts] = useState<ContractWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<'landlord' | 'renter' | null>(null);
-  const [filter, setFilter] = useState<'all' | 'active' | 'pending' | 'terminated' | 'expired'>('all');
+  const [filter, setFilter] = useState<'all' | 'active' | 'pending' | 'terminated' | 'expired'>(
+    'all',
+  );
 
   useEffect(() => {
     const loadContracts = async () => {
@@ -172,7 +174,7 @@ export default function ContractsScreen() {
         setUserRole(currentUser.role);
 
         let contractsList: RentalContract[] = [];
-        
+
         // Get contracts based on user role
         if (currentUser.role === 'landlord') {
           contractsList = await api.contracts.getByLandlord(currentUser.id);
@@ -184,14 +186,14 @@ export default function ContractsScreen() {
         const contractsWithDetails = await Promise.all(
           contractsList.map(async (contract) => {
             const property = await api.properties.getById(contract.propertyId);
-            
+
             let renter = null;
             if (currentUser.role === 'landlord') {
               renter = await api.users.getById(contract.renterId);
             }
-            
+
             return { contract, property, renter };
-          })
+          }),
         );
 
         setContracts(contractsWithDetails);
@@ -206,7 +208,7 @@ export default function ContractsScreen() {
   }, []);
 
   const filteredContracts = contracts.filter(
-    (item) => filter === 'all' || item.contract.status === filter
+    (item) => filter === 'all' || item.contract.status === filter,
   );
 
   const getStatusStyle = (status: string) => {
@@ -246,10 +248,7 @@ export default function ContractsScreen() {
             onPress={() => setFilter('all')}
           >
             <ThemedText
-              style={[
-                styles.filterButtonText,
-                filter === 'all' && styles.filterButtonTextActive,
-              ]}
+              style={[styles.filterButtonText, filter === 'all' && styles.filterButtonTextActive]}
               children={t('contracts.filters.all')}
             />
           </TouchableOpacity>
@@ -294,18 +293,27 @@ export default function ContractsScreen() {
                 onPress={() => router.push(`/contracts/${item.contract.id}`)}
               >
                 <ThemedText style={styles.propertyTitle} children={item.property?.title} />
-                <ThemedText style={styles.contractDates} children={`${formatDate(item.contract.startDate)} - ${formatDate(item.contract.endDate)}`} />
-                
+                <ThemedText
+                  style={styles.contractDates}
+                  children={`${formatDate(item.contract.startDate)} - ${formatDate(item.contract.endDate)}`}
+                />
+
                 {userRole === 'landlord' && item.renter && (
                   <View style={styles.ownerRenterLine}>
-                    <ThemedText style={styles.ownerRenterLabel} children={`${t('contracts.tenant')}:`} />
+                    <ThemedText
+                      style={styles.ownerRenterLabel}
+                      children={`${t('contracts.tenant')}:`}
+                    />
                     <ThemedText style={styles.ownerRenterName} children={item.renter.fullName} />
                   </View>
                 )}
-                
+
                 <View style={styles.statusLine}>
-                  <ThemedText style={getStatusStyle(item.contract.status)} children={t(`contracts.status.${item.contract.status}`)} />
-                  
+                  <ThemedText
+                    style={getStatusStyle(item.contract.status)}
+                    children={t(`contracts.status.${item.contract.status}`)}
+                  />
+
                   <View style={styles.viewButton}>
                     <ThemedText style={styles.viewButtonText} children={t('contracts.view')} />
                     <Ionicons name="chevron-forward" size={16} color="#34568B" />
@@ -317,7 +325,7 @@ export default function ContractsScreen() {
         )}
 
         {userRole === 'landlord' && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.createButton}
             onPress={() => router.push('/contracts/create')}
           >
@@ -327,4 +335,4 @@ export default function ContractsScreen() {
       </View>
     </>
   );
-} 
+}

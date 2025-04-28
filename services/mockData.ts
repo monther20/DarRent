@@ -28,6 +28,12 @@ export interface Property {
   views: number;
   inquiries: number;
   daysListed: number;
+  area: number;
+  nextPayment?: {
+    amount: number;
+    currency: string;
+    dueInDays: number;
+  };
 }
 
 export interface User {
@@ -45,6 +51,7 @@ export interface User {
   properties?: string[]; // Property IDs for landlords
   rentedProperties?: string[]; // Property IDs for renters
   renters?: string[]; // Added for the new structure
+  savedProperties?: string[]; // Property IDs for saved/favorite properties
 }
 
 export interface Message {
@@ -142,6 +149,7 @@ export const mockProperties: Property[] = [
     views: 245,
     inquiries: 12,
     daysListed: 15,
+    area: 120,
   },
   {
     id: 'prop2',
@@ -172,6 +180,8 @@ export const mockProperties: Property[] = [
     views: 180,
     inquiries: 8,
     daysListed: 30,
+    area: 180,
+    nextPayment: { amount: 1065, currency: 'JOD', dueInDays: 3 },
   },
   {
     id: 'prop3',
@@ -201,6 +211,7 @@ export const mockProperties: Property[] = [
     views: 320,
     inquiries: 15,
     daysListed: 7,
+    area: 300,
   },
   {
     id: 'prop4',
@@ -230,6 +241,7 @@ export const mockProperties: Property[] = [
     views: 95,
     inquiries: 5,
     daysListed: 3,
+    area: 120,
   },
   {
     id: 'prop5',
@@ -259,6 +271,7 @@ export const mockProperties: Property[] = [
     views: 210,
     inquiries: 12,
     daysListed: 20,
+    area: 300,
   },
   {
     id: 'prop6',
@@ -270,8 +283,8 @@ export const mockProperties: Property[] = [
       city: 'Amman',
       area: 'Jabal Amman',
       coordinates: {
-        latitude: 31.9500,
-        longitude: 35.9100,
+        latitude: 31.95,
+        longitude: 35.91,
       },
     },
     features: {
@@ -288,6 +301,7 @@ export const mockProperties: Property[] = [
     views: 150,
     inquiries: 8,
     daysListed: 5,
+    area: 80,
   },
   {
     id: 'prop7',
@@ -299,8 +313,8 @@ export const mockProperties: Property[] = [
       city: 'Amman',
       area: 'Tlaa Al Ali',
       coordinates: {
-        latitude: 31.9800,
-        longitude: 35.8500,
+        latitude: 31.98,
+        longitude: 35.85,
       },
     },
     features: {
@@ -318,6 +332,8 @@ export const mockProperties: Property[] = [
     views: 280,
     inquiries: 15,
     daysListed: 45,
+    area: 200,
+    nextPayment: { amount: 1200, currency: 'JOD', dueInDays: 8 },
   },
   {
     id: 'prop8',
@@ -329,8 +345,8 @@ export const mockProperties: Property[] = [
       city: 'Amman',
       area: 'Abdali',
       coordinates: {
-        latitude: 31.9600,
-        longitude: 35.9200,
+        latitude: 31.96,
+        longitude: 35.92,
       },
     },
     features: {
@@ -347,6 +363,7 @@ export const mockProperties: Property[] = [
     views: 350,
     inquiries: 20,
     daysListed: 2,
+    area: 250,
   },
 ];
 
@@ -365,6 +382,7 @@ export const mockUsers: User[] = [
     createdAt: '2023-01-01T00:00:00.000Z',
     properties: ['prop1', 'prop2', 'prop3', 'prop6', 'prop8'],
     renters: ['user3', 'user4'],
+    savedProperties: [],
   },
   {
     id: 'user2',
@@ -380,6 +398,7 @@ export const mockUsers: User[] = [
     createdAt: '2023-02-15T00:00:00.000Z',
     properties: ['prop4', 'prop5', 'prop7'],
     renters: ['user4'],
+    savedProperties: [],
   },
   {
     id: 'user3',
@@ -394,6 +413,7 @@ export const mockUsers: User[] = [
     },
     createdAt: '2023-03-10T00:00:00.000Z',
     rentedProperties: ['prop2'],
+    savedProperties: ['prop1', 'prop6'],
   },
   {
     id: 'user4',
@@ -408,6 +428,7 @@ export const mockUsers: User[] = [
     },
     createdAt: '2023-02-01T00:00:00.000Z',
     rentedProperties: ['prop7'],
+    savedProperties: ['prop3', 'prop5', 'prop8'],
   },
   {
     id: 'user5',
@@ -422,6 +443,7 @@ export const mockUsers: User[] = [
     },
     createdAt: '2023-03-15T00:00:00.000Z',
     rentedProperties: [],
+    savedProperties: ['prop4'],
   },
 ];
 
@@ -430,7 +452,7 @@ export const mockMessages: Message[] = [
     id: 'msg1',
     senderId: 'user3',
     receiverId: 'user1',
-    content: 'Hi, I\'m interested in viewing the apartment next week.',
+    content: "Hi, I'm interested in viewing the apartment next week.",
     timestamp: '2023-05-15T10:30:00.000Z',
     isRead: true,
     propertyId: 'prop1',
@@ -466,7 +488,7 @@ export const mockMessages: Message[] = [
     id: 'msg5',
     senderId: 'user1',
     receiverId: 'user4',
-    content: 'I\'m sorry, it was just rented yesterday.',
+    content: "I'm sorry, it was just rented yesterday.",
     timestamp: '2023-05-14T15:25:00.000Z',
     isRead: false,
     propertyId: 'prop2',
@@ -535,7 +557,7 @@ export const mockApplications: Application[] = [
     createdAt: '2023-05-10T00:00:00.000Z',
     documents: {
       idCard: true,
-      proofOfIncome: true,
+      proofOfIncome: false,
       bankStatement: false,
     },
     progress: 50,
@@ -552,6 +574,32 @@ export const mockApplications: Application[] = [
       bankStatement: true,
     },
     progress: 100,
+  },
+  {
+    id: 'app4',
+    propertyId: 'prop2',
+    renterId: 'user3',
+    status: 'rejected',
+    createdAt: '2023-05-15T00:00:00.000Z',
+    documents: {
+      idCard: false,
+      proofOfIncome: false,
+      bankStatement: false,
+    },
+    progress: 10,
+  },
+  {
+    id: 'app5',
+    propertyId: 'prop5',
+    renterId: 'user5',
+    status: 'pending',
+    createdAt: '2023-05-18T00:00:00.000Z',
+    documents: {
+      idCard: true,
+      proofOfIncome: true,
+      bankStatement: true,
+    },
+    progress: 80,
   },
 ];
 
@@ -589,8 +637,8 @@ export const mockRentalContracts: RentalContract[] = [
     createdAt: '2023-03-25T00:00:00.000Z',
     documents: {
       signed: true,
-      url: 'contracts/contract1.pdf'
-    }
+      url: 'contracts/contract1.pdf',
+    },
   },
   {
     id: 'contract2',
@@ -602,8 +650,8 @@ export const mockRentalContracts: RentalContract[] = [
     securityDeposit: 850,
     createdAt: '2023-05-10T00:00:00.000Z',
     documents: {
-      signed: false
-    }
+      signed: false,
+    },
   },
   {
     id: 'contract3',
@@ -616,7 +664,7 @@ export const mockRentalContracts: RentalContract[] = [
     createdAt: '2022-09-25T00:00:00.000Z',
     documents: {
       signed: true,
-      url: 'contracts/contract3.pdf'
-    }
-  }
-]; 
+      url: 'contracts/contract3.pdf',
+    },
+  },
+];

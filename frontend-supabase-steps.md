@@ -1,9 +1,11 @@
 # Frontend Supabase Integration Steps
 
 ## Overview
+
 This document outlines the step-by-step process for integrating Supabase into the frontend of the DarRent property rental application, with support for Arabic language.
 
 ## Prerequisites
+
 - React Native project set up
 - Supabase project configured
 - Basic understanding of React Native
@@ -12,6 +14,7 @@ This document outlines the step-by-step process for integrating Supabase into th
 ## Implementation Steps
 
 ### 1. Setup and Installation
+
 1. Install required dependencies:
    - @supabase/supabase-js
    - @react-native-async-storage/async-storage
@@ -24,6 +27,7 @@ This document outlines the step-by-step process for integrating Supabase into th
    - Contexts directory
 
 ### 2. Authentication Integration
+
 1. Create authentication context:
    - User state management
    - Session handling
@@ -38,6 +42,7 @@ This document outlines the step-by-step process for integrating Supabase into th
    - User interface
 
 ### 3. Properties Integration
+
 1. Create property service:
    - Property fetching
    - Search functionality
@@ -52,6 +57,7 @@ This document outlines the step-by-step process for integrating Supabase into th
    - Filter options
 
 ### 4. Image Upload Integration
+
 1. Set up storage service:
    - Image upload
    - Image retrieval
@@ -66,6 +72,7 @@ This document outlines the step-by-step process for integrating Supabase into th
    - Progress indicators
 
 ### 5. Real-time Messaging
+
 1. Create message service:
    - Message sending
    - Conversation management
@@ -80,6 +87,7 @@ This document outlines the step-by-step process for integrating Supabase into th
    - Notifications
 
 ### 6. Applications System
+
 1. Develop application service:
    - Application submission
    - Status tracking
@@ -94,6 +102,7 @@ This document outlines the step-by-step process for integrating Supabase into th
    - Document handling
 
 ### 7. Role-based Access Control
+
 1. Implement role management:
    - User roles
    - Permission checks
@@ -108,6 +117,7 @@ This document outlines the step-by-step process for integrating Supabase into th
    - Interface elements
 
 ## Testing Steps
+
 1. Test authentication flow
 2. Verify property search
 3. Test image upload
@@ -116,6 +126,7 @@ This document outlines the step-by-step process for integrating Supabase into th
 6. Test role-based access
 
 ## Deliverables
+
 - [ ] Authentication system with Arabic support
 - [ ] Property management with search
 - [ ] Image upload functionality
@@ -124,7 +135,8 @@ This document outlines the step-by-step process for integrating Supabase into th
 - [ ] Role-based access control
 
 ## Timeline
+
 - Day 1: Setup and authentication
 - Day 2: Properties and image upload
 - Day 3: Messaging and applications
-- Day 4: Role-based access and testing 
+- Day 4: Role-based access and testing

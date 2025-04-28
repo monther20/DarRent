@@ -15,49 +15,40 @@ export default function RenterSettingsScreen() {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
 
-  const SettingItem = ({ 
-    title, 
-    value, 
-    onPress, 
-    icon, 
-    showArrow = true 
-  }: { 
-    title: string; 
-    value?: string; 
-    onPress: () => void; 
+  const SettingItem = ({
+    title,
+    value,
+    onPress,
+    icon,
+    showArrow = true,
+  }: {
+    title: string;
+    value?: string;
+    onPress: () => void;
     icon: keyof typeof MaterialIcons.glyphMap;
     showArrow?: boolean;
   }) => (
-    <TouchableOpacity
-      onPress={onPress}
-      style={styles.settingItem}
-    >
+    <TouchableOpacity onPress={onPress} style={styles.settingItem}>
       <View style={styles.settingItemLeft}>
         <MaterialIcons name={icon} size={24} style={styles.settingIcon} />
         <ThemedText style={styles.settingText}>{title}</ThemedText>
       </View>
       <View style={styles.settingItemRight}>
         {value && <ThemedText style={styles.settingValue}>{value}</ThemedText>}
-        {showArrow && (
-          <MaterialIcons 
-            name="chevron-right" 
-            size={24} 
-            style={styles.settingArrow} 
-          />
-        )}
+        {showArrow && <MaterialIcons name="chevron-right" size={24} style={styles.settingArrow} />}
       </View>
     </TouchableOpacity>
   );
 
-  const SettingToggle = ({ 
-    title, 
-    value, 
-    onValueChange, 
-    icon 
-  }: { 
-    title: string; 
-    value: boolean; 
-    onValueChange: (value: boolean) => void; 
+  const SettingToggle = ({
+    title,
+    value,
+    onValueChange,
+    icon,
+  }: {
+    title: string;
+    value: boolean;
+    onValueChange: (value: boolean) => void;
     icon: keyof typeof MaterialIcons.glyphMap;
   }) => (
     <View style={styles.settingItem}>
@@ -246,4 +237,4 @@ const styles = StyleSheet.create({
   logoutButton: {
     margin: 16,
   },
-}); 
+});

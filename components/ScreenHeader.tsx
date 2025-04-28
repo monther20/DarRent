@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/Text';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { MenuButton } from '@/components/MenuButton';
 
 type ScreenHeaderProps = {
   title: string;
@@ -12,11 +13,9 @@ type ScreenHeaderProps = {
 export function ScreenHeader({ title, showBackButton = false }: ScreenHeaderProps) {
   return (
     <View style={styles.container}>
+      <MenuButton position="right" />
       {showBackButton && (
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
       )}
@@ -40,4 +39,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: 'white',
   },
-}); 
+});

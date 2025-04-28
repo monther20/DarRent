@@ -1,9 +1,11 @@
 # Frontend Supabase Integration Guide
 
 ## Overview
+
 This document outlines the frontend integration with Supabase for the DarRent property rental application, including support for Arabic language.
 
 ## Prerequisites
+
 - Supabase project set up
 - Database and API services implemented
 - Basic understanding of React Native and Expo
@@ -686,4 +688,4 @@ export default function RoleGuard({ allowedRoles, children }) {
 - Day 1: Authentication and property screens
 - Day 2: Image uploader and chat component
 - Day 3: Application form and role guard
-- Day 4: Testing and refinements 
+- Day 4: Testing and refinements
