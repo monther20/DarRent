@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Platform as RNPlatform } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { MenuButton } from '@/components/MenuButton';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -9,9 +9,15 @@ interface ScreenHeaderProps {
   title: string;
   showAddButton?: boolean;
   onAddPress?: () => void;
+  rightElement?: React.ReactNode;
 }
 
-export function ScreenHeader({ title, showAddButton, onAddPress }: ScreenHeaderProps) {
+export function ScreenHeader({
+  title,
+  showAddButton,
+  onAddPress,
+  rightElement,
+}: ScreenHeaderProps) {
   const { language } = useLanguage();
   const isRTL = language === 'ar';
 
@@ -21,6 +27,7 @@ export function ScreenHeader({ title, showAddButton, onAddPress }: ScreenHeaderP
         <View style={styles.headerContent}>
           <ThemedText style={styles.title}>{title}</ThemedText>
           <View style={styles.rightContainer}>
+            {rightElement}
             {showAddButton && (
               <TouchableOpacity style={styles.addButton} onPress={onAddPress}>
                 <Ionicons name="add" size={24} color="white" />
@@ -41,7 +48,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#34568B',
     zIndex: 1,
-    ...RNPlatform.select({
+    ...Platform.select({
       ios: {
         shadowColor: '#000',
         shadowOffset: {

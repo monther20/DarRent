@@ -1,10 +1,19 @@
-import { Tenant, Property, Transaction, Application, Stats, User } from '../types';
+import {
+  Tenant,
+  Property,
+  Transaction,
+  Application,
+  Stats,
+  User,
+  MaintenanceRequest,
+} from '../types';
 import {
   mockProperties,
   mockUsers,
   mockApplications,
   mockTransactions,
 } from '../../services/mockData';
+import { mockMaintenanceRequests, getActiveRequests, getPastRequests } from './mockMaintenanceData';
 
 // Mock API Service
 class MockApiService {
@@ -126,6 +135,50 @@ class MockApiService {
     const renter = mockUsers.find((user) => user.id === renterId);
     if (!renter?.savedProperties) return [];
     return mockProperties.filter((property) => renter.savedProperties?.includes(property.id));
+  }
+
+  async getMaintenanceRequests(renterId: string): Promise<MaintenanceRequest[]> {
+    await this.simulateDelay();
+    return mockMaintenanceRequests.filter((request) => request.renterId === renterId);
+  }
+
+  async getActiveMaintenanceRequests(renterId: string): Promise<MaintenanceRequest[]> {
+    await this.simulateDelay();
+    return getActiveRequests(renterId);
+  }
+
+  async getPastMaintenanceRequests(renterId: string): Promise<MaintenanceRequest[]> {
+    await this.simulateDelay();
+    return getPastRequests(renterId);
+  }
+
+  async createMaintenanceRequest(
+    request: Omit<MaintenanceRequest, 'id' | 'createdAt'>,
+  ): Promise<MaintenanceRequest> {
+    await this.simulateDelay();
+    const newRequest: MaintenanceRequest = {
+      ...request,
+      id: `req${mockMaintenanceRequests.length + 1}`,
+      createdAt: new Date().toISOString(),
+    };
+    mockMaintenanceRequests.push(newRequest);
+    return newRequest;
+  }
+
+  async updateMaintenanceRequest(
+    id: string,
+    updates: Partial<MaintenanceRequest>,
+  ): Promise<MaintenanceRequest> {
+    await this.simulateDelay();
+    const index = mockMaintenanceRequests.findIndex((request) => request.id === id);
+    if (index === -1) {
+      throw new Error('Maintenance request not found');
+    }
+    mockMaintenanceRequests[index] = {
+      ...mockMaintenanceRequests[index],
+      ...updates,
+    };
+    return mockMaintenanceRequests[index];
   }
 
   private simulateDelay(): Promise<void> {
