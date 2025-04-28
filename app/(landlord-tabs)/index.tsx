@@ -66,7 +66,7 @@ export default function DashboardScreen() {
         <View style={styles.quickActions}>
           <TouchableOpacity 
             style={styles.actionButton}
-            onPress={() => router.push('/properties/add')}
+            onPress={() => router.push('/add-property')}
           >
             <MaterialIcons name="add-circle" size={24} color="white" />
             <ThemedText style={styles.actionButtonText}>Add Property</ThemedText>
