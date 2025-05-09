@@ -1,274 +1,194 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import * as SecureStore from 'expo-secure-store';
-import { router } from 'expo-router';
-import api from '@/services/api';
-import { User } from '@/services/mockData';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+// import { supabase } from '../lib/supabase';
+import { Session, User } from '@supabase/supabase-js';
+import { mockAuth } from '../services/mockAuth.service';
+import { mockUsers } from '../services/mockData';
 
-// Types
-type UserRole = 'landlord' | 'renter';
+// Extend the User type to include role
+interface ExtendedUser extends User {
+  role?: 'landlord' | 'renter' | 'unknown';
+}
 
 type AuthContextType = {
-  user: User | null;
+  user: ExtendedUser | null;
+  session: Session | null;
   isLoading: boolean;
   isLoggedIn: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: RegisterData) => Promise<boolean>;
-  logout: () => Promise<void>;
-  forgotPassword: (email: string) => Promise<boolean>;
-  resetPassword: (token: string, newPassword: string) => Promise<boolean>;
-  changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
-  updateProfile: (userData: Partial<User>) => Promise<boolean>;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, metadata: any) => Promise<{ error: any }>;
+  signOut: () => Promise<void>;
 };
 
-type RegisterData = {
-  email: string;
-  password: string;
-  fullName: string;
-  phone: string;
-  role: UserRole;
-};
-
-// Create the context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Storage keys
-const AUTH_TOKEN_KEY = 'darrent_auth_token';
-const USER_DATA_KEY = 'darrent_user_data';
-
-// Auth provider component
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<ExtendedUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check if user is already logged in on app load
   useEffect(() => {
-    const loadStoredUser = async () => {
-      try {
-        const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
-        const userData = await SecureStore.getItemAsync(USER_DATA_KEY);
+    // Get initial session
+    mockAuth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session);
+      setSession(session);
 
-        if (token && userData) {
-          setUser(JSON.parse(userData));
-          setIsLoggedIn(true);
+      const userEmail = session?.user?.email;
+      if (session?.user && userEmail) {
+        // Find the user in mock data to get their role
+        const mockUser = mockUsers.find((u) => u.email.toLowerCase() === userEmail.toLowerCase());
+        if (mockUser) {
+          console.log('Found user in mock data during init:', mockUser.fullName, mockUser.role);
+          // Create an extended user with role
+          const extendedUser = {
+            ...session.user,
+            role: mockUser.role,
+          } as ExtendedUser;
+          setUser(extendedUser);
+        } else {
+          setUser(session.user as ExtendedUser);
         }
-      } catch (error) {
-        console.error('Error loading stored authentication:', error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        setUser(null);
       }
-    };
 
-    loadStoredUser();
+      setIsLoading(false);
+    });
+
+    // Since we're using mock auth, we don't need real-time auth state changes
+    // but we'll keep the structure similar for easy switching back later
+    return () => {
+      // No cleanup needed for mock
+    };
   }, []);
 
-  // Handle login
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const signIn = async (email: string, password: string) => {
     try {
-      setIsLoading(true);
+      console.log('Attempting to sign in with:', { email });
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const { data, error } = await mockAuth.signIn(email, password);
 
-      // In a real app, you would call an API endpoint here
-      // For this mock version, we'll find a matching user by email
-      const matchedUser = await api.users.getLandlords().then((landlords) => {
-        return landlords.find((u) => u.email.toLowerCase() === email.toLowerCase());
+      console.log('Mock auth sign in response:', {
+        data: {
+          user: data?.user,
+          session: data?.session,
+        },
+        error,
       });
 
-      if (!matchedUser) {
-        const renters = await api.users.getRenters();
-        const renterUser = renters.find((u) => u.email.toLowerCase() === email.toLowerCase());
-        if (renterUser) {
-          // Store token and user data
-          const mockToken = `mock_token_${Date.now()}`;
-          await SecureStore.setItemAsync(AUTH_TOKEN_KEY, mockToken);
-          await SecureStore.setItemAsync(USER_DATA_KEY, JSON.stringify(renterUser));
-
-          setUser(renterUser);
-          setIsLoggedIn(true);
-          return true;
-        }
-
-        return false;
+      if (error) {
+        console.error('Sign in error:', error);
+        return { error };
       }
 
-      // In a real app, you would verify the password here
-      // For mock purposes, we're just "logging in" without checking the password
+      // Update local state
+      setSession(data.session);
 
-      // Store token and user data
-      const mockToken = `mock_token_${Date.now()}`;
-      await SecureStore.setItemAsync(AUTH_TOKEN_KEY, mockToken);
-      await SecureStore.setItemAsync(USER_DATA_KEY, JSON.stringify(matchedUser));
+      // Add additional user data from mock users
+      if (data.user) {
+        const mockUser = mockUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
+        if (mockUser) {
+          console.log('Found matching mock user:', mockUser.fullName, mockUser.role);
+          // Augment the user object with role information
+          const extendedUser = {
+            ...data.user,
+            role: mockUser.role,
+            fullName: mockUser.fullName,
+          } as ExtendedUser;
+          setUser(extendedUser);
+        } else {
+          setUser(data.user as ExtendedUser);
+        }
+      }
 
-      setUser(matchedUser);
-      setIsLoggedIn(true);
-      return true;
-    } catch (error) {
-      console.error('Login error:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
+      return { error: null };
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      return { error };
     }
   };
 
-  // Handle registration
-  const register = async (userData: RegisterData): Promise<boolean> => {
+  const signUp = async (email: string, password: string, metadata: any) => {
     try {
-      setIsLoading(true);
+      console.log('Attempting to sign up with:', { email, metadata });
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // For mock purposes, we'll just sign in since we don't handle registration
+      // In a real implementation, you'd add the user to your mock data
+      const { data, error } = await mockAuth.signIn(email, password);
 
-      // In a real app, you would call an API endpoint here to create a new user
-      // For this mock version, we'll just pretend to create a user
-
-      // Create a mock new user
-      const newUser: User = {
-        id: `user_${Date.now()}`,
-        fullName: userData.fullName,
-        email: userData.email,
-        phone: userData.phone,
-        role: userData.role,
-        location: {
-          city: 'Amman',
-          country: 'Jordan',
+      console.log('Mock sign up response:', {
+        data: {
+          user: data?.user,
+          session: data?.session,
         },
-        createdAt: new Date().toISOString(),
-        properties: userData.role === 'landlord' ? [] : undefined,
-        rentedProperties: userData.role === 'renter' ? [] : undefined,
-      };
+        error,
+      });
 
-      // Store token and user data
-      const mockToken = `mock_token_${Date.now()}`;
-      await SecureStore.setItemAsync(AUTH_TOKEN_KEY, mockToken);
-      await SecureStore.setItemAsync(USER_DATA_KEY, JSON.stringify(newUser));
+      if (error) {
+        console.error('Sign up error:', error);
+        return { error };
+      }
 
-      setUser(newUser);
-      setIsLoggedIn(true);
-      return true;
-    } catch (error) {
-      console.error('Registration error:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
+      // Update local state
+      setSession(data.session);
+
+      // Add additional user data from mock users
+      if (data.user) {
+        const mockUser = mockUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
+        if (mockUser) {
+          console.log('Found matching mock user:', mockUser.fullName, mockUser.role);
+          // Augment the user object with role information
+          const extendedUser = {
+            ...data.user,
+            role: mockUser.role,
+            fullName: mockUser.fullName,
+          } as ExtendedUser;
+          setUser(extendedUser);
+        } else {
+          setUser(data.user as ExtendedUser);
+        }
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      return { error };
     }
   };
 
-  // Handle logout
-  const logout = async (): Promise<void> => {
+  const signOut = async () => {
     try {
-      setIsLoading(true);
+      console.log('Attempting to sign out');
 
-      // Remove stored auth data
-      await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
-      await SecureStore.deleteItemAsync(USER_DATA_KEY);
+      const { error } = await mockAuth.signOut();
+      if (error) throw error;
 
-      // Reset auth state
+      console.log('Successfully signed out');
+
+      // Clear local state
+      setSession(null);
       setUser(null);
-      setIsLoggedIn(false);
-
-      // Navigate to login
-      router.replace('/auth/login');
     } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle forgot password request
-  const forgotPassword = async (email: string): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // In a real app, you would call an API endpoint here to initiate password reset
-      // For this mock version, we'll just pretend it worked
-
-      return true;
-    } catch (error) {
-      console.error('Forgot password error:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle password reset
-  const resetPassword = async (token: string, newPassword: string): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // In a real app, you would call an API endpoint here to reset password
-      // For this mock version, we'll just pretend it worked
-
-      return true;
-    } catch (error) {
-      console.error('Reset password error:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const changePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      return true;
-    } catch (error) {
-      console.error('Error changing password:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const updateProfile = async (userData: Partial<User>): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setUser((prevUser) => ({ ...prevUser, ...userData }) as User);
-      return true;
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
+      console.error('Error signing out:', error);
     }
   };
 
   const value = {
     user,
+    session,
     isLoading,
-    isLoggedIn,
-    login,
-    register,
-    logout,
-    forgotPassword,
-    resetPassword,
-    changePassword,
-    updateProfile,
+    isLoggedIn: !!session,
+    signIn,
+    signUp,
+    signOut,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+}
 
-// Custom hook to use the auth context
-export const useAuth = (): AuthContextType => {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
-
-export default AuthContext;
+}

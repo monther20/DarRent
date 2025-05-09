@@ -239,5 +239,54 @@
     "resetPasswordCheckEmail": "تحقق من بريدك الإلكتروني للحصول على تعليمات إعادة تعيين كلمة المرور.",
     "passwordResetSuccess": "تم إعادة تعيين كلمة المرور بنجاح!",
     "canLoginWithNewPassword": "يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة."
+  },
+  "payments": {
+    "title": "المدفوعات",
+    "currentBalance": "الرصيد الحالي",
+    "dueOn": "مستحق في",
+    "makePayment": "إجراء الدفع",
+    "paymentHistory": "سجل المدفوعات",
+    "noPaymentHistory": "لا يوجد سجل مدفوعات",
+    "selectBill": "اختر الفاتورة",
+    "billDetails": "تفاصيل الفاتورة",
+    "amount": "المبلغ",
+    "dueDate": "تاريخ الاستحقاق",
+    "status": "الحالة",
+    "pending": "معلق",
+    "paid": "مدفوع",
+    "overdue": "متأخر",
+    "selectPaymentMethod": "اختر طريقة الدفع",
+    "paymentMethods": {
+      "creditCard": "بطاقة ائتمان",
+      "bankTransfer": "تحويل بنكي",
+      "eWallet": "محفظة إلكترونية"
+    },
+    "confirmPayment": "تأكيد الدفع",
+    "paymentConfirmation": "تأكيد الدفع",
+    "processingPayment": "جاري معالجة الدفع",
+    "paymentSuccess": "تم الدفع بنجاح",
+    "paymentFailed": "فشل الدفع",
+    "tryAgain": "حاول مرة أخرى",
+    "backToPayments": "العودة إلى المدفوعات",
+    "billTypes": {
+      "electricity": "فاتورة الكهرباء",
+      "water": "فاتورة الماء",
+      "rent": "دفع الإيجار"
+    },
+    "errors": {
+      "paymentFailed": "فشل الدفع. الرجاء المحاولة مرة أخرى.",
+      "invalidAmount": "مبلغ غير صالح",
+      "networkError": "خطأ في الشبكة. الرجاء التحقق من اتصالك."
+    },
+    "subscriberNumber": "رقم المشترك",
+    "enterSubscriberNumber": "أدخل رقم مشترك المياه",
+    "electricityCompany": "شركة الكهرباء",
+    "contractNumber": "رقم العقد",
+    "enterContractNumber": "أدخل رقم عقد الكهرباء",
+    "rentPaymentInfo": "يرجى تحويل مبلغ الإيجار إلى رقم الحساب التالي: {{number}}",
+    "validation": {
+      "subscriberNumberRequired": "يرجى إدخال رقم المشترك",
+      "contractNumberRequired": "يرجى إدخال رقم العقد"
+    }
   }
 }

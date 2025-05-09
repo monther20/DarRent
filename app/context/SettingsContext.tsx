@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useColorScheme } from '../hooks/useColorScheme';
-import i18n from '@/localization/i18n';
+import i18n from '@/app/i18n/i18n';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 type Language = 'en' | 'ar';

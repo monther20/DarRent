@@ -266,5 +266,54 @@
       "phone": "Call Support",
       "chat": "Live Chat"
     }
+  },
+  "payments": {
+    "title": "Payments",
+    "currentBalance": "Current Balance",
+    "dueOn": "Due on",
+    "makePayment": "Make Payment",
+    "paymentHistory": "Payment History",
+    "noPaymentHistory": "No payment history",
+    "selectBill": "Select Bill",
+    "billDetails": "Bill Details",
+    "amount": "Amount",
+    "dueDate": "Due Date",
+    "status": "Status",
+    "pending": "Pending",
+    "paid": "Paid",
+    "overdue": "Overdue",
+    "selectPaymentMethod": "Select Payment Method",
+    "paymentMethods": {
+      "creditCard": "Credit Card",
+      "bankTransfer": "Bank Transfer",
+      "eWallet": "e-Wallet"
+    },
+    "confirmPayment": "Confirm Payment",
+    "paymentConfirmation": "Payment Confirmation",
+    "processingPayment": "Processing Payment",
+    "paymentSuccess": "Payment Successful",
+    "paymentFailed": "Payment Failed",
+    "tryAgain": "Try Again",
+    "backToPayments": "Back to Payments",
+    "billTypes": {
+      "electricity": "Electricity Bill",
+      "water": "Water Bill",
+      "rent": "Rent Payment"
+    },
+    "errors": {
+      "paymentFailed": "Payment failed. Please try again.",
+      "invalidAmount": "Invalid amount",
+      "networkError": "Network error. Please check your connection."
+    },
+    "subscriberNumber": "Subscriber Number",
+    "enterSubscriberNumber": "Enter your water subscriber number",
+    "electricityCompany": "Electricity Company",
+    "contractNumber": "Contract Number",
+    "enterContractNumber": "Enter your electricity contract number",
+    "rentPaymentInfo": "Please transfer the rent amount to the following account number: {{number}}",
+    "validation": {
+      "subscriberNumberRequired": "Please enter your subscriber number",
+      "contractNumberRequired": "Please enter your contract number"
+    }
   }
 }

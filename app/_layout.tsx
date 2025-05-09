@@ -5,8 +5,8 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { I18nextProvider } from 'react-i18next';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import i18n from '../localization/i18n';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import i18n from './i18n/i18n';
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
@@ -67,6 +67,7 @@ function RootLayoutNav() {
         headerTitleStyle: {
           fontWeight: '600',
         },
+        headerShown: false,
       }}
     >
       {!user ? (
@@ -76,7 +77,7 @@ function RootLayoutNav() {
             headerShown: false,
           }}
         />
-      ) : user.role === 'landlord' ? (
+      ) : user.user_metadata.role === 'landlord' ? (
         <Stack.Screen
           name="(landlord-tabs)"
           options={{

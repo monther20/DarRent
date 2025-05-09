@@ -17,9 +17,11 @@ import { mockApi } from '../services/mockApi';
 import type { Property } from '@/types';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { mockMaintenanceRequests } from '../../services/mockData';
+import '../i18n/i18n'; // Import the combined i18n configuration
 
 export default function RenterDashboard() {
-  const { t } = useTranslation();
+  // Use all the namespaces we need in this component
+  const { t } = useTranslation(['common', 'rental', 'property', 'home', 'search', 'maintenance']);
   const { user } = useAuth();
   const { language } = useLanguage();
   const isRTL = language === 'ar';
@@ -27,7 +29,7 @@ export default function RenterDashboard() {
   const [currentRental, setCurrentRental] = useState<Property | null>(null);
   const [savedProperties, setSavedProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [maintenance, setMaintenance] = useState([]);
+  const [maintenance, setMaintenance] = useState<any[]>([]);
 
   const getImageSource = (image: string) => {
     if (!image) return require('../../assets/images/property-placeholder.jpg');
@@ -71,9 +73,14 @@ export default function RenterDashboard() {
     );
   }
 
+  const userName = user?.fullName || '';
+  const greeting = userName
+    ? `${t('hello', { ns: 'common' })}, ${userName}`
+    : t('hello', { ns: 'common' });
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 80 }}>
-      <ScreenHeader title={t('common.hello') + (user ? `, ${user.fullName}` : '')} />
+      <ScreenHeader title={greeting} />
       {/* Search Bar */}
       <View style={[styles.searchBarContainer, isRTL && { flexDirection: 'row-reverse' }]}>
         <View style={styles.searchBarWrapper}>
@@ -82,7 +89,7 @@ export default function RenterDashboard() {
           )}
           <TextInput
             style={[styles.searchBar, isRTL && { textAlign: 'right', paddingRight: 36 }]}
-            placeholder={t('search.searchByLocation')}
+            placeholder={t('searchByLocation', { ns: 'search' })}
           />
           {isRTL ? (
             <Ionicons name="search" size={20} color="#888" style={styles.searchIconRTL} />
@@ -91,7 +98,7 @@ export default function RenterDashboard() {
       </View>
       {/* Current Rental */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('rental.currentRental')}</Text>
+        <Text style={styles.sectionTitle}>{t('currentRental', { ns: 'rental' })}</Text>
         {currentRental ? (
           <View style={styles.currentRentalCard}>
             <View style={styles.currentRentalContent}>
@@ -102,27 +109,29 @@ export default function RenterDashboard() {
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <Text style={styles.currentRentalTitle}>{currentRental.title}</Text>
                 <Text style={styles.currentRentalDetails}>
-                  {currentRental.price} {currentRental.currency}/{t('month', 'month')}
+                  {currentRental.price} {currentRental.currency}/{t('month', { ns: 'common' })}
                 </Text>
                 <Text style={styles.currentRentalDetails}>
-                  {t('rental.leaseEnds')} {t('in', 'in')} 3 {t('tenant.months')}
+                  {t('leaseEnds', { ns: 'rental' })} {t('in', { ns: 'common' })} 3{' '}
+                  {t('months', { ns: 'tenant' })}
                 </Text>
               </View>
             </View>
             <View style={styles.nextPaymentBox}>
               <Text style={styles.nextPaymentText}>
-                {t('rental.nextPayment')}: {currentRental.nextPayment?.amount} JOD{' '}
-                {t('rental.dueIn')} {currentRental.nextPayment?.dueInDays} {t('rental.days')}
+                {t('nextPayment', { ns: 'rental' })}: {currentRental.nextPayment?.amount} JOD{' '}
+                {t('dueIn', { ns: 'rental' })} {currentRental.nextPayment?.dueInDays}{' '}
+                {t('days', { ns: 'rental' })}
               </Text>
             </View>
           </View>
         ) : (
-          <Text style={styles.noData}>{t('rental.noCurrentRental')}</Text>
+          <Text style={styles.noData}>{t('noCurrentRental', { ns: 'rental' })}</Text>
         )}
       </View>
       {/* Upcoming Maintenance */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('maintenance.upcoming', 'Upcoming Maintenance')}</Text>
+        <Text style={styles.sectionTitle}>{t('upcoming', { ns: 'maintenance' })}</Text>
         {maintenance.length > 0 ? (
           <ScrollView
             horizontal
@@ -149,12 +158,12 @@ export default function RenterDashboard() {
                   ]}
                 >
                   <Text style={styles.maintenanceBadgeText}>
-                    {t(`maintenance.status.${req.status}`, req.status)}
+                    {t(`status.${req.status}`, { ns: 'maintenance' })}
                   </Text>
                 </View>
                 {req.scheduledDate && (
                   <Text style={styles.maintenanceDate}>
-                    {t('maintenance.scheduled')}:{' '}
+                    {t('scheduled', { ns: 'maintenance' })}:{' '}
                     {new Date(req.scheduledDate).toLocaleDateString(language)}
                   </Text>
                 )}
@@ -173,20 +182,20 @@ export default function RenterDashboard() {
               style={{ marginBottom: 8 }}
             />
             <Text style={styles.maintenanceEmptyText}>
-              {t('maintenance.noUpcoming', 'No upcoming maintenance requests')}
+              {t('noRequests', { ns: 'maintenance' })}
             </Text>
           </View>
         )}
         <TouchableOpacity style={styles.maintenanceRequestBtn}>
           <Ionicons name="add-circle" size={20} color="#fff" style={{ marginRight: 6 }} />
           <Text style={styles.maintenanceRequestBtnText}>
-            {t('maintenance.request', 'Request Maintenance')}
+            {t('createRequest', { ns: 'maintenance' })}
           </Text>
         </TouchableOpacity>
       </View>
       {/* Saved Properties */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('property.savedProperties')}</Text>
+        <Text style={styles.sectionTitle}>{t('savedProperties', { ns: 'property' })}</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -201,31 +210,31 @@ export default function RenterDashboard() {
                 />
                 <Text style={styles.savedPropertyTitle}>{property.title}</Text>
                 <Text style={styles.savedPropertyDetails}>
-                  {property.price} {property.currency}/ {t('month', 'month')}
+                  {property.price} {property.currency}/ {t('month', { ns: 'common' })}
                 </Text>
                 <Text style={styles.savedPropertyDetails}>
-                  {property.features.bedrooms} {t('property.bed')} • {property.features.bathrooms}{' '}
-                  {t('property.bath')}
+                  {property.features.bedrooms} {t('bed', { ns: 'property' })} •{' '}
+                  {property.features.bathrooms} {t('bath', { ns: 'property' })}
                 </Text>
                 <Text style={styles.savedPropertyDetails}>{property.location.area}</Text>
               </View>
             ))
           ) : (
-            <Text style={styles.noData}>{t('home.noProperties')}</Text>
+            <Text style={styles.noData}>{t('noProperties', { ns: 'home' })}</Text>
           )}
         </ScrollView>
       </View>
       {/* Quick Actions */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('home.quickActions')}</Text>
+        <Text style={styles.sectionTitle}>{t('quickActions', { ns: 'home' })}</Text>
         <View style={[styles.quickActionsRow, isRTL && { flexDirection: 'row-reverse' }]}>
           <TouchableOpacity style={styles.quickActionButton} activeOpacity={0.85}>
             <Ionicons name="card" size={24} color="#fff" style={styles.quickActionIconVertical} />
-            <Text style={styles.quickActionText}>{t('rental.payNow')}</Text>
+            <Text style={styles.quickActionText}>{t('payNow', { ns: 'rental' })}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.quickActionButton} activeOpacity={0.85}>
             <Ionicons name="call" size={24} color="#fff" style={styles.quickActionIconVertical} />
-            <Text style={styles.quickActionText}>{t('rental.contactOwner')}</Text>
+            <Text style={styles.quickActionText}>{t('contactOwner', { ns: 'rental' })}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.quickActionButton} activeOpacity={0.85}>
             <Ionicons
@@ -234,7 +243,7 @@ export default function RenterDashboard() {
               color="#fff"
               style={styles.quickActionIconVertical}
             />
-            <Text style={styles.quickActionText}>{t('rental.support')}</Text>
+            <Text style={styles.quickActionText}>{t('support', { ns: 'rental' })}</Text>
           </TouchableOpacity>
         </View>
       </View>

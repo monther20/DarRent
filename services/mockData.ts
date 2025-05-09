@@ -293,7 +293,7 @@ export const mockProperties: Property[] = [
       area: 80,
       amenities: ['Parking', 'Air Conditioning', 'Security'],
     },
-    images: ['/assets/images/property-placeholder.jpg'],
+    images: ['/assets/images/property-placeholder.jpg', '/assets/images/apartment.jpg'],
     status: 'available',
     ownerId: 'user1',
     createdAt: '2023-05-15T00:00:00.000Z',

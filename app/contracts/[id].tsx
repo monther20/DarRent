@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  TextInput,
+  SafeAreaView,
+  Modal,
+} from 'react-native';
 // @ts-ignore
-import { Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { useTranslation } from 'react-i18next';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -10,6 +19,10 @@ import { RentalContract, Property, User } from '@/services/mockData';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { formatDate } from '@/lib/utils';
 import { StatusBar } from 'expo-status-bar';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { mockApi } from '../services/mockApi';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const styles = StyleSheet.create({
   container: {
@@ -98,17 +111,288 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F7FA',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  rtlContainer: {
+    direction: 'rtl',
+  },
+  contentContainer: {
+    paddingBottom: 100,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 50,
+  },
+  statusContainer: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  statusBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
+  statusPending: {
+    backgroundColor: '#FFC107',
+  },
+  statusActive: {
+    backgroundColor: '#4CAF50',
+  },
+  statusRejected: {
+    backgroundColor: '#F44336',
+  },
+  statusTerminated: {
+    backgroundColor: '#F44336',
+  },
+  statusExpired: {
+    backgroundColor: '#9E9E9E',
+  },
+  statusChangesRequested: {
+    backgroundColor: '#2196F3',
+  },
+  statusChangesAccepted: {
+    backgroundColor: '#4CAF50',
+  },
+  statusChangesRejected: {
+    backgroundColor: '#F44336',
+  },
+  statusText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  dateContainer: {
+    marginTop: 4,
+  },
+  dateLabel: {
+    fontSize: 14,
+    color: '#888',
+  },
+  dateValue: {
+    fontSize: 14,
+    color: '#333',
+  },
+  detailCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  propertyTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  propertyDetail: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  propertyFeatures: {
+    marginTop: 8,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 12,
+  },
+  contractParty: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  contractPartyLabel: {
+    fontSize: 14,
+    color: '#666',
+  },
+  contractPartyValue: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+    textAlign: 'right',
+  },
+  termsText: {
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20,
+  },
+  downloadButton: {
+    backgroundColor: '#34568B',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 16,
+    marginTop: 24,
+    padding: 12,
+    borderRadius: 8,
+  },
+  downloadIcon: {
+    marginRight: 8,
+  },
+  downloadButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  actionsContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  actionButton: {
+    flex: 1,
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 4,
+  },
+  rejectButton: {
+    backgroundColor: '#f0f0f0',
+  },
+  rejectButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#F44336',
+  },
+  acceptButton: {
+    backgroundColor: '#34568B',
+  },
+  acceptButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  changeButton: {
+    backgroundColor: '#E0E0E0',
+  },
+  changeButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2196F3',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#34568B',
+  },
+  modalCloseButton: {
+    padding: 4,
+  },
+  modalBody: {
+    padding: 16,
+  },
+  modalLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 8,
+    color: '#333',
+  },
+  changesInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    minHeight: 150,
+    textAlignVertical: 'top',
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  modalCancelButton: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
+    padding: 12,
+    borderRadius: 8,
+    marginRight: 8,
+    alignItems: 'center',
+  },
+  modalCancelButtonText: {
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  modalSubmitButton: {
+    flex: 2,
+    backgroundColor: '#34568B',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalSubmitButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
 });
 
 export default function ContractDetailsScreen() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'rental', 'property', 'propertyDetails', 'contracts']);
   const { id } = useLocalSearchParams();
+  const { user } = useAuth();
+  const { language } = useLanguage();
+  const isRTL = language === 'ar';
+  const userIsLandlord = user?.role === 'landlord';
+
   const [contract, setContract] = useState<RentalContract | null>(null);
   const [property, setProperty] = useState<Property | null>(null);
+  const [landlord, setLandlord] = useState<User | null>(null);
   const [renter, setRenter] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [newEndDate, setNewEndDate] = useState(new Date());
+  const [processingAction, setProcessingAction] = useState(false);
+  const [showChangesModal, setShowChangesModal] = useState(false);
+  const [requestedChanges, setRequestedChanges] = useState('');
 
   useEffect(() => {
     const loadContractDetails = async () => {
@@ -116,11 +400,13 @@ export default function ContractDetailsScreen() {
         const contractData = await api.contracts.getById(id as string);
         if (contractData) {
           setContract(contractData);
-          const [propertyData, renterData] = await Promise.all([
+          const [propertyData, landlordData, renterData] = await Promise.all([
             api.properties.getById(contractData.propertyId),
+            api.users.getById(contractData.landlordId),
             api.users.getById(contractData.renterId),
           ]);
           setProperty(propertyData);
+          setLandlord(landlordData);
           setRenter(renterData);
         }
       } catch (error) {
@@ -134,6 +420,99 @@ export default function ContractDetailsScreen() {
     loadContractDetails();
   }, [id, t]);
 
+  const handleAcceptContract = async () => {
+    if (!user) return;
+
+    // Only renters can accept contracts
+    if (userIsLandlord) return;
+
+    setProcessingAction(true);
+    try {
+      await api.contracts.updateContract(id as string, {
+        ...contract,
+        status: 'active',
+        acceptedAt: new Date().toISOString(),
+      });
+
+      // Refresh contract data
+      const updatedContract = await api.contracts.getById(id as string);
+      setContract(updatedContract);
+
+      Alert.alert(t('common.success'), t('propertyDetails.contractAccepted'));
+    } catch (error) {
+      console.error('Error accepting contract:', error);
+      Alert.alert(t('common.error'), t('propertyDetails.errorAcceptingContract'));
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  const handleRejectContract = async () => {
+    if (!user) return;
+
+    // Only renters can reject contracts
+    if (userIsLandlord) return;
+
+    Alert.alert(t('common.confirm'), t('propertyDetails.rejectContractConfirm'), [
+      { text: t('common.cancel') },
+      {
+        text: t('common.confirm'),
+        onPress: async () => {
+          setProcessingAction(true);
+          try {
+            await api.contracts.updateContract(id as string, {
+              ...contract,
+              status: 'rejected',
+              rejectedAt: new Date().toISOString(),
+            });
+
+            // Refresh contract data
+            const updatedContract = await api.contracts.getById(id as string);
+            setContract(updatedContract);
+
+            Alert.alert(t('common.success'), t('propertyDetails.contractRejected'));
+          } catch (error) {
+            console.error('Error rejecting contract:', error);
+            Alert.alert(t('common.error'), t('propertyDetails.errorRejectingContract'));
+          } finally {
+            setProcessingAction(false);
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleRequestChanges = async () => {
+    if (requestedChanges.trim() === '') {
+      Alert.alert(t('common.error'), t('propertyDetails.enterChanges'));
+      return;
+    }
+
+    setShowChangesModal(false);
+    setProcessingAction(true);
+
+    try {
+      await api.contracts.updateContract(id as string, {
+        ...contract,
+        status: 'changes_requested',
+        requestedChanges: requestedChanges,
+        requestedChangesAt: new Date().toISOString(),
+      });
+
+      // Refresh contract data
+      const updatedContract = await api.contracts.getById(id as string);
+      setContract(updatedContract);
+
+      Alert.alert(t('common.success'), t('propertyDetails.contractChangesRequested'));
+    } catch (error) {
+      console.error('Error requesting changes:', error);
+      Alert.alert(t('common.error'), t('propertyDetails.errorRequestingChanges'));
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  // For landlords accepting/rejecting requested changes
   const handleTerminateContract = async () => {
     Alert.alert(t('contracts.terminateTitle'), t('contracts.terminateMessage'), [
       {

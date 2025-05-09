@@ -1,190 +1,64 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { ThemedText } from '@/components/ThemedText';
-import { InputField } from '@/components/InputField';
-import { useTranslation } from 'react-i18next';
-import { router, Link } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
-import { useForm, Controller } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Ionicons } from '@expo/vector-icons';
-import Checkbox from '@/app/components/Checkbox';
-
-// Define validation schema with zod
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: 'Email is required' })
-    .email({ message: 'Invalid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { View, StyleSheet, TextInput, TouchableOpacity, Text, Image } from 'react-native';
+import { LoginForm } from '../../components/auth/LoginForm';
+import { Link, useRouter } from 'expo-router';
+import Checkbox from 'expo-checkbox';
+import { IconSymbol } from '../../components/ui/IconSymbol';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function LoginScreen() {
-  const { t } = useTranslation();
-  const { login, loginWithGoogle, user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      setIsLoading(true);
-      setErrorMessage('');
-      const success = await login(data.email, data.password, rememberMe);
-      if (success) {
-        if (user?.role === 'landlord') {
-          router.replace('/(landlord-tabs)/profile');
-        } else {
-          router.replace('/(renter-tabs)/profile');
-        }
-      } else {
-        setErrorMessage('Invalid email or password');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      setErrorMessage('Something went wrong');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    try {
-      setIsLoading(true);
-      const success = await loginWithGoogle();
-      if (success) {
-        router.replace('/(tabs)');
-      }
-    } catch (error) {
-      console.error('Google login error:', error);
-      setErrorMessage('Failed to login with Google');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
-      <StatusBar style="light" />
-
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color="white" />
+          <IconSymbol
+            name="chevron.right"
+            size={20}
+            color="#fff"
+            style={{ transform: [{ scaleX: -1 }] } as import('react-native').ViewStyle}
+          />
         </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>Login</ThemedText>
+        <Text style={styles.headerTitle}>Login</Text>
       </View>
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Login Form */}
-        <View style={styles.formContainer}>
-          {/* Email Input */}
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View style={styles.inputContainer}>
-                <InputField
-                  placeholder="Enter your email"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  label="Email"
-                  value={value}
-                  error={errors.email?.message}
-                />
-              </View>
-            )}
+      {/* Form */}
+      <View style={styles.formContainer}>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require('../../assets/images/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
           />
-
-          {/* Password Input */}
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View style={styles.inputContainer}>
-                <InputField
-                  placeholder="Enter your password"
-                  secureTextEntry
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  error={errors.password?.message}
-                  label="Password"
-                />
-              </View>
-            )}
-          />
-
-          {/* Remember Me and Forgot Password */}
-          <View style={styles.rememberForgotContainer}>
-            <View style={styles.rememberContainer}>
-              <Checkbox checked={rememberMe} onPress={() => setRememberMe(!rememberMe)} />
-              <ThemedText style={styles.rememberText}>Remember me</ThemedText>
-            </View>
-            <Link href="/auth/forgot-password" style={styles.forgotText}>
-              Forgot Password?
-            </Link>
-          </View>
-
-          {/* Error Message */}
-          {errorMessage ? <ThemedText style={styles.errorText}>{errorMessage}</ThemedText> : null}
-
-          {/* Login Button */}
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={handleSubmit(onSubmit)}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <ThemedText style={styles.loginButtonText}>Login</ThemedText>
-            )}
-          </TouchableOpacity>
-
-          {/* Or continue with */}
-          <View style={styles.orContainer}>
-            <View style={styles.orLine} />
-            <ThemedText style={styles.orText}>Or continue with</ThemedText>
-            <View style={styles.orLine} />
-          </View>
-
-          {/* Google Sign In */}
-          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
-            <Ionicons name="logo-google" size={20} color="#34568B" />
-            <ThemedText style={styles.googleButtonText}>Google</ThemedText>
-          </TouchableOpacity>
-
-          {/* Sign Up Link */}
-          <View style={styles.signUpContainer}>
-            <ThemedText style={styles.signUpText}>
-              Don't have an account?{' '}
-              <Link href="/auth/register" style={styles.signUpLink}>
-                Sign up
-              </Link>
-            </ThemedText>
-          </View>
         </View>
-      </ScrollView>
+        <LoginForm />
+        {/* Password input is inside LoginForm */}
+
+        <Text style={styles.orText}>Or continue with</Text>
+
+        <View style={styles.socialRow}>
+          <TouchableOpacity style={styles.googleButton}>
+            <MaterialCommunityIcons
+              name="google"
+              size={22}
+              color="#EA4335"
+              style={styles.googleIcon}
+            />
+            <Text style={styles.googleButtonText}>Google</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Footer */}
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Don't have an account? </Text>
+        <Link href="/auth/register" style={styles.signUpLink}>
+          Sign up
+        </Link>
+      </View>
     </View>
   );
 }
@@ -192,116 +66,129 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
   },
   header: {
-    backgroundColor: '#34568B',
-    paddingTop: 40,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#34568B',
+    height: 80,
+    paddingTop: 36,
+    paddingHorizontal: 16,
   },
   backButton: {
-    padding: 8,
-    marginRight: 8,
+    marginRight: 12,
+    padding: 4,
   },
   headerTitle: {
-    color: 'white',
+    color: '#fff',
     fontSize: 20,
-    fontWeight: '600',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
+    fontWeight: 'bold',
   },
   formContainer: {
-    padding: 24,
+    padding: 20,
   },
-  inputContainer: {
-    // marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 16,
+  label: {
+    fontSize: 14,
     color: '#34568B',
-    marginBottom: 8,
+    marginBottom: 4,
+    marginTop: 16,
+    fontWeight: '500',
   },
-  rememberForgotContainer: {
+  rowBetween: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginVertical: 12,
   },
-  rememberContainer: {
+  rowCenter: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  rememberText: {
-    marginLeft: 8,
+  checkbox: {
+    marginRight: 8,
+    borderRadius: 4,
+    borderColor: '#34568B',
+  },
+  rememberMeText: {
     color: '#34568B',
+    fontSize: 14,
   },
-  forgotText: {
-    color: '#E67E22',
-    textDecorationLine: 'none',
-  },
-  errorText: {
-    color: '#dc2626',
-    marginBottom: 16,
-    textAlign: 'center',
+  forgotPassword: {
+    color: '#F2994A',
+    fontSize: 14,
+    fontWeight: '500',
   },
   loginButton: {
     backgroundColor: '#34568B',
-    paddingVertical: 16,
-    borderRadius: 8,
+    borderRadius: 24,
+    height: 48,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginTop: 8,
   },
   loginButtonText: {
-    color: 'white',
+    color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
-  },
-  orContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  orLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E5E7EB',
+    fontWeight: 'bold',
   },
   orText: {
-    marginHorizontal: 16,
-    color: '#6B7280',
+    textAlign: 'center',
+    color: '#888',
+    marginVertical: 16,
+    fontSize: 14,
+  },
+  socialRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
   googleButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    height: 48,
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
     justifyContent: 'center',
-    backgroundColor: '#F3F4F6',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    marginBottom: 24,
+    marginHorizontal: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
+  },
+  googleIcon: {
+    marginRight: 8,
   },
   googleButtonText: {
-    marginLeft: 12,
+    color: '#222',
     fontSize: 16,
-    color: '#34568B',
-    fontWeight: '500',
+    fontWeight: '600',
   },
-  signUpContainer: {
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 24,
+    marginTop: 'auto',
   },
-  signUpText: {
-    color: '#6B7280',
+  footerText: {
+    color: '#222',
+    fontSize: 15,
   },
   signUpLink: {
-    color: '#E67E22',
+    color: '#F2994A',
     fontWeight: '600',
-    textDecorationLine: 'none',
+    fontSize: 15,
+  },
+  logoContainer: {
+    alignItems: 'center',
+  },
+  logo: {
+    width: 300,
+    height: 250,
   },
 });

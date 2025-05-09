@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ThemedText } from '@/components/ThemedText';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import { changeLanguage } from '../../localization/i18n';
+import { changeLanguage } from '../i18n/i18n';
 import { Link } from 'expo-router';
 
 export default function WelcomeScreen() {

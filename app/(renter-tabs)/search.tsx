@@ -81,7 +81,7 @@ export default function PropertySearchScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
-      <ScreenHeader title="Payments" />
+      <ScreenHeader title="Find Your Home" />
       <SearchBar
         value={search}
         onChange={setSearch}

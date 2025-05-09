@@ -1,6 +1,7 @@
 import { Redirect } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { View, ActivityIndicator } from 'react-native';
+import './i18n/i18n';
 
 export default function Index() {
   try {
