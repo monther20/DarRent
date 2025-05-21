@@ -111,7 +111,7 @@ export default function PropertyDetails() {
 
     try {
       // Submit rent request using mock API
-      await mockApi.sendRentRequest({
+      const newRequest = await mockApi.sendRentRequest({
         renterId: user?.id as string,
         propertyId: property?.id as string,
         landlordId: property?.ownerId as string,
@@ -120,9 +120,19 @@ export default function PropertyDetails() {
         status: 'pending',
       });
 
-      Alert.alert(t('success', { ns: 'common' }), t('rentRequestSent', { ns: 'propertyDetails' }), [
-        { text: t('ok', { ns: 'common' }) },
-      ]);
+      // Directly navigate to contract review for testing
+      router.push({
+        pathname: '/(renter-tabs)/ContractReview',
+        params: {
+          propertyId: newRequest.propertyId,
+          requestId: newRequest.id,
+        },
+      });
+
+      // Optionally, you can comment out the alert below
+      // Alert.alert(t('success', { ns: 'common' }), t('rentRequestSent', { ns: 'propertyDetails' }), [
+      //   { text: t('ok', { ns: 'common' }) },
+      // ]);
     } catch (error) {
       console.error('Error sending rent request:', error);
       Alert.alert(

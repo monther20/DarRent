@@ -8,7 +8,7 @@ import { changeLanguage } from '../i18n/i18n';
 import { Link } from 'expo-router';
 
 export default function WelcomeScreen() {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['auth', 'common']);
   const [selectedLanguage, setSelectedLanguage] = useState(i18n.language || 'en');
 
   const handleLanguageChange = async (lang: string) => {

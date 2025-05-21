@@ -29,9 +29,17 @@ export function useMockUserData() {
           setUserRole(mockUser.role);
           setUserData(mockUser);
         } else {
-          // If user exists in auth but not in our data, default to unknown
-          console.log('User not found in mock data, defaulting to unknown role');
-          setUserRole('unknown');
+          // Check localStorage for a saved dynamic role
+          let dynamicRole: 'landlord' | 'renter' | 'unknown' = 'unknown';
+          if (typeof localStorage !== 'undefined' && user.email) {
+            const savedRole = localStorage.getItem(`userRole:${user.email}`);
+            if (savedRole === 'landlord' || savedRole === 'renter') {
+              dynamicRole = savedRole;
+            }
+          }
+          console.log('User not found in mock data, using dynamic role:', dynamicRole);
+          setUserRole(dynamicRole);
+          setUserData({ ...user, role: dynamicRole });
         }
       } catch (error) {
         console.error('Error fetching user data:', error);

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Slot, usePathname } from 'expo-router';
 import { BottomNavBar } from '@/components/BottomNavBar';
+import NotificationContainer from '@/app/components/NotificationContainer';
 
 export default function RenterTabLayout() {
   const pathname = usePathname();
@@ -13,6 +14,7 @@ export default function RenterTabLayout() {
       <View style={styles.content}>
         <Slot />
       </View>
+      <NotificationContainer />
       <BottomNavBar userType="renter" />
     </View>
   );

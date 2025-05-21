@@ -12,6 +12,9 @@ import enProfile from './locales/en/profile.json';
 import enMenu from './locales/en/menu.json';
 import enMaintenance from './locales/en/maintenance.json';
 import enPropertyDetails from './locales/en/propertyDetails.json';
+import enSettings from './locales/en/settings.json';
+import enPayments from './locales/en/payments.json';
+import enHelp from './locales/en/help.json';
 
 // Import all Arabic translations
 import arCommon from './locales/ar/common.json';
@@ -24,6 +27,9 @@ import arProfile from './locales/ar/profile.json';
 import arMenu from './locales/ar/menu.json';
 import arMaintenance from './locales/ar/maintenance.json';
 import arPropertyDetails from './locales/ar/propertyDetails.json';
+import arSettings from './locales/ar/settings.json';
+import arPayments from './locales/ar/payments.json';
+import arHelp from './locales/ar/help.json';
 
 // Initialize i18n
 i18n.use(initReactI18next).init({
@@ -39,6 +45,9 @@ i18n.use(initReactI18next).init({
       menu: enMenu,
       maintenance: enMaintenance,
       propertyDetails: enPropertyDetails,
+      settings: enSettings,
+      payments: enPayments,
+      help: enHelp,
     },
     ar: {
       common: arCommon,
@@ -51,6 +60,9 @@ i18n.use(initReactI18next).init({
       menu: arMenu,
       maintenance: arMaintenance,
       propertyDetails: arPropertyDetails,
+      settings: arSettings,
+      payments: arPayments,
+      help: arHelp,
     },
   },
   lng: 'en',
@@ -70,6 +82,9 @@ i18n.use(initReactI18next).init({
     'menu',
     'maintenance',
     'propertyDetails',
+    'settings',
+    'payments',
+    'help',
   ],
 });
 

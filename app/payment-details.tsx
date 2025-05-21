@@ -11,7 +11,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 
 export default function PaymentDetailsScreen() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['payments']);
   const params = useLocalSearchParams();
   const bill = params.bill as unknown as Bill;
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
@@ -24,12 +24,12 @@ export default function PaymentDetailsScreen() {
       case 'water':
         return (
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>{t('payments.subscriberNumber')}</Text>
+            <Text style={styles.inputLabel}>{t('subscriberNumber')}</Text>
             <TextInput
               style={styles.input}
               value={subscriberNumber}
               onChangeText={setSubscriberNumber}
-              placeholder={t('payments.enterSubscriberNumber')}
+              placeholder={t('enterSubscriberNumber')}
               keyboardType="numeric"
             />
           </View>
@@ -38,7 +38,7 @@ export default function PaymentDetailsScreen() {
         return (
           <>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>{t('payments.electricityCompany')}</Text>
+              <Text style={styles.inputLabel}>{t('electricityCompany')}</Text>
               <View style={styles.pickerContainer}>
                 <Picker
                   selectedValue={electricityCompany}
@@ -52,12 +52,12 @@ export default function PaymentDetailsScreen() {
               </View>
             </View>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>{t('payments.contractNumber')}</Text>
+              <Text style={styles.inputLabel}>{t('contractNumber')}</Text>
               <TextInput
                 style={styles.input}
                 value={contractNumber}
                 onChangeText={setContractNumber}
-                placeholder={t('payments.enterContractNumber')}
+                placeholder={t('enterContractNumber')}
                 keyboardType="numeric"
               />
             </View>
@@ -67,7 +67,7 @@ export default function PaymentDetailsScreen() {
         return (
           <View style={styles.infoContainer}>
             <Text style={styles.infoText}>
-              {t('payments.rentPaymentInfo', { number: bill.landlordPaymentNumber })}
+              {t('rentPaymentInfo', { number: bill.landlordPaymentNumber })}
             </Text>
           </View>
         );
@@ -125,16 +125,16 @@ export default function PaymentDetailsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <ScreenHeader title={t('payments.billDetails')} />
+      <ScreenHeader title={t('billDetails')} />
 
       <View style={styles.content}>
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>{t(`payments.billTypes.${bill.type}`)}</Text>
+          <Text style={styles.sectionTitle}>{t(`billTypes.${bill.type}`)}</Text>
           {renderBillDetails()}
         </View>
 
         <View style={[styles.card, styles.marginTop]}>
-          <Text style={styles.sectionTitle}>{t('payments.selectPaymentMethod')}</Text>
+          <Text style={styles.sectionTitle}>{t('selectPaymentMethod')}</Text>
           <View style={styles.paymentMethodsContainer}>
             {mockPaymentMethods.map(renderPaymentMethod)}
           </View>
@@ -145,7 +145,7 @@ export default function PaymentDetailsScreen() {
           onPress={handleConfirmPayment}
           disabled={!selectedMethod}
         >
-          <Text style={styles.confirmButtonText}>{t('payments.confirmPayment')}</Text>
+          <Text style={styles.confirmButtonText}>{t('confirmPayment')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

@@ -85,12 +85,26 @@ function RootLayoutNav() {
           }}
         />
       ) : (
-        <Stack.Screen
-          name="(renter-tabs)"
-          options={{
-            headerShown: false,
-          }}
-        />
+        <>
+          <Stack.Screen
+            name="(renter-tabs)"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="(renter-tabs)/ContractReview"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="(renter-tabs)/ContractSignature"
+            options={{
+              headerShown: false,
+            }}
+          />
+        </>
       )}
       <Stack.Screen
         name="modal"

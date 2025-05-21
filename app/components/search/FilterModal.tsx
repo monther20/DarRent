@@ -48,7 +48,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
         <View style={styles.modalBox}>
           {filterModalType === 'price' && (
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{t('search.price')}</Text>
+              <Text style={styles.modalTitle}>{t('price')}</Text>
               {/* Simulated slider UI */}
               <View style={styles.sliderRow}>
                 <Text style={styles.sliderLabel}>{priceRange[0]} JOD</Text>
@@ -89,7 +89,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     color={priceSort === 'asc' ? '#fff' : '#34568B'}
                   />
                   <Text style={[styles.sortBtnText, priceSort === 'asc' && { color: '#fff' }]}>
-                    {t('search.lowToHigh', 'Low to High')}
+                    {t('lowToHigh', 'Low to High')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -102,13 +102,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     color={priceSort === 'desc' ? '#fff' : '#34568B'}
                   />
                   <Text style={[styles.sortBtnText, priceSort === 'desc' && { color: '#fff' }]}>
-                    {t('search.highToLow', 'High to Low')}
+                    {t('highToLow', 'High to Low')}
                   </Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.modalActions}>
                 <TouchableOpacity style={styles.modalBtn} onPress={onClose}>
-                  <Text style={styles.modalBtnText}>{t('common.ok', 'OK')}</Text>
+                  <Text style={styles.modalBtnText}>{t('ok', 'OK')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalBtnOutline}
@@ -117,14 +117,14 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     setPriceSort(null);
                   }}
                 >
-                  <Text style={styles.modalBtnOutlineText}>{t('common.reset', 'Reset')}</Text>
+                  <Text style={styles.modalBtnOutlineText}>{t('reset', 'Reset')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
           )}
           {filterModalType === 'type' && (
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{t('search.type')}</Text>
+              <Text style={styles.modalTitle}>{t('type')}</Text>
               <View style={styles.typeRow}>
                 {propertyTypes.map((type) => (
                   <TouchableOpacity
@@ -159,20 +159,20 @@ export const FilterModal: React.FC<FilterModalProps> = ({
               </View>
               <View style={styles.modalActions}>
                 <TouchableOpacity style={styles.modalBtn} onPress={onClose}>
-                  <Text style={styles.modalBtnText}>{t('common.ok', 'OK')}</Text>
+                  <Text style={styles.modalBtnText}>{t('ok', 'OK')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalBtnOutline}
                   onPress={() => setSelectedTypes([])}
                 >
-                  <Text style={styles.modalBtnOutlineText}>{t('common.reset', 'Reset')}</Text>
+                  <Text style={styles.modalBtnOutlineText}>{t('reset', 'Reset')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
           )}
           {filterModalType === 'rooms' && (
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{t('search.rooms')}</Text>
+              <Text style={styles.modalTitle}>{t('rooms')}</Text>
               <View style={styles.roomsRow}>
                 {[1, 2, 3, 4].map((n) => (
                   <TouchableOpacity
@@ -189,10 +189,10 @@ export const FilterModal: React.FC<FilterModalProps> = ({
               </View>
               <View style={styles.modalActions}>
                 <TouchableOpacity style={styles.modalBtn} onPress={onClose}>
-                  <Text style={styles.modalBtnText}>{t('common.ok', 'OK')}</Text>
+                  <Text style={styles.modalBtnText}>{t('ok', 'OK')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.modalBtnOutline} onPress={() => setRoomCount(null)}>
-                  <Text style={styles.modalBtnOutlineText}>{t('common.reset', 'Reset')}</Text>
+                  <Text style={styles.modalBtnOutlineText}>{t('reset', 'Reset')}</Text>
                 </TouchableOpacity>
               </View>
             </View>

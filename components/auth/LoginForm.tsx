@@ -76,6 +76,7 @@ export function LoginForm() {
 
       setLoading(true);
       const { error } = await signIn(email, password);
+      
 
       if (error) {
         console.error('Login error:', error);

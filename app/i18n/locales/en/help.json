@@ -1,0 +1,24 @@
+{
+  "title": "Help Center",
+  "faqTitle": "Frequently Asked Questions",
+  "contactTitle": "Contact Us",
+  "contact": {
+    "email": "Email Support",
+    "phone": "Call Support",
+    "chat": "Live Chat"
+  },
+  "faq1": {
+    "question": "How do I reset my password?",
+    "answer": "Go to settings and select 'Reset Password'. You will receive instructions via email to complete the process."
+  },
+  "faq2": {
+    "question": "How do I report an issue with my rental?",
+    "answer": "Navigate to your rental details page and click on 'Report Issue'. Fill out the form with details about the problem, and our team will respond shortly."
+  },
+  "faq3": {
+    "question": "What payment methods are accepted?",
+    "answer": "We accept credit/debit cards, bank transfers, and mobile payment solutions like Apple Pay and Google Pay. Visit the payments section for more details."
+  },
+  "supportHours": "Support Hours: 9am - 6pm, Sunday to Thursday",
+  "emergencySupport": "For emergency issues, please call our 24/7 hotline"
+} 

@@ -10,10 +10,10 @@ import { Bill } from '@/types/payment';
 import { router } from 'expo-router';
 
 export default function PaymentsScreen() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['payments']);
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
 
-  console.log(t('payments.title'));
+  console.log(t('title'));
   const renderBillItem = ({ item }: { item: Bill }) => (
     <TouchableOpacity
       style={styles.billCard}
@@ -32,33 +32,33 @@ export default function PaymentsScreen() {
           color={Colors.light.primary}
         />
         <View style={styles.billInfo}>
-          <Text style={styles.billTitle}>{t(`payments.billTypes.${item.type}`)}</Text>
+          <Text style={styles.billTitle}>{t(`billTypes.${item.type}`)}</Text>
           <Text style={styles.billDescription}>{item.description}</Text>
         </View>
       </View>
       <View style={styles.billDetails}>
         <View style={styles.billAmount}>
-          <Text style={styles.amountLabel}>{t('payments.amount')}</Text>
+          <Text style={styles.amountLabel}>{t('amount')}</Text>
           <Text style={styles.amountValue}>${item.amount.toFixed(2)}</Text>
         </View>
         <View style={styles.billDueDate}>
-          <Text style={styles.dueDateLabel}>{t('payments.dueOn')}</Text>
+          <Text style={styles.dueDateLabel}>{t('dueOn')}</Text>
           <Text style={styles.dueDateValue}>{new Date(item.dueDate).toLocaleDateString()}</Text>
         </View>
       </View>
       <View style={[styles.statusBadge, styles[`${item.status}Status`]]}>
-        <Text style={styles.statusText}>{t(`payments.${item.status}`)}</Text>
+        <Text style={styles.statusText}>{t(`${item.status}`)}</Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
     <ScrollView style={styles.container}>
-      <ScreenHeader title={t('payments.title')} />
+      <ScreenHeader title={t('title')} />
 
       <View style={styles.content}>
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>{t('payments.currentBalance')}</Text>
+          <Text style={styles.cardTitle}>{t('currentBalance')}</Text>
           <View style={styles.balanceContainer}>
             <Text style={styles.balanceAmount}>
               $
@@ -66,12 +66,12 @@ export default function PaymentsScreen() {
                 .reduce((sum, bill) => sum + (bill.status === 'pending' ? bill.amount : 0), 0)
                 .toFixed(2)}
             </Text>
-            <Text style={styles.balanceLabel}>{t('payments.dueOn')} 4/30/2025</Text>
+            <Text style={styles.balanceLabel}>{t('dueOn')} 4/30/2025</Text>
           </View>
         </View>
 
         <View style={[styles.card, styles.marginTop]}>
-          <Text style={styles.cardTitle}>{t('payments.selectBill')}</Text>
+          <Text style={styles.cardTitle}>{t('selectBill')}</Text>
           <FlatList
             data={mockBills}
             renderItem={renderBillItem}

@@ -1,7 +1,17 @@
 {
+  "title": "ابحث عن منزلك",
   "searchByLocation": "ابحث حسب الموقع...",
   "price": "السعر",
   "type": "النوع",
   "rooms": "الغرف",
-  "propertiesFound": "العقارات الموجودة"
+  "propertiesFound": "العقارات الموجودة",
+  "lowToHigh": "من الأقل إلى الأعلى",
+  "highToLow": "من الأعلى إلى الأقل",
+  "ok": "موافق",
+  "reset": "إعادة ضبط",
+  "property": {
+    "apartment": "شقة",
+    "villa": "فيلا",
+    "studio": "ستوديو"
+  }
 }

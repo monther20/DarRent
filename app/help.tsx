@@ -10,38 +10,38 @@ import { MenuButton } from '@/components/MenuButton';
 import { router } from 'expo-router';
 
 export default function HelpScreen() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['help']);
   const { language } = useLanguage();
   const isRTL = language === 'ar';
 
   const faqItems = [
     {
-      question: t('help.faq1.question'),
-      answer: t('help.faq1.answer'),
+      question: t('faq1.question'),
+      answer: t('faq1.answer'),
     },
     {
-      question: t('help.faq2.question'),
-      answer: t('help.faq2.answer'),
+      question: t('faq2.question'),
+      answer: t('faq2.answer'),
     },
     {
-      question: t('help.faq3.question'),
-      answer: t('help.faq3.answer'),
+      question: t('faq3.question'),
+      answer: t('faq3.answer'),
     },
   ];
 
   const contactOptions = [
     {
-      title: t('help.contact.email'),
+      title: t('contact.email'),
       icon: 'envelope',
       action: () => Linking.openURL('mailto:support@darrent.com'),
     },
     {
-      title: t('help.contact.phone'),
+      title: t('contact.phone'),
       icon: 'phone',
       action: () => Linking.openURL('tel:+1234567890'),
     },
     {
-      title: t('help.contact.chat'),
+      title: t('contact.chat'),
       icon: 'comments',
       action: () => Linking.openURL('https://darrent.com/chat'),
     },
@@ -54,7 +54,7 @@ export default function HelpScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
           <FontAwesome name="arrow-left" size={24} color="#fff" />
         </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>{t('help.title')}</ThemedText>
+        <ThemedText style={styles.headerTitle}>{t('title')}</ThemedText>
         <View style={styles.headerIcon}>
           <MenuButton position="right" />
         </View>
@@ -63,7 +63,7 @@ export default function HelpScreen() {
       <ScrollView style={styles.content}>
         {/* FAQ Section */}
         <ThemedView style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>{t('help.faqTitle')}</ThemedText>
+          <ThemedText style={styles.sectionTitle}>{t('faqTitle')}</ThemedText>
           {faqItems.map((item, index) => (
             <ThemedView key={index} style={styles.faqItem}>
               <ThemedText style={styles.faqQuestion}>{item.question}</ThemedText>
@@ -74,7 +74,7 @@ export default function HelpScreen() {
 
         {/* Contact Section */}
         <ThemedView style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>{t('help.contactTitle')}</ThemedText>
+          <ThemedText style={styles.sectionTitle}>{t('contactTitle')}</ThemedText>
           {contactOptions.map((option, index) => (
             <TouchableOpacity key={index} style={styles.contactItem} onPress={option.action}>
               <FontAwesome name={option.icon} size={24} color="#34568B" />

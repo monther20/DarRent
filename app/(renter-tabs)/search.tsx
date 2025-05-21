@@ -21,7 +21,7 @@ type FilterType = 'price' | 'type' | 'rooms' | null;
 type PropertyTypeKey = 'apartment' | 'villa' | 'studio';
 
 export default function PropertySearchScreen() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['search']);
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2500]);
@@ -74,19 +74,19 @@ export default function PropertySearchScreen() {
   };
 
   const filterChips: FilterChip[] = [
-    { key: 'price', icon: 'pricetag', label: t('search.price') },
-    { key: 'type', icon: 'business', label: t('search.type') },
-    { key: 'rooms', icon: 'bed', label: t('search.rooms') },
+    { key: 'price', icon: 'pricetag', label: t('price') },
+    { key: 'type', icon: 'business', label: t('type') },
+    { key: 'rooms', icon: 'bed', label: t('rooms') },
   ];
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
-      <ScreenHeader title="Find Your Home" />
+      <ScreenHeader title={t('title', 'Find Your Home')} />
       <SearchBar
         value={search}
         onChange={setSearch}
         onClear={() => setSearch('')}
-        placeholder={t('search.searchByLocation')}
+        placeholder={t('searchByLocation')}
       />
       <FilterChips
         activeFilter={activeFilter}
@@ -99,7 +99,7 @@ export default function PropertySearchScreen() {
       />
       <PropertiesCount
         count={filteredProperties.length}
-        label={t('search.propertiesFound', 'Properties Found')}
+        label={t('propertiesFound', 'Properties Found')}
       />
       <PropertyList properties={filteredProperties} t={t as any} getImageSource={getImageSource} />
       <FilterModal

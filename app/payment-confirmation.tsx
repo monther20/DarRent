@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
 export default function PaymentConfirmationScreen() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['payments']);
   const [paymentStatus, setPaymentStatus] = useState<'processing' | 'success' | 'failed'>(
     'processing',
   );
@@ -41,7 +41,7 @@ export default function PaymentConfirmationScreen() {
         return (
           <View style={styles.statusContainer}>
             <ActivityIndicator size="large" color={Colors.light.primary} />
-            <Text style={styles.statusText}>{t('payments.processingPayment')}</Text>
+            <Text style={styles.statusText}>{t('processingPayment')}</Text>
           </View>
         );
       case 'success':
@@ -50,9 +50,9 @@ export default function PaymentConfirmationScreen() {
             <View style={styles.successIconContainer}>
               <FontAwesome name="check-circle" size={64} color="#10B981" />
             </View>
-            <Text style={styles.statusText}>{t('payments.paymentSuccess')}</Text>
+            <Text style={styles.statusText}>{t('paymentSuccess')}</Text>
             <TouchableOpacity style={styles.button} onPress={handleBackToPayments}>
-              <Text style={styles.buttonText}>{t('payments.backToPayments')}</Text>
+              <Text style={styles.buttonText}>{t('backToPayments')}</Text>
             </TouchableOpacity>
           </View>
         );
@@ -62,20 +62,20 @@ export default function PaymentConfirmationScreen() {
             <View style={styles.errorIconContainer}>
               <FontAwesome name="times-circle" size={64} color="#EF4444" />
             </View>
-            <Text style={styles.statusText}>{t('payments.paymentFailed')}</Text>
+            <Text style={styles.statusText}>{t('paymentFailed')}</Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.button, styles.tryAgainButton]}
                 onPress={handleTryAgain}
               >
-                <Text style={styles.buttonText}>{t('payments.tryAgain')}</Text>
+                <Text style={styles.buttonText}>{t('tryAgain')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.button, styles.backButton]}
                 onPress={handleBackToPayments}
               >
                 <Text style={[styles.buttonText, styles.backButtonText]}>
-                  {t('payments.backToPayments')}
+                  {t('backToPayments')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -86,7 +86,7 @@ export default function PaymentConfirmationScreen() {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title={t('payments.paymentConfirmation')} />
+      <ScreenHeader title={t('paymentConfirmation')} />
       {renderContent()}
     </View>
   );
