@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, Text, SafeAreaView, Alert, Platform } from 'react-native';
+import { View, ScrollView, StyleSheet, Text, SafeAreaView, Alert, Platform, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { mockApi } from '../services/mockApi';
@@ -10,13 +10,15 @@ import { PropertyHeader } from '@/app/components/property/PropertyHeader';
 import { PropertyInformation } from '@/app/components/property/PropertyInformation';
 import { PropertyActionButtons } from '@/app/components/property/PropertyActionButtons';
 import { RentRequestModal } from '@/app/components/property/RentRequestModal';
+import { ViewingRequestModal } from '@/app/components/property/ViewingRequestModal';
 import { Loader } from '@/app/components/animations';
-import type { Property } from '@/types';
+import { PropertyReviewCard } from '@/app/components/reviews/PropertyReviewCard';
+import type { Property, PropertyReview } from '@/types';
 import ImageViewing from 'react-native-image-viewing';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function PropertyDetails() {
-  const { t } = useTranslation(['common', 'property', 'propertyDetails']);
+  const { t } = useTranslation(['common', 'property', 'propertyDetails', 'viewings', 'reviews']);
   const { id } = useLocalSearchParams();
   const { user } = useAuth();
   const { language } = useLanguage();
@@ -26,8 +28,10 @@ export default function PropertyDetails() {
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
   const [showRentRequestModal, setShowRentRequestModal] = useState(false);
+  const [showViewingRequestModal, setShowViewingRequestModal] = useState(false);
   const [isImageViewerVisible, setImageViewerVisible] = useState(false);
   const [imageViewerIndex, setImageViewerIndex] = useState(0);
+  const [propertyReviews, setPropertyReviews] = useState<PropertyReview[]>([]);
 
   useEffect(() => {
     async function fetchProperty() {
@@ -42,6 +46,10 @@ export default function PropertyDetails() {
           const savedProperties = await mockApi.getSavedProperties(user.id);
           setIsSaved(savedProperties.some((p) => p.id === propertyData.id));
         }
+        
+        // Fetch property reviews
+        const reviews = await mockApi.getPropertyReviews(id as string);
+        setPropertyReviews(reviews);
       } catch (error) {
         console.error('Error fetching property:', error);
         Alert.alert(t('error', { ns: 'common' }), t('propertyNotFound', { ns: 'propertyDetails' }));
@@ -106,6 +114,27 @@ export default function PropertyDetails() {
     setShowRentRequestModal(true);
   };
 
+  const handleRequestViewing = () => {
+    if (!user) {
+      Alert.alert(t('notice', { ns: 'common' }), t('loginToViewProperty', { ns: 'viewings' }), [
+        { text: t('cancel', { ns: 'common' }) },
+        { text: t('login', { ns: 'common' }), onPress: () => router.push('/login') },
+      ]);
+      return;
+    }
+
+    // Check if property is available
+    if (property?.status !== 'available') {
+      Alert.alert(
+        t('notice', { ns: 'common' }),
+        t('propertyNotAvailable', { ns: 'propertyDetails' }),
+      );
+      return;
+    }
+
+    setShowViewingRequestModal(true);
+  };
+
   const handleSubmitRentRequest = async (months: number) => {
     setShowRentRequestModal(false);
 
@@ -140,6 +169,46 @@ export default function PropertyDetails() {
         t('errorSendingRequest', { ns: 'propertyDetails' }),
       );
     }
+  };
+
+  const handleSubmitViewingRequest = async (dates: string[], notes: string) => {
+    setShowViewingRequestModal(false);
+
+    try {
+      // In a real implementation, this would send the request to the backend
+      // For now, we're just showing a success message
+      
+      // Mock API call to send viewing request
+      // TODO: Implement actual API call once backend is ready
+      // await mockApi.sendViewingRequest({
+      //   renterId: user?.id as string,
+      //   propertyId: property?.id as string,
+      //   landlordId: property?.ownerId as string,
+      //   preferredDates: dates,
+      //   notes: notes,
+      //   status: 'pending',
+      //   createdAt: new Date().toISOString(),
+      // });
+
+      Alert.alert(
+        t('success', { ns: 'common' }), 
+        t('viewingRequestSent', { ns: 'viewings' }),
+        [{ text: t('ok', { ns: 'common' }) }]
+      );
+    } catch (error) {
+      console.error('Error sending viewing request:', error);
+      Alert.alert(
+        t('error', { ns: 'common' }),
+        t('errorSendingViewingRequest', { ns: 'viewings' }),
+      );
+    }
+  };
+
+  // Calculate average rating from reviews
+  const getAverageRating = () => {
+    if (propertyReviews.length === 0) return 0;
+    const sum = propertyReviews.reduce((acc, review) => acc + review.overallRating, 0);
+    return (sum / propertyReviews.length).toFixed(1);
   };
 
   if (loading) {
@@ -219,6 +288,81 @@ export default function PropertyDetails() {
           </View>
         </View>
 
+        {/* Action Buttons */}
+        <View style={styles.actionButtonsContainer}>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.viewingButton]} 
+            onPress={handleRequestViewing}
+          >
+            <Ionicons name="calendar-outline" size={20} color="#FFFFFF" style={styles.actionButtonIcon} />
+            <Text style={styles.actionButtonText}>
+              {t('requestViewing', { ns: 'viewings' })}
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.rentButton]} 
+            onPress={handleSendRentRequest}
+          >
+            <Ionicons name="home-outline" size={20} color="#FFFFFF" style={styles.actionButtonIcon} />
+            <Text style={styles.actionButtonText}>
+              {t('rentNow', { ns: 'propertyDetails' })}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Reviews Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            <Ionicons name="star-outline" size={20} color="#F2994A" />{' '}
+            {t('reviews', { ns: 'reviews' })}
+          </Text>
+          
+          {propertyReviews.length > 0 ? (
+            <View>
+              <View style={styles.reviewsSummary}>
+                <View style={styles.ratingCircle}>
+                  <Text style={styles.averageRating}>{getAverageRating()}</Text>
+                </View>
+                <Text style={styles.reviewCount}>
+                  {propertyReviews.length} {propertyReviews.length === 1 
+                    ? t('review', { ns: 'reviews' }) 
+                    : t('reviews', { ns: 'reviews' })}
+                </Text>
+              </View>
+              
+              {/* Show first review only, with button to see more */}
+              <PropertyReviewCard
+                review={propertyReviews[0]}
+                isExpanded={false}
+              />
+              
+              {propertyReviews.length > 1 && (
+                <TouchableOpacity 
+                  style={styles.showAllReviewsButton}
+                  onPress={() => router.push({
+                    pathname: '/(renter-tabs)/property-reviews',
+                    params: { propertyId: property.id }
+                  })}
+                >
+                  <Text style={styles.showAllReviewsText}>
+                    {t('viewAllReviews', { ns: 'reviews' })} ({propertyReviews.length})
+                  </Text>
+                  <Ionicons 
+                    name={isRTL ? "chevron-back" : "chevron-forward"} 
+                    size={16} 
+                    color="#34568B" 
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+          ) : (
+            <View style={styles.noReviewsContainer}>
+              <Text style={styles.noReviewsText}>{t('noReviewsYet', { ns: 'reviews' })}</Text>
+            </View>
+          )}
+        </View>
+
         {/* Amenities Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
@@ -283,6 +427,14 @@ export default function PropertyDetails() {
         propertyPrice={property.price}
         propertyCurrency={property.currency}
         isRTL={isRTL}
+      />
+
+      <ViewingRequestModal
+        visible={showViewingRequestModal}
+        propertyId={property.id}
+        propertyTitle={property.title}
+        onClose={() => setShowViewingRequestModal(false)}
+        onSubmit={handleSubmitViewingRequest}
       />
 
       <ImageViewing
@@ -494,5 +646,90 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#34568B',
     fontWeight: '600',
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginBottom: 16,
+    marginTop: 4,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 14,
+    borderRadius: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: { elevation: 3 },
+    }),
+  },
+  viewingButton: {
+    backgroundColor: '#34568B',
+    marginRight: 8,
+  },
+  rentButton: {
+    backgroundColor: '#F2994A',
+  },
+  actionButtonIcon: {
+    marginRight: 6,
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  // New styles for reviews section
+  reviewsSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  ratingCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#F2994A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  averageRating: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+  reviewCount: {
+    fontSize: 16,
+    color: '#4F4F4F',
+  },
+  showAllReviewsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    paddingVertical: 8,
+    backgroundColor: '#F5F7FA',
+    borderRadius: 8,
+  },
+  showAllReviewsText: {
+    color: '#34568B',
+    fontSize: 14,
+    fontWeight: '500',
+    marginRight: 4,
+  },
+  noReviewsContainer: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  noReviewsText: {
+    fontSize: 14,
+    color: '#7F8FA4',
   },
 });

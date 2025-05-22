@@ -1,0 +1,17 @@
+{
+  "yourProperties": "عقاراتك",
+  "addNewProperty": "إضافة عقار جديد",
+  "viewings": "المعاينات",
+  "rented": "مؤجر",
+  "available": "متاح",
+  "edit": "تعديل",
+  "delete": "حذف",
+  "publishProperty": "نشر العقار",
+  "unpublishProperty": "إلغاء نشر العقار",
+  "viewProperty": "عرض العقار",
+  "manageViewings": "إدارة المعاينات",
+  "pendingViewings": "معاينات معلقة",
+  "allProperties": "جميع العقارات",
+  "rentedProperties": "العقارات المؤجرة",
+  "availableProperties": "العقارات المتاحة"
+} 

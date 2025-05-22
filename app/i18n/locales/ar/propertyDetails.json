@@ -138,5 +138,6 @@
   "errorRejectingRequest": "حدث خطأ أثناء رفض الطلب. يرجى المحاولة مرة أخرى.",
   "errorLoadingRequest": "حدث خطأ أثناء تحميل تفاصيل الطلب. يرجى المحاولة مرة أخرى.",
   "requestNotFound": "لم يتم العثور على طلب الإيجار",
-  "rejectRequestConfirm": "هل أنت متأكد من رفض طلب الإيجار هذا؟"
+  "rejectRequestConfirm": "هل أنت متأكد من رفض طلب الإيجار هذا؟",
+  "rentNow": "استأجر الآن"
 }

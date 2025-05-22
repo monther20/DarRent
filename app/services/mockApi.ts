@@ -7,6 +7,8 @@ import {
   User,
   MaintenanceRequest,
   RentRequest,
+  RenterReview,
+  PropertyReview,
 } from '../types';
 import {
   mockProperties,
@@ -68,6 +70,74 @@ export type Notification = {
 // Store for notifications
 const mockNotifications: Notification[] = [];
 
+// Example tenant data with review status
+const tenants: Tenant[] = [
+  {
+    id: 'tenant1',
+    fullName: 'Sarah Johnson',
+    avatar: '',
+    propertyId: 'prop1',
+    propertyName: 'Seaside Apartment',
+    leaseStart: '2023-01-01',
+    leaseEnd: '2023-12-31',
+    contactEmail: 'sarah@example.com',
+    contactPhone: '+1234567890',
+    status: 'active',
+    reviewStatus: 'unreviewed',
+  },
+  {
+    id: 'tenant2',
+    fullName: 'David Thompson',
+    avatar: '',
+    propertyId: 'prop2',
+    propertyName: 'Downtown Loft',
+    leaseStart: '2022-10-01',
+    leaseEnd: '2023-09-30',
+    contactEmail: 'david@example.com',
+    contactPhone: '+1987654321',
+    status: 'active',
+    reviewStatus: 'unreviewed',
+  },
+  {
+    id: 'tenant3',
+    fullName: 'Michael Carter',
+    avatar: '',
+    propertyId: 'prop3', 
+    propertyName: 'Garden Villa',
+    leaseStart: '2021-05-15',
+    leaseEnd: '2022-05-14',
+    contactEmail: 'michael@example.com',
+    contactPhone: '+1122334455',
+    status: 'former',
+    reviewStatus: 'reviewed',
+  }
+];
+
+const applications: Application[] = [
+  {
+    id: 'app1',
+    applicantId: 'user1',
+    applicantName: 'John Doe',
+    propertyId: 'prop1',
+    propertyName: 'Seaside Apartment',
+    applicationDate: '2023-09-15',
+    status: 'pending',
+  },
+  {
+    id: 'app2',
+    applicantId: 'user2',
+    applicantName: 'Jane Smith',
+    propertyId: 'prop2',
+    propertyName: 'Downtown Loft',
+    applicationDate: '2023-09-18',
+    status: 'pending',
+  }
+];
+
+// Review data store
+let reviews: RenterReview[] = [];
+let propertyReviews: PropertyReview[] = [];
+
 // Mock API Service
 class MockApiService {
   // Notifications methods
@@ -105,41 +175,15 @@ class MockApiService {
   }
 
   // Existing methods
-  async getTenants(status?: 'active' | 'pending' | 'past'): Promise<Tenant[]> {
-    await this.simulateDelay();
-    const tenants = mockUsers
-      .filter((user) => user.role === 'renter')
-      .map((user) => ({
-        id: user.id,
-        fullName: user.fullName,
-        avatar: user.profileImage || '/assets/images/avatar-placeholder.jpg',
-        propertyId: user.rentedProperties?.[0] || '',
-        propertyName: mockProperties.find((p) => p.id === user.rentedProperties?.[0])?.title || '',
-        leaseStart: '2024-01-01',
-        leaseEnd: '2024-12-31',
-        status: (user.rentedProperties?.length ? 'active' : 'pending') as
-          | 'active'
-          | 'pending'
-          | 'past',
-        rating: 4.8,
-      }));
-
-    if (status) {
-      return tenants.filter((tenant) => tenant.status === status);
+  async getTenants(status?: string): Promise<Tenant[]> {
+    if (status === 'active') {
+      return tenants.filter(t => t.status === 'active');
     }
     return tenants;
   }
 
   async getApplications(): Promise<Application[]> {
-    await this.simulateDelay();
-    return mockApplications.map((app) => ({
-      id: app.id,
-      applicantName: mockUsers.find((u) => u.id === app.renterId)?.fullName || '',
-      propertyId: app.propertyId,
-      propertyName: mockProperties.find((p) => p.id === app.propertyId)?.title || '',
-      applicationDate: app.createdAt,
-      status: app.status,
-    }));
+    return applications;
   }
 
   async getApplicationsDetailed() {
@@ -148,13 +192,13 @@ class MockApiService {
   }
 
   async getStats(): Promise<Stats> {
-    await this.simulateDelay();
     return {
-      activeLeases: mockUsers.filter(
-        (user) => user.role === 'renter' && user.rentedProperties?.length,
-      ).length,
-      expiringSoon: 1,
-      averageRating: 4.8,
+      activeLeases: tenants.filter(t => t.status === 'active').length,
+      expiringSoon: 2,
+      averageRating: 4.2,
+      occupancyRate: 85,
+      vacantUnits: 3,
+      totalIncome: 15000,
     };
   }
 
@@ -166,9 +210,37 @@ class MockApiService {
     return mockProperties;
   }
 
-  async getPropertyById(id: string): Promise<Property | undefined> {
-    await this.simulateDelay();
-    return mockProperties.find((property) => property.id === id);
+  async getPropertyById(id: string): Promise<Property> {
+    // This would normally fetch from API
+    return {
+      id,
+      ownerId: 'owner1',
+      title: 'Beautiful Apartment',
+      description: 'Spacious and modern apartment with great views.',
+      price: 1200,
+      currency: 'USD',
+      location: {
+        city: 'New York',
+        area: 'Manhattan',
+        address: '123 Main St',
+      },
+      features: {
+        size: 100,
+        bedrooms: 2,
+        bathrooms: 1,
+        furnished: true,
+        amenities: ['WiFi', 'Parking', 'Pool', 'Gym'],
+      },
+      images: [
+        'https://picsum.photos/800/600?random=1',
+        'https://picsum.photos/800/600?random=2',
+        'https://picsum.photos/800/600?random=3',
+      ],
+      status: 'available',
+      rules: ['No pets', 'No smoking'],
+      createdAt: '2023-01-01T00:00:00Z',
+      updatedAt: '2023-01-01T00:00:00Z',
+    };
   }
 
   async getLandlordProperties(landlordId: string): Promise<Property[]> {
@@ -391,6 +463,108 @@ class MockApiService {
     await this.simulateDelay();
     // Implementation would go here in a real app
     return null;
+  }
+
+  async saveProperty(userId: string, propertyId: string): Promise<boolean> {
+    console.log(`Property ${propertyId} saved by user ${userId}`);
+    return true;
+  }
+
+  async unsaveProperty(userId: string, propertyId: string): Promise<boolean> {
+    console.log(`Property ${propertyId} unsaved by user ${userId}`);
+    return true;
+  }
+
+  // New methods for renter review system
+  async submitRenterReview(review: Omit<RenterReview, 'id'>): Promise<RenterReview> {
+    const newReview: RenterReview = {
+      ...review,
+      id: `review-${Math.random().toString(36).substr(2, 9)}`,
+    };
+    
+    reviews.push(newReview);
+    
+    // Update tenant's review status
+    const tenant = tenants.find(t => t.id === review.renterId);
+    if (tenant) {
+      tenant.reviewStatus = 'reviewed';
+    }
+    
+    return newReview;
+  }
+  
+  async getRenterReviews(renterId: string): Promise<RenterReview[]> {
+    return reviews.filter(review => review.renterId === renterId);
+  }
+  
+  async submitReviewResponse(reviewId: string, responseText: string): Promise<RenterReview> {
+    const review = reviews.find(r => r.id === reviewId);
+    
+    if (!review) {
+      throw new Error('Review not found');
+    }
+    
+    review.response = {
+      text: responseText,
+      createdAt: new Date().toISOString(),
+    };
+    
+    return review;
+  }
+  
+  async getTenantEligibleForReview(landlordId: string): Promise<Tenant[]> {
+    const currentDate = new Date();
+    
+    return tenants.filter(tenant => {
+      const leaseEndDate = new Date(tenant.leaseEnd);
+      return leaseEndDate <= currentDate && tenant.reviewStatus === 'unreviewed';
+    });
+  }
+
+  // Property review system methods
+  async submitPropertyReview(review: Omit<PropertyReview, 'id'>): Promise<PropertyReview> {
+    const newReview: PropertyReview = {
+      ...review,
+      id: `p-review-${Math.random().toString(36).substr(2, 9)}`,
+    };
+    
+    propertyReviews.push(newReview);
+    
+    // Update property's review status if we were tracking it at the property level
+    // In a real implementation, you might want to update property metadata
+    
+    return newReview;
+  }
+  
+  async getPropertyReviews(propertyId: string): Promise<PropertyReview[]> {
+    return propertyReviews.filter(review => review.propertyId === propertyId);
+  }
+  
+  async submitPropertyReviewResponse(reviewId: string, responseText: string): Promise<PropertyReview> {
+    const review = propertyReviews.find(r => r.id === reviewId);
+    
+    if (!review) {
+      throw new Error('Property review not found');
+    }
+    
+    review.response = {
+      text: responseText,
+      createdAt: new Date().toISOString(),
+    };
+    
+    return review;
+  }
+  
+  async getPropertiesEligibleForReview(renterId: string): Promise<Property[]> {
+    const currentDate = new Date();
+    
+    // In a real implementation, this would check contracts with ended lease terms
+    // For now, we'll return mock properties that would be eligible
+    return mockProperties.filter(property => 
+      // Some logic to check if this renter has a completed contract for this property
+      // and hasn't already reviewed it
+      property.id.includes('prop')
+    );
   }
 
   private simulateDelay(): Promise<void> {

@@ -1,0 +1,17 @@
+{
+  "yourProperties": "Your Properties",
+  "addNewProperty": "Add New Property",
+  "viewings": "Viewings",
+  "rented": "Rented",
+  "available": "Available",
+  "edit": "Edit",
+  "delete": "Delete",
+  "publishProperty": "Publish Property",
+  "unpublishProperty": "Unpublish Property",
+  "viewProperty": "View Property",
+  "manageViewings": "Manage Viewings",
+  "pendingViewings": "Pending Viewings",
+  "allProperties": "All Properties",
+  "rentedProperties": "Rented Properties",
+  "availableProperties": "Available Properties"
+} 

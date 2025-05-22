@@ -8,8 +8,12 @@ import { InputField } from '@/components/InputField';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import * as Location from 'expo-location';
+import { VideoUpload } from '@/components/VideoUpload';
+import { useTranslation } from 'react-i18next';
+import { mockApi } from '../services/mockApi';
 
 const AddPropertyScreen: React.FC = () => {
+  const { t } = useTranslation();
   const [property, setProperty] = useState({
     title: '',
     description: '',
@@ -25,10 +29,13 @@ const AddPropertyScreen: React.FC = () => {
     location: '', // for backward compatibility, not used in new fields
     images: [] as string[],
     furnished: false,
+    videoUrl: '', // Added for storing video URL
+    requires_video: true, // Default to requiring video
   });
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locLoading, setLocLoading] = useState(false);
   const [locError, setLocError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Validation logic
   const isValid =
@@ -49,11 +56,17 @@ const AddPropertyScreen: React.FC = () => {
     !isNaN(Number(property.bathrooms)) &&
     Number(property.bathrooms) > 0 &&
     property.currency.trim().length > 0 &&
-    property.status.trim().length > 0;
+    property.status.trim().length > 0 &&
+    // Add video validation - either video not required or video provided
+    (!property.requires_video || property.videoUrl.trim().length > 0);
 
   const handleAddImage = () => {
     // TODO: Implement image picker
     console.log('Add image');
+  };
+
+  const handleVideoSelected = (uri: string) => {
+    setProperty({ ...property, videoUrl: uri });
   };
 
   const handleGetLocation = async () => {
@@ -62,7 +75,7 @@ const AddPropertyScreen: React.FC = () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setLocError('Permission to access location was denied');
+        setLocError(t('Permission to access location was denied'));
         setLocLoading(false);
         return;
       }
@@ -73,71 +86,124 @@ const AddPropertyScreen: React.FC = () => {
       });
       setLocLoading(false);
     } catch (e) {
-      setLocError('Could not get location');
+      setLocError(t('Could not get location'));
       setLocLoading(false);
     }
   };
 
-  const handleSubmit = () => {
-    // TODO: Implement property submission
-    console.log('Submit property:', property);
-    router.back();
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      // In real implementation, we would upload the video to a storage service
+      // and get a permanent URL to save with the property
+      
+      // Create property data object
+      const propertyData = {
+        ...property,
+        price: parseFloat(property.price),
+        bedrooms: parseInt(property.bedrooms),
+        bathrooms: parseInt(property.bathrooms),
+        areaSize: parseFloat(property.areaSize),
+        coordinates: coords ? [coords.latitude, coords.longitude] : undefined,
+      };
+      
+      // Mock API call to create property
+      // This would be replaced with a real API call in production
+      await mockApi.createProperty(propertyData);
+      
+      // Navigate back after successful submission
+      router.back();
+    } catch (error) {
+      console.error('Error creating property:', error);
+      // Would show an error toast/alert here in a real implementation
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFurnishedToggle = (value: boolean) => {
     setProperty({ ...property, furnished: value });
   };
+  
+  const handleVideoRequiredToggle = (value: boolean) => {
+    setProperty({ ...property, requires_video: value });
+  };
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="Add New Property" showAddButton={false} />
+      <ScreenHeader title={t('Add New Property')} showAddButton={false} />
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
         <View style={styles.formCard}>
           {/* Image Upload Section */}
           <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Property Images</ThemedText>
+            <ThemedText style={styles.sectionTitle}>{t('Property Images')}</ThemedText>
             <View style={styles.imageUploadContainer}>
               <TouchableOpacity style={styles.imageUploadButton} onPress={handleAddImage}>
                 <MaterialIcons name="add-a-photo" size={32} color="#34568B" />
-                <ThemedText style={styles.imageUploadText}>Add Images</ThemedText>
+                <ThemedText style={styles.imageUploadText}>{t('Add Images')}</ThemedText>
               </TouchableOpacity>
             </View>
+          </View>
+          
+          {/* Video Upload Section - New */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={styles.sectionTitle}>{t('Property Video')}</ThemedText>
+              <View style={styles.videoRequiredToggle}>
+                <ThemedText style={styles.toggleLabel}>{t('Required')}</ThemedText>
+                <Switch
+                  value={property.requires_video}
+                  onValueChange={handleVideoRequiredToggle}
+                  thumbColor={property.requires_video ? '#34568B' : '#ccc'}
+                  trackColor={{ false: '#ccc', true: '#34568B55' }}
+                />
+              </View>
+            </View>
+            <VideoUpload
+              onVideoSelected={handleVideoSelected}
+              videoUri={property.videoUrl}
+              verificationStatus={property.videoUrl ? 'pending' : null}
+            />
+            <ThemedText style={styles.videoNote}>
+              {t('A verified property video can help attract more renters and increases trust.')}
+            </ThemedText>
           </View>
 
           {/* Basic Information */}
           <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Basic Information</ThemedText>
+            <ThemedText style={styles.sectionTitle}>{t('Basic Information')}</ThemedText>
             <InputField
-              label="Property Title"
+              label={t('Property Title')}
               value={property.title}
               onChangeText={(text) => setProperty({ ...property, title: text })}
-              placeholder="Enter property title"
+              placeholder={t('Enter property title')}
               style={styles.inputFull}
             />
             <InputField
-              label="Description"
+              label={t('Description')}
               value={property.description}
               onChangeText={(text) => setProperty({ ...property, description: text })}
-              placeholder="Enter property description"
+              placeholder={t('Enter property description')}
               style={[styles.inputFull, styles.multilineInput]}
+              multiline={true}
             />
           </View>
 
           {/* Location Information */}
           <View style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>Location</ThemedText>
+            <ThemedText style={styles.sectionTitle}>{t('Location')}</ThemedText>
             <InputField
-              label="City"
+              label={t('City')}
               value={property.city}
               onChangeText={(text) => setProperty({ ...property, city: text })}
-              placeholder="Enter city"
+              placeholder={t('Enter city')}
               style={styles.inputFull}
             />
             <InputField
-              label="Area / Neighborhood"
+              label={t('Area / Neighborhood')}
               value={property.area}
               onChangeText={(text) => setProperty({ ...property, area: text })}
-              placeholder="Enter area/neighborhood"
+              placeholder={t('Enter area/neighborhood')}
               style={styles.inputFull}
             />
             <TouchableOpacity
@@ -147,12 +213,12 @@ const AddPropertyScreen: React.FC = () => {
             >
               <MaterialIcons name="my-location" size={22} color="#fff" style={{ marginRight: 8 }} />
               <ThemedText style={styles.locationButtonText}>
-                {locLoading ? 'Getting Location...' : 'Use My Current Location'}
+                {locLoading ? t('Getting Location...') : t('Use My Current Location')}
               </ThemedText>
             </TouchableOpacity>
             {coords && (
               <ThemedText style={styles.coordsText}>
-                Location set: {coords.latitude.toFixed(5)}, {coords.longitude.toFixed(5)}
+                {t('Location set')}: {coords.latitude.toFixed(5)}, {coords.longitude.toFixed(5)}
               </ThemedText>
             )}
             {locError && <ThemedText style={styles.coordsError}>{locError}</ThemedText>}
@@ -160,19 +226,19 @@ const AddPropertyScreen: React.FC = () => {
 
           {/* Property Details */}
           <View style={styles.sectionCard}>
-            <ThemedText style={styles.sectionTitle}>Property Details</ThemedText>
+            <ThemedText style={styles.sectionTitle}>{t('Property Details')}</ThemedText>
             <View style={styles.fieldGroup}>
               <InputField
-                label="Price"
+                label={t('Price')}
                 value={property.price}
                 onChangeText={(text) => setProperty({ ...property, price: text })}
-                placeholder="Enter price"
+                placeholder={t('Enter price')}
                 keyboardType="numeric"
                 style={styles.inputFull}
               />
             </View>
             <View style={styles.fieldGroup}>
-              <ThemedText style={styles.inputLabel}>Currency</ThemedText>
+              <ThemedText style={styles.inputLabel}>{t('Currency')}</ThemedText>
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={property.currency}
@@ -188,36 +254,36 @@ const AddPropertyScreen: React.FC = () => {
             </View>
             <View style={styles.fieldGroup}>
               <InputField
-                label="Area (m²)"
+                label={t('Area (m²)')}
                 value={property.areaSize}
                 onChangeText={(text) => setProperty({ ...property, areaSize: text })}
-                placeholder="Enter area"
+                placeholder={t('Enter area')}
                 keyboardType="numeric"
                 style={styles.inputFull}
               />
             </View>
             <View style={styles.fieldGroup}>
               <InputField
-                label="Bedrooms"
+                label={t('Bedrooms')}
                 value={property.bedrooms}
                 onChangeText={(text) => setProperty({ ...property, bedrooms: text })}
-                placeholder="Enter number"
+                placeholder={t('Enter number')}
                 keyboardType="numeric"
                 style={styles.inputFull}
               />
             </View>
             <View style={styles.fieldGroup}>
               <InputField
-                label="Bathrooms"
+                label={t('Bathrooms')}
                 value={property.bathrooms}
                 onChangeText={(text) => setProperty({ ...property, bathrooms: text })}
-                placeholder="Enter number"
+                placeholder={t('Enter number')}
                 keyboardType="numeric"
                 style={styles.inputFull}
               />
             </View>
             <View style={styles.fieldGroup}>
-              <ThemedText style={styles.inputLabel}>Status</ThemedText>
+              <ThemedText style={styles.inputLabel}>{t('Status')}</ThemedText>
               <View style={styles.pickerWrapper}>
                 <Picker
                   selectedValue={property.status}
@@ -225,15 +291,15 @@ const AddPropertyScreen: React.FC = () => {
                   style={styles.picker}
                   dropdownIconColor="#34568B"
                 >
-                  <Picker.Item label="Available" value="available" />
-                  <Picker.Item label="Rented" value="rented" />
-                  <Picker.Item label="Pending" value="pending" />
+                  <Picker.Item label={t('Available')} value="available" />
+                  <Picker.Item label={t('Rented')} value="rented" />
+                  <Picker.Item label={t('Pending')} value="pending" />
                 </Picker>
               </View>
             </View>
             <View style={styles.fieldGroup}>
               <View style={styles.furnishedRow}>
-                <ThemedText style={styles.inputLabel}>Furnished Apartment?</ThemedText>
+                <ThemedText style={styles.inputLabel}>{t('Furnished Apartment?')}</ThemedText>
                 <Switch
                   value={property.furnished}
                   onValueChange={handleFurnishedToggle}
@@ -244,10 +310,10 @@ const AddPropertyScreen: React.FC = () => {
             </View>
             <View style={styles.fieldGroup}>
               <InputField
-                label="Amenities (comma separated)"
+                label={t('Amenities (comma separated)')}
                 value={property.amenities}
                 onChangeText={(text) => setProperty({ ...property, amenities: text })}
-                placeholder="e.g. Parking, Balcony, Air Conditioning"
+                placeholder={t('e.g. Parking, Balcony, Air Conditioning')}
                 style={[styles.inputFull, property.furnished && { opacity: 0.5 }]}
                 editable={!property.furnished}
               />
@@ -256,10 +322,10 @@ const AddPropertyScreen: React.FC = () => {
 
           {/* Submit Button */}
           <ThemedButton
-            title="Add Property"
+            title={isSubmitting ? t('Creating...') : t('Add Property')}
             onPress={handleSubmit}
             style={[styles.submitButton, !isValid && styles.disabledButton]}
-            disabled={!isValid}
+            disabled={!isValid || isSubmitting}
           />
         </View>
       </ScrollView>
@@ -296,11 +362,26 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 28,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
     color: '#34568B',
     marginBottom: 14,
+  },
+  videoRequiredToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  toggleLabel: {
+    marginRight: 8,
+    fontSize: 14,
+    color: '#4B5563',
   },
   imageUploadContainer: {
     backgroundColor: '#F5F6F8',
@@ -439,6 +520,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 8,
+  },
+  videoNote: {
+    marginTop: 8,
+    fontSize: 12,
+    color: '#6B7280',
+    fontStyle: 'italic',
   },
 });
 
