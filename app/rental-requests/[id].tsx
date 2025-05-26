@@ -1,352 +1,167 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-  Alert,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, Button } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { mockApi } from '../services/mockApi';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { Loader, SuccessAnimation } from '@/app/components/animations';
+import type { RentRequest, Property } from '../types';
+import { useAuth } from '../contexts/AuthContext'; // Adjusted path
+import { useLanguage } from '../../contexts/LanguageContext'; // Corrected path
 
-export default function RentRequestDetails() {
-  const { t } = useTranslation(['common', 'rental', 'property', 'propertyDetails']);
+export default function RentRequestDetailsScreen() {
+  const { t } = useTranslation(['propertyDetails', 'common']);
   const { id } = useLocalSearchParams();
   const { user } = useAuth();
   const { language } = useLanguage();
   const isRTL = language === 'ar';
 
-  const [rentRequest, setRentRequest] = useState<any>(null);
-  const [property, setProperty] = useState<any>(null);
-  const [renter, setRenter] = useState<any>(null);
+  const [request, setRequest] = useState<RentRequest | null>(null);
+  const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
-  const [processingAction, setProcessingAction] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    async function fetchRequestData() {
-      setLoading(true);
-      try {
-        // Fetch rent request details
-        const request = await mockApi.getRentRequestById(id as string);
-        setRentRequest(request);
-
-        // Fetch property details
-        const propertyData = await mockApi.getPropertyById(request.propertyId);
-        setProperty(propertyData);
-
-        // Fetch renter details
-        const renterData = await mockApi.getUserById(request.renterId);
-        setRenter(renterData);
-      } catch (error) {
-        console.error('Error fetching request details:', error);
-        Alert.alert(
-          t('error', { ns: 'common' }),
-          t('errorLoadingRequest', { ns: 'propertyDetails' }),
-        );
-      } finally {
-        setLoading(false);
-      }
+    if (id && typeof id === 'string') {
+      fetchRequestDetails(id);
+    } else {
+      setError(t('requestNotFound', { ns: 'propertyDetails' }));
+      setLoading(false);
     }
-
-    fetchRequestData();
   }, [id, t]);
 
-  const handleAcceptRequest = async () => {
-    setProcessingAction(true);
+  const fetchRequestDetails = async (requestId: string) => {
+    setLoading(true);
+    setError(null);
     try {
-      // Check if contract already exists
-      const existingContract = await mockApi.getContractByProperty(property.id, renter.id);
-
-      if (existingContract) {
-        // Send existing contract
-        await mockApi.updateRentRequest(rentRequest.id, {
-          ...rentRequest,
-          status: 'accepted',
-          contractId: existingContract.id,
-          responseDate: new Date().toISOString(),
-        });
-
-        setSuccessMessage(t('requestAccepted', { ns: 'propertyDetails' }));
-        setShowSuccess(true);
-
-        // Navigate back after showing success animation
-        setTimeout(() => {
-          router.back();
-        }, 2500);
+      const rentRequestData = await mockApi.getRentRequestById(requestId);
+      if (rentRequestData) {
+        setRequest(rentRequestData);
+        const propertyData = await mockApi.getPropertyById(rentRequestData.propertyId);
+        setProperty(propertyData);
       } else {
-        // Redirect to create contract screen
-        await mockApi.updateRentRequest(rentRequest.id, {
-          ...rentRequest,
-          status: 'accepted',
-          responseDate: new Date().toISOString(),
-        });
-
-        router.push({
-          pathname: `/contracts/create`,
-          params: {
-            propertyId: property.id,
-            renterId: renter.id,
-            requestId: rentRequest.id,
-            months: rentRequest.months,
-          },
-        });
+        setError(t('requestNotFound', { ns: 'propertyDetails' }));
       }
-    } catch (error) {
-      console.error('Error accepting request:', error);
-      Alert.alert(
-        t('error', { ns: 'common' }),
-        t('errorAcceptingRequest', { ns: 'propertyDetails' }),
-      );
-      setProcessingAction(false);
+    } catch (err) {
+      console.error('Error fetching rent request details:', err);
+      setError(t('errorLoadingRequest', { ns: 'propertyDetails' }));
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleRejectRequest = async () => {
-    Alert.alert(
-      t('confirm', { ns: 'common' }),
-      t('rejectRequestConfirm', { ns: 'propertyDetails' }),
-      [
-        { text: t('cancel', { ns: 'common' }) },
-        {
-          text: t('confirm', { ns: 'common' }),
-          onPress: async () => {
-            setProcessingAction(true);
-            try {
-              await mockApi.updateRentRequest(rentRequest.id, {
-                ...rentRequest,
-                status: 'rejected',
-                responseDate: new Date().toISOString(),
-              });
+  const handleUpdateRequestStatus = async (newStatus: 'accepted' | 'rejected') => {
+    if (!id || typeof id !== 'string' || !request) return;
 
-              setSuccessMessage(t('requestRejected', { ns: 'propertyDetails' }));
-              setShowSuccess(true);
-
-              // Navigate back after showing success animation
-              setTimeout(() => {
-                router.back();
-              }, 2500);
-            } catch (error) {
-              console.error('Error rejecting request:', error);
-              Alert.alert(
-                t('error', { ns: 'common' }),
-                t('errorRejectingRequest', { ns: 'propertyDetails' }),
-              );
-              setProcessingAction(false);
-            }
-          },
-        },
-      ],
-    );
+    setIsSubmitting(true);
+    try {
+      await mockApi.updateRentRequestStatus(id, newStatus);
+      Alert.alert(
+        t('common:success'),
+        t('propertyDetails:requestStatusUpdated', { status: t(`propertyDetails:status.${newStatus}`) })
+      );
+      fetchRequestDetails(id); // Refetch to update UI
+    } catch (err) {
+      console.error('Error updating rent request status:', err);
+      Alert.alert(t('common:error'), t('propertyDetails:errorUpdatingStatus'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <Loader size={120} />
-      </SafeAreaView>
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#34568B" />
+      </View>
     );
   }
 
-  if (showSuccess) {
+  if (error) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <SuccessAnimation message={successMessage} size={150} />
-      </SafeAreaView>
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
     );
   }
 
-  if (!rentRequest || !property || !renter) {
+  if (!request || !property) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>{t('requestNotFound', { ns: 'propertyDetails' })}</Text>
-      </SafeAreaView>
+      <View style={styles.centered}>
+        <Text>{t('requestNotFound', { ns: 'propertyDetails' })}</Text>
+      </View>
     );
   }
 
-  // Format date and time
-  const requestDate = new Date(rentRequest.requestDate);
-  const formattedDate = requestDate.toLocaleDateString(language, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-  const formattedTime = requestDate.toLocaleTimeString(language, {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
-  const totalAmount = rentRequest.months * property.price;
+  const detailItem = (label: string, value?: string | number) => (
+    <View style={[styles.detailItem, isRTL && styles.detailItemRTL]}>
+      <Text style={styles.detailLabel}>{label}:</Text>
+      <Text style={styles.detailValue}>{value || '-'}</Text>
+    </View>
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        style={[styles.scrollView, isRTL && styles.rtlContainer]}
-        contentContainerStyle={styles.contentContainer}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={[styles.backButton, isRTL ? styles.backButtonRTL : styles.backButtonLTR]}
-            onPress={() => router.back()}
-          >
-            <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>
-            {t('rentRequestDetails', { ns: 'propertyDetails' })}
-          </Text>
-        </View>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <Text style={[styles.title, isRTL && styles.titleRTL]}>
+        {t('rentRequestDetails', { ns: 'propertyDetails' })}
+      </Text>
 
-        {/* Request Status */}
-        <View style={styles.statusContainer}>
-          <View style={[styles.statusBadge, getStatusBadgeStyle(rentRequest.status)]}>
-            <Text style={styles.statusText}>
-              {t(`status.${rentRequest.status}`, { ns: 'propertyDetails' })}
-            </Text>
-          </View>
-          <View style={styles.dateContainer}>
-            <Text style={styles.dateLabel}>{t('requested', { ns: 'propertyDetails' })}</Text>
-            <Text style={styles.dateValue}>
-              {formattedDate} {formattedTime}
-            </Text>
-          </View>
-        </View>
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, isRTL && styles.sectionTitleRTL]}>
+          {t('propertyInfo', { ns: 'propertyDetails' })}
+        </Text>
+        {detailItem(t('property', { ns: 'propertyDetails' }), property.title)}
+        {detailItem(t('location', { ns: 'propertyDetails' }), `${property.location.area}, ${property.location.city}`)}
+        {detailItem(t('price', { ns: 'propertyDetails' }), `${property.price} ${property.currency}/${t('month', { ns: 'common' })}`)}
+      </View>
 
-        {/* Property Info */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('propertyInfo', { ns: 'propertyDetails' })}</Text>
-          <View style={styles.propertyCard}>
-            <View style={styles.propertyHeader}>
-              <Text style={styles.propertyTitle}>{property.title}</Text>
-              <Text style={styles.propertyPrice}>
-                {property.price} {property.currency}/{t('month', { ns: 'common' })}
-              </Text>
-            </View>
-            <Text style={styles.propertyLocation}>
-              {property.location.area}, {property.location.city}
-            </Text>
-            <View style={styles.propertyFeatures}>
-              <View style={styles.featureItem}>
-                <Ionicons name="bed-outline" size={18} color="#666" />
-                <Text style={styles.featureText}>
-                  {property.features.bedrooms} {t('bed', { ns: 'property' })}
-                </Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Ionicons name="water-outline" size={18} color="#666" />
-                <Text style={styles.featureText}>
-                  {property.features.bathrooms} {t('bath', { ns: 'property' })}
-                </Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Ionicons name="expand-outline" size={18} color="#666" />
-                <Text style={styles.featureText}>{property.features.size} m²</Text>
-              </View>
-            </View>
-          </View>
-        </View>
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, isRTL && styles.sectionTitleRTL]}>
+          {t('requestDetails', { ns: 'propertyDetails' })}
+        </Text>
+        {detailItem(t('requested', { ns: 'propertyDetails' }), new Date(request.requestDate).toLocaleDateString())}
+        {detailItem(t('rentalPeriod', { ns: 'propertyDetails' }), `${request.months} ${t('months', { ns: 'propertyDetails' })}`)}
+        {detailItem(t('status.title', { ns: 'common', defaultValue: 'Status' }), t(`status.${request.status}`, { ns: 'propertyDetails', defaultValue: request.status }))}
+        {request.message && detailItem(t('message', { ns: 'propertyDetails.rentRequestForm', defaultValue: 'Message' }), request.message)}
+        {request.responseDate && detailItem(t('responseDate', { ns: 'propertyDetails', defaultValue: 'Response Date' }), new Date(request.responseDate).toLocaleDateString())}
+      </View>
 
-        {/* Renter Info */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('renterInfo', { ns: 'propertyDetails' })}</Text>
-          <View style={styles.renterCard}>
-            <View style={styles.renterHeader}>
-              <Ionicons name="person-circle-outline" size={40} color="#34568B" />
-              <View style={styles.renterDetails}>
-                <Text style={styles.renterName}>{renter.fullName}</Text>
-                <View style={styles.ratingContainer}>
-                  <Ionicons name="star" size={16} color="#FFC107" />
-                  <Text style={styles.ratingText}>{renter.rating || '4.5'}</Text>
-                </View>
-              </View>
-            </View>
-            <View style={styles.renterContact}>
-              <View style={styles.contactItem}>
-                <Ionicons name="mail-outline" size={18} color="#666" />
-                <Text style={styles.contactText}>{renter.email}</Text>
-              </View>
-              <View style={styles.contactItem}>
-                <Ionicons name="call-outline" size={18} color="#666" />
-                <Text style={styles.contactText}>{renter.phoneNumber}</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Request Details */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('requestDetails', { ns: 'propertyDetails' })}</Text>
-          <View style={styles.detailsCard}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>{t('rentalPeriod', { ns: 'propertyDetails' })}</Text>
-              <Text style={styles.detailValue}>
-                {rentRequest.months} {t('months', { ns: 'propertyDetails' })}
-              </Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>{t('monthlyRent', { ns: 'propertyDetails' })}</Text>
-              <Text style={styles.detailValue}>
-                {property.price} {property.currency}
-              </Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.detailRow}>
-              <Text style={styles.totalLabel}>{t('totalAmount', { ns: 'propertyDetails' })}</Text>
-              <Text style={styles.totalValue}>
-                {totalAmount} {property.currency}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-
-      {/* Actions */}
-      {rentRequest.status === 'pending' && (
+      {/* Action Buttons */}
+      {user && request && (
         <View style={styles.actionsContainer}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.rejectButton]}
-            onPress={handleRejectRequest}
-            disabled={processingAction}
-          >
-            <Text style={styles.rejectButtonText}>{t('reject', { ns: 'common' })}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.acceptButton]}
-            onPress={handleAcceptRequest}
-            disabled={processingAction}
-          >
-            {processingAction ? (
-              <Loader size={24} />
-            ) : (
-              <Text style={styles.acceptButtonText}>{t('accept', { ns: 'common' })}</Text>
-            )}
-          </TouchableOpacity>
+          {user.role === 'landlord' && request.status === 'pending' && (
+            <>
+              <View style={styles.buttonWrapper}>
+                <Button
+                  title={t('propertyDetails:actions.accept', 'Accept')}
+                  onPress={() => handleUpdateRequestStatus('accepted')}
+                  disabled={isSubmitting}
+                  color="#4CAF50"
+                />
+              </View>
+              <View style={styles.buttonWrapper}>
+                <Button
+                  title={t('propertyDetails:actions.reject', 'Reject')}
+                  onPress={() => handleUpdateRequestStatus('rejected')}
+                  disabled={isSubmitting}
+                  color="#F44336"
+                />
+              </View>
+            </>
+          )}
+          {user.role === 'renter' && request.status === 'pending' && (
+            <View style={styles.buttonWrapperFull}>
+              <Button
+                title={t('propertyDetails:actions.cancelRequest', 'Cancel Request')}
+                onPress={() => handleUpdateRequestStatus('rejected')} // Renters cancelling effectively "rejects" their own request
+                disabled={isSubmitting}
+                color="#FF9800"
+              />
+            </View>
+          )}
         </View>
       )}
-    </SafeAreaView>
+    </ScrollView>
   );
-}
-
-// Function to get badge style based on status
-function getStatusBadgeStyle(status: string) {
-  switch (status) {
-    case 'pending':
-      return styles.statusPending;
-    case 'accepted':
-      return styles.statusAccepted;
-    case 'rejected':
-      return styles.statusRejected;
-    default:
-      return styles.statusPending;
-  }
 }
 
 const styles = StyleSheet.create({
@@ -354,271 +169,89 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F7FA',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5F7FA',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  rtlContainer: {
-    direction: 'rtl',
-  },
   contentContainer: {
-    paddingBottom: 100,
+    padding: 20,
   },
-  errorText: {
-    fontSize: 16,
-    color: '#888',
-    textAlign: 'center',
-    marginTop: 50,
-  },
-  header: {
-    backgroundColor: '#34568B',
-    paddingTop: 16,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    position: 'relative',
-  },
-  backButton: {
-    position: 'absolute',
-    top: 16,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    alignItems: 'center',
+  centered: {
+    flex: 1,
     justifyContent: 'center',
-    zIndex: 1,
+    alignItems: 'center',
+    padding: 20,
   },
-  backButtonLTR: {
-    left: 16,
-  },
-  backButtonRTL: {
-    right: 16,
-  },
-  headerTitle: {
-    fontSize: 18,
+  title: {
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#34568B',
+    marginBottom: 20,
+    textAlign: 'left',
   },
-  statusContainer: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  statusBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginBottom: 8,
-  },
-  statusPending: {
-    backgroundColor: '#FFC107',
-  },
-  statusAccepted: {
-    backgroundColor: '#4CAF50',
-  },
-  statusRejected: {
-    backgroundColor: '#F44336',
-  },
-  statusText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  dateContainer: {
-    marginTop: 4,
-  },
-  dateLabel: {
-    fontSize: 14,
-    color: '#888',
-  },
-  dateValue: {
-    fontSize: 14,
-    color: '#333',
+  titleRTL: {
+    textAlign: 'right',
   },
   section: {
-    marginTop: 16,
-    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#34568B',
+    fontWeight: '600',
+    color: '#333333',
+    marginBottom: 15,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+    textAlign: 'left',
   },
-  propertyCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+  sectionTitleRTL: {
+    textAlign: 'right',
   },
-  propertyHeader: {
+  detailItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
+    paddingVertical: 8,
   },
-  propertyTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    flex: 1,
-    marginRight: 8,
-  },
-  propertyPrice: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#34568B',
-  },
-  propertyLocation: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
-  },
-  propertyFeatures: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  featureText: {
-    marginLeft: 4,
-    fontSize: 13,
-    color: '#666',
-  },
-  renterCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  renterHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  renterDetails: {
-    marginLeft: 12,
-  },
-  renterName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingText: {
-    marginLeft: 4,
-    fontSize: 14,
-    color: '#666',
-  },
-  renterContact: {
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 12,
-  },
-  contactItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  contactText: {
-    marginLeft: 8,
-    fontSize: 14,
-    color: '#666',
-  },
-  detailsCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
+  detailItemRTL: {
+    flexDirection: 'row-reverse',
   },
   detailLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 16,
+    color: '#555555',
+    fontWeight: '500',
   },
   detailValue: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#eee',
-    marginVertical: 12,
-  },
-  totalLabel: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    color: '#333333',
+    textAlign: 'right',
   },
-  totalValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#34568B',
+  errorText: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
   },
   actionsContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  actionButton: {
-    flex: 1,
+    marginTop: 20,
+    paddingHorizontal: 10, // Match section padding
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  rejectButton: {
-    backgroundColor: '#f0f0f0',
-    marginRight: 8,
+  buttonWrapper: {
+    marginVertical: 5,
   },
-  rejectButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#F44336',
-  },
-  acceptButton: {
-    backgroundColor: '#34568B',
-  },
-  acceptButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
+  buttonWrapperFull: {
+    marginVertical: 5,
   },
 });

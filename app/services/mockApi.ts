@@ -1,15 +1,56 @@
 import {
   Tenant,
   Property,
-  Transaction,
   Application,
   Stats,
   User,
-  MaintenanceRequest,
   RentRequest,
   RenterReview,
   PropertyReview,
+  TimeSlot, // Added import
+  ViewingRequest, // Added import
+  PropertyStatus,
 } from '../types';
+
+// Define type for Admin User Management
+export interface AdminUserDisplay {
+  id: string;
+  name: string;
+  email: string;
+  role: 'Admin' | 'User' | 'Landlord' | 'Renter'; // Expanded roles for flexibility
+  status: 'active' | 'suspended' | 'pending_verification';
+}
+
+// Define Transaction and MaintenanceRequest types locally
+export interface Transaction {
+  id: string;
+  propertyId: string;
+  renterId: string;
+  landlordId: string;
+  amount: number;
+  currency: string;
+  type: 'rent' | 'deposit' | 'utility';
+  status: 'paid' | 'pending' | 'overdue';
+  dueDate: string;
+  paidDate?: string;
+  description: string;
+}
+
+export interface MaintenanceRequest {
+  id: string;
+  propertyId: string;
+  renterId: string;
+  title: string;
+  description: string;
+  status: 'pending' | 'scheduled' | 'completed' | 'cancelled';
+  createdAt: string;
+  scheduledDate?: string;
+  completedDate?: string;
+}
+
+// ViewingRequest and TimeSlot types are now imported from ../types
+
+import { supabase } from '../../lib/supabase'; // Import Supabase client
 import {
   mockProperties,
   mockUsers,
@@ -27,9 +68,9 @@ const mockRentRequests: RentRequest[] = [
     requestDate: new Date().toISOString(),
     status: 'pending',
     months: 6,
-    startDate: new Date().toISOString(),
+    // startDate: new Date().toISOString(), // Removed based on TS error
     message: 'I am interested in renting this property.',
-    responseDate: null,
+    responseDate: undefined, // Changed from null based on TS error
   },
   {
     id: 'rent2',
@@ -38,10 +79,10 @@ const mockRentRequests: RentRequest[] = [
     requestDate: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
     status: 'accepted',
     months: 12,
-    startDate: new Date().toISOString(),
     message: 'Looking for a long term rental.',
+    // startDate: new Date().toISOString(), // Removed based on TS error
     responseDate: new Date(Date.now() - 43200000).toISOString(), // 12 hours ago
-    contractId: 'contract2',
+    // contractId: 'contract2', // Removed based on TS error
   },
   {
     id: 'rent3',
@@ -50,8 +91,8 @@ const mockRentRequests: RentRequest[] = [
     requestDate: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
     status: 'rejected',
     months: 3,
-    startDate: new Date().toISOString(),
     message: 'Short term rental needed.',
+    // startDate: new Date().toISOString(), // Removed based on TS error
     responseDate: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
   },
 ];
@@ -60,7 +101,16 @@ const mockRentRequests: RentRequest[] = [
 export type Notification = {
   id: string;
   userId: string;
-  type: 'rent_accepted' | 'rent_rejected' | 'maintenance_update' | 'general';
+  type:
+    | 'rent_accepted'
+    | 'rent_rejected'
+    | 'maintenance_update'
+    | 'general'
+    | 'viewing_request_created'
+    | 'viewing_request_confirmed'
+    | 'viewing_request_rejected'
+    | 'viewing_request_cancelled'
+    | 'viewing_request_updated';
   message: string;
   data?: any;
   read: boolean;
@@ -69,6 +119,46 @@ export type Notification = {
 
 // Store for notifications
 const mockNotifications: Notification[] = [];
+
+// Mock data for viewing requests and time slots
+const mockAvailableTimeSlots: TimeSlot[] = [
+  { id: 'slot1', startTime: '2024-07-01T09:00:00Z', endTime: '2024-07-01T10:00:00Z', isBooked: false },
+  { id: 'slot2', startTime: '2024-07-01T10:00:00Z', endTime: '2024-07-01T11:00:00Z', isBooked: false },
+  { id: 'slot3', startTime: '2024-07-01T11:00:00Z', endTime: '2024-07-01T12:00:00Z', isBooked: true }, // Example of a booked slot
+  { id: 'slot4', startTime: '2024-07-01T14:00:00Z', endTime: '2024-07-01T15:00:00Z', isBooked: false },
+  { id: 'slot5', startTime: '2024-07-02T09:00:00Z', endTime: '2024-07-02T10:00:00Z', isBooked: false },
+  { id: 'slot6', startTime: '2024-07-02T10:00:00Z', endTime: '2024-07-02T11:00:00Z', isBooked: false },
+];
+
+const mockViewingRequests: ViewingRequest[] = [
+  {
+    id: 'viewReq1',
+    propertyId: 'prop1',
+    renterId: 'user3',
+    landlordId: 'user1',
+    requestedDates: [new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0]],
+    preferredTimeSlots: [{ date: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0], timeSlotId: 'slot1' }],
+    notes: 'Interested in the kitchen layout.',
+    status: 'pending',
+    requestDate: new Date().toISOString(),
+  },
+  {
+    id: 'viewReq2',
+    propertyId: 'prop2',
+    renterId: 'user4',
+    landlordId: 'user2',
+    requestedDates: [
+        new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
+        new Date(Date.now() + 6 * 86400000).toISOString().split('T')[0]
+    ],
+    preferredTimeSlots: [
+        { date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0], timeSlotId: 'slot5' },
+    ],
+    status: 'confirmed',
+    requestDate: new Date(Date.now() - 86400000).toISOString(),
+    responseDate: new Date().toISOString(),
+  },
+];
 
 // Example tenant data with review status
 const tenants: Tenant[] = [
@@ -138,8 +228,20 @@ const applications: Application[] = [
 let reviews: RenterReview[] = [];
 let propertyReviews: PropertyReview[] = [];
 
+const mockAdminPanelUsers: AdminUserDisplay[] = [
+  { id: 'adminUser1', name: 'Alice Wonderland', email: 'alice@example.com', role: 'Admin', status: 'active' },
+  { id: 'adminUser2', name: 'Bob The Builder', email: 'bob@example.com', role: 'User', status: 'active' },
+  { id: 'adminUser3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'User', status: 'suspended' },
+  { id: 'adminUser4', name: 'Diana Prince', email: 'diana@example.com', role: 'Landlord', status: 'active' },
+  { id: 'adminUser5', name: 'Edward Nigma', email: 'edward@example.com', role: 'Renter', status: 'pending_verification' },
+];
+
 // Mock API Service
 class MockApiService {
+  private async simulateDelay(ms: number = 500) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   // Notifications methods
   async getNotifications(userId: string): Promise<Notification[]> {
     await this.simulateDelay();
@@ -202,12 +304,164 @@ class MockApiService {
     };
   }
 
-  async getProperties(ownerId?: string): Promise<Property[]> {
-    await this.simulateDelay();
-    if (ownerId) {
-      return mockProperties.filter((property) => property.ownerId === ownerId);
+  async getProperties(ownerId?: string, filters?: { location?: string; minPrice?: number; maxPrice?: number; bedrooms?: number; bathrooms?: number; status?: string }): Promise<Property[]> {
+    try {
+      let rpcName: string;
+      let rpcParams: any;
+
+      if (ownerId) {
+        rpcName = 'get_landlord_properties';
+        rpcParams = { p_landlord_id: ownerId };
+      } else {
+        rpcName = 'get_properties';
+        rpcParams = {
+          p_location: filters?.location || null,
+          p_min_price: filters?.minPrice || null,
+          p_max_price: filters?.maxPrice || null,
+          p_bedrooms: filters?.bedrooms || null,
+          p_bathrooms: filters?.bathrooms || null,
+          p_status: filters?.status || null,
+        };
+      }
+
+      const { data, error } = await supabase.rpc(rpcName, rpcParams);
+
+      if (error) {
+        console.error(`Error calling Supabase RPC ${rpcName}:`, error);
+        throw error;
+      }
+
+      return (data || []).map((dbProperty: any) => {
+        const p = {
+          id: dbProperty.id,
+          title: dbProperty.title_en || dbProperty.title || '',
+          description: dbProperty.description_en || dbProperty.description || '',
+          price: dbProperty.rent_amount || 0,
+          currency: dbProperty.currency || 'USD',
+          location: {
+            city: dbProperty.city_en || dbProperty.city || '',
+            area: dbProperty.area_en || dbProperty.area || '',
+            coordinates: (dbProperty.latitude && dbProperty.longitude) ?
+              [parseFloat(dbProperty.latitude), parseFloat(dbProperty.longitude)] as [number, number] // Assuming array based on error
+              : undefined,
+          },
+          features: {
+            bedrooms: dbProperty.number_of_rooms || 0,
+            bathrooms: dbProperty.number_of_bathrooms || 0,
+            size: dbProperty.square_footage || 0, // Assuming 'size' instead of 'area' based on error
+            furnished: dbProperty.furnished !== undefined ? dbProperty.furnished : false, // Assuming 'furnished' based on error
+            amenities: dbProperty.amenities || [],
+          },
+          images: dbProperty.images || [],
+          status: dbProperty.status || 'pending',
+          ownerId: dbProperty.owner_id,
+          renterId: dbProperty.renter_id,
+          createdAt: dbProperty.listing_date || dbProperty.created_at || new Date().toISOString(),
+          updatedAt: dbProperty.updated_at || dbProperty.listing_date || new Date().toISOString(),
+          views: dbProperty.views || 0,
+          inquiries: dbProperty.inquiries || 0,
+          daysListed: dbProperty.days_listed || 0,
+        };
+        return p as Property;
+      });
+    } catch (error) {
+      console.error(`Supabase getProperties via RPC (${ownerId ? 'get_landlord_properties' : 'get_properties'}) failed:`, error);
+      return [];
     }
-    return mockProperties;
+  }
+
+  async createProperty(propertyData: Omit<Property, 'id' | 'createdAt' | 'updatedAt' | 'views' | 'inquiries' | 'daysListed'>, ownerId: string): Promise<Property | null> {
+    try {
+      // Adjusting to hypothetical Property type based on TS errors
+      const features = propertyData.features as any; // Cast to any to access potentially missing/renamed fields
+      const location = propertyData.location as any;
+
+      const params = {
+        p_title_en: propertyData.title,
+        p_title_ar: null,
+        p_description_en: propertyData.description,
+        p_description_ar: null,
+        p_rent_amount: propertyData.price,
+        p_security_deposit: 0,
+        p_number_of_rooms: features.bedrooms,
+        p_square_footage: features.size || features.area || 0, // Prefer 'size', fallback to 'area' if error was misleading
+        p_property_type_en: 'Apartment',
+        p_property_type_ar: null,
+        p_availability_date: new Date().toISOString(),
+        p_owner_id: ownerId,
+        p_city_en: location.city,
+        p_city_ar: null,
+        p_area_en: location.area,
+        p_area_ar: null,
+        p_latitude: Array.isArray(location.coordinates) ? location.coordinates[0] : location.coordinates?.latitude || null,
+        p_longitude: Array.isArray(location.coordinates) ? location.coordinates[1] : location.coordinates?.longitude || null,
+      };
+
+      const { data: newPropertyId, error: rpcError } = await supabase.rpc('add_property', params);
+
+      if (rpcError) {
+        console.error('Error calling Supabase RPC add_property:', rpcError);
+        throw rpcError;
+      }
+
+      if (!newPropertyId || typeof newPropertyId !== 'string') {
+        console.error('Supabase RPC add_property did not return a valid ID.');
+        return null;
+      }
+
+      const { data: newPropertyArray, error: fetchError } = await supabase.rpc('get_property_by_id', { p_property_id: newPropertyId });
+
+      if (fetchError) {
+        console.error(`Error calling Supabase RPC get_property_by_id for ID ${newPropertyId}:`, fetchError);
+        return null;
+      }
+
+      if (!newPropertyArray || !Array.isArray(newPropertyArray) || newPropertyArray.length === 0) {
+        console.error(`Supabase RPC get_property_by_id (ID: ${newPropertyId}) did not return the new property.`);
+        return null;
+      }
+      
+      const dbProperty = newPropertyArray[0];
+      // Cast propertyData features/location to 'any' to handle potential discrepancies indicated by TS errors
+      const inputFeatures = propertyData.features as any;
+      const inputLocation = propertyData.location as any;
+
+      const p = {
+        id: dbProperty.id,
+        title: dbProperty.title_en || dbProperty.title || '',
+        description: dbProperty.description_en || dbProperty.description || '',
+        price: dbProperty.rent_amount || 0,
+        currency: propertyData.currency || 'USD',
+        location: {
+          city: dbProperty.city_en || dbProperty.city || '',
+          area: dbProperty.area_en || dbProperty.area || '',
+          coordinates: (dbProperty.latitude && dbProperty.longitude) ?
+            [parseFloat(dbProperty.latitude), parseFloat(dbProperty.longitude)] as [number, number] // Assuming array
+            : undefined,
+        },
+        features: {
+          bedrooms: dbProperty.number_of_rooms || 0,
+          bathrooms: dbProperty.number_of_bathrooms || 0,
+          size: dbProperty.square_footage || 0, // Assuming 'size'
+          furnished: inputFeatures.furnished !== undefined ? inputFeatures.furnished : (dbProperty.furnished !== undefined ? dbProperty.furnished : false), // Assuming 'furnished'
+          amenities: inputFeatures.amenities || [],
+        },
+        images: propertyData.images || [],
+        status: dbProperty.status || 'available',
+        ownerId: dbProperty.owner_id,
+        renterId: dbProperty.renter_id,
+        createdAt: dbProperty.listing_date || dbProperty.created_at || new Date().toISOString(),
+        updatedAt: dbProperty.updated_at || dbProperty.listing_date || new Date().toISOString(),
+        views: dbProperty.views || 0,
+        inquiries: dbProperty.inquiries || 0,
+        daysListed: dbProperty.days_listed || 0,
+      };
+      return p as Property;
+
+    } catch (error) {
+      console.error('Supabase createProperty via RPC failed:', error);
+      return null;
+    }
   }
 
   async getPropertyById(id: string): Promise<Property> {
@@ -267,8 +521,12 @@ class MockApiService {
             mockProperties.find((p) => p.id === renter.rentedProperties?.[0])?.title || '',
           leaseStart: '2024-01-01',
           leaseEnd: '2024-12-31',
-          status: renter.rentedProperties?.length ? 'active' : ('pending' as const),
-          rating: 4.8,
+          status: (renter.rentedProperties?.length ? 'active' : 'pending') as 'active' | 'pending' | 'past',
+          rating: 4.8, // Assuming rating is part of the mock structure
+          // Adding missing fields based on the persistent Tenant type error
+          contactEmail: renter.email || 'default-mock-email@example.com',
+          contactPhone: renter.phone || '+11234567890',
+          reviewStatus: 'unreviewed' as 'unreviewed' | 'reviewed' | 'pending_landlord_review', // Provide a default valid status
         };
       })
       .filter(Boolean) as Tenant[];
@@ -359,7 +617,7 @@ class MockApiService {
       id: `rent${mockRentRequests.length + 1}`,
       requestDate: new Date().toISOString(),
       status: 'pending',
-      responseDate: null,
+      responseDate: undefined,
       ...requestData,
     };
     
@@ -567,8 +825,176 @@ class MockApiService {
     );
   }
 
-  private simulateDelay(): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, 500));
+  // Viewing Request Methods
+  async getAvailableTimeSlots(propertyId: string, date: string): Promise<TimeSlot[]> {
+    await this.simulateDelay();
+    // For now, return all slots, filtering by date and availability
+    // In a real scenario, this would check landlord availability, existing bookings for the property, etc.
+    return mockAvailableTimeSlots.filter(slot => {
+      const slotDate = slot.startTime.split('T')[0];
+      // A simple check: if a viewing request for this property and slot is confirmed, it's booked.
+      const isBookedByViewingRequest = mockViewingRequests.some(vr =>
+        vr.propertyId === propertyId &&
+        vr.status === 'confirmed' &&
+        vr.preferredTimeSlots.some(pts => pts.date === date && pts.timeSlotId === slot.id)
+      );
+      return slotDate.startsWith(date.split('T')[0]) && !slot.isBooked && !isBookedByViewingRequest;
+    });
+  }
+
+  async createViewingRequest(
+    requestData: Omit<ViewingRequest, 'id' | 'requestDate' | 'status' | 'landlordId'>,
+    renterId: string,
+    propertyOwnerId: string // Assuming we can get the property owner ID
+  ): Promise<ViewingRequest> {
+    await this.simulateDelay();
+    const newRequest: ViewingRequest = {
+      ...requestData,
+      id: `viewReq-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      renterId,
+      landlordId: propertyOwnerId,
+      requestDate: new Date().toISOString(),
+      status: 'pending',
+    };
+    mockViewingRequests.push(newRequest);
+
+    // Notify Landlord
+    this.createNotification(
+      propertyOwnerId,
+      'viewing_request_created',
+      `New viewing request for property ${requestData.propertyId} from user ${renterId}.`,
+      { viewingRequestId: newRequest.id, propertyId: requestData.propertyId }
+    );
+    return newRequest;
+  }
+
+  async getViewingRequestById(id: string): Promise<ViewingRequest | null> {
+    await this.simulateDelay();
+    const request = mockViewingRequests.find(req => req.id === id);
+    return request || null;
+  }
+
+  async getViewingRequestsForProperty(propertyId: string): Promise<ViewingRequest[]> {
+    await this.simulateDelay();
+    return mockViewingRequests.filter(req => req.propertyId === propertyId);
+  }
+
+  async getViewingRequestsForUser(userId: string, role: 'renter' | 'landlord'): Promise<ViewingRequest[]> {
+    await this.simulateDelay();
+    if (role === 'renter') {
+      return mockViewingRequests.filter(req => req.renterId === userId);
+    } else {
+      return mockViewingRequests.filter(req => req.landlordId === userId);
+    }
+  }
+
+  async updateViewingRequestStatus(
+    id: string,
+    status: 'confirmed' | 'rejected' | 'cancelled',
+    reason?: string, // For rejection or cancellation
+    actorId?: string // ID of user performing action (landlord or renter for cancellation)
+  ): Promise<ViewingRequest | null> {
+    await this.simulateDelay();
+    const requestIndex = mockViewingRequests.findIndex(req => req.id === id);
+    if (requestIndex === -1) {
+      return null;
+    }
+
+    const oldRequest = mockViewingRequests[requestIndex];
+    const updatedRequest: ViewingRequest = {
+      ...oldRequest,
+      status,
+      responseDate: new Date().toISOString(),
+    };
+
+    if (status === 'rejected' && reason) {
+      updatedRequest.rejectionReason = reason;
+    }
+    if (status === 'cancelled' && reason) {
+      updatedRequest.cancellationReason = reason;
+    }
+
+    mockViewingRequests[requestIndex] = updatedRequest;
+
+    // Handle booking of time slot if confirmed
+    if (status === 'confirmed') {
+      updatedRequest.preferredTimeSlots.forEach(pts => {
+        const slotIndex = mockAvailableTimeSlots.findIndex(s => s.id === pts.timeSlotId && s.startTime.startsWith(pts.date));
+        if (slotIndex !== -1) {
+          mockAvailableTimeSlots[slotIndex].isBooked = true;
+        }
+      });
+      // Notify Renter
+      this.createNotification(
+        updatedRequest.renterId,
+        'viewing_request_confirmed',
+        `Your viewing request for property ${updatedRequest.propertyId} has been confirmed.`,
+        { viewingRequestId: updatedRequest.id, propertyId: updatedRequest.propertyId }
+      );
+    } else if (status === 'rejected') {
+      // Notify Renter
+      this.createNotification(
+        updatedRequest.renterId,
+        'viewing_request_rejected',
+        `Your viewing request for property ${updatedRequest.propertyId} has been rejected. Reason: ${reason}`,
+        { viewingRequestId: updatedRequest.id, propertyId: updatedRequest.propertyId }
+      );
+    } else if (status === 'cancelled') {
+      // Unbook time slot if it was previously confirmed
+      if (oldRequest.status === 'confirmed') {
+         oldRequest.preferredTimeSlots.forEach(pts => {
+            const slotIndex = mockAvailableTimeSlots.findIndex(s => s.id === pts.timeSlotId && s.startTime.startsWith(pts.date));
+            if (slotIndex !== -1) {
+                mockAvailableTimeSlots[slotIndex].isBooked = false;
+            }
+        });
+      }
+      // Notify the other party
+      const recipientId = actorId === updatedRequest.renterId ? updatedRequest.landlordId : updatedRequest.renterId;
+      const cancelledBy = actorId === updatedRequest.renterId ? 'the renter' : 'the landlord';
+      this.createNotification(
+        recipientId,
+        'viewing_request_cancelled',
+        `Viewing request for property ${updatedRequest.propertyId} has been cancelled by ${cancelledBy}. Reason: ${reason}`,
+        { viewingRequestId: updatedRequest.id, propertyId: updatedRequest.propertyId }
+      );
+    }
+
+    return updatedRequest;
+  }
+
+  async getAllUsers(): Promise<AdminUserDisplay[]> {
+    await this.simulateDelay();
+    return mockAdminPanelUsers;
+  }
+
+  async getPropertiesForVerification(): Promise<Property[]> {
+    await this.simulateDelay();
+    // Assuming mockProperties is an array of Property objects
+    // and includes properties with 'pending_verification' status.
+    // If mockProperties is not already populated with such data,
+    // we might need to adjust mockData.ts or add specific mock data here.
+    const allProperties = await this.getProperties(); // Utilize existing method
+    return allProperties.filter(property => property.status === 'pending_verification');
+  }
+
+  async updatePropertyVerificationStatus(propertyId: string, newStatus: PropertyStatus): Promise<Property | null> {
+    await this.simulateDelay();
+    const propertyIndex = mockProperties.findIndex(p => p.id === propertyId);
+    if (propertyIndex !== -1) {
+      // Ensure we are creating a new object for the update to avoid direct state mutation if mockProperties is used elsewhere
+      const updatedProperty = { ...mockProperties[propertyIndex], status: newStatus, updatedAt: new Date().toISOString() };
+      mockProperties[propertyIndex] = updatedProperty;
+      
+      // If using Supabase or a real backend, this is where you'd make the API call
+      // For example, if there's a general updateProperty method:
+      // return this.updateProperty(propertyId, { status: newStatus });
+      
+      // For now, just return the updated mock object
+      return updatedProperty;
+    }
+    console.warn(`Property with ID ${propertyId} not found for verification status update.`);
+    return null;
   }
 }
 

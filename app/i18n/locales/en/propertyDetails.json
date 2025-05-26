@@ -32,6 +32,8 @@
   "maxMonthsExceeded": "Maximum rental period is 24 months",
   "monthlyRent": "Monthly Rent",
   "totalAmount": "Total Amount",
+  "optionalMessageLabel": "Optional Message to Landlord",
+  "optionalMessagePlaceholder": "E.g., tell the landlord about yourself, why you're interested, or any specific questions you have.",
   "rentRequestNote": "Note: This is a request to rent. The landlord will review your request and may accept, reject, or propose different terms.",
   "contractTitle": "Rental Contract",
   "contractDetails": "Contract Details",

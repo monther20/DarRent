@@ -96,6 +96,8 @@
   "maxMonthsExceeded": "الحد الأقصى لفترة الإيجار هو 24 شهرًا",
   "monthlyRent": "الإيجار الشهري",
   "totalAmount": "المبلغ الإجمالي",
+  "optionalMessageLabel": "رسالة اختيارية للمالك",
+  "optionalMessagePlaceholder": "مثال: أخبر المالك عن نفسك، لماذا أنت مهتم، أو أي أسئلة محددة لديك.",
   "rentRequestNote": "ملاحظة: هذا طلب للإيجار. سيقوم المالك بمراجعة طلبك وقد يقبله أو يرفضه أو يقترح شروطًا مختلفة.",
   "contractTitle": "عقد الإيجار",
   "contractDetails": "تفاصيل العقد",

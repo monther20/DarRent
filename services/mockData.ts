@@ -1,40 +1,7 @@
+import { Property } from '../app/types'; // Import Property type
+
 // Mock data types
-export interface Property {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  currency: string;
-  location: {
-    city: string;
-    area: string;
-    coordinates?: {
-      latitude: number;
-      longitude: number;
-    };
-  };
-  features: {
-    bedrooms: number;
-    bathrooms: number;
-    area: number;
-    amenities: string[];
-  };
-  images: string[];
-  status: 'available' | 'rented' | 'pending';
-  ownerId: string;
-  renterId?: string;
-  createdAt: string;
-  updatedAt: string;
-  views: number;
-  inquiries: number;
-  daysListed: number;
-  area: number;
-  nextPayment?: {
-    amount: number;
-    currency: string;
-    dueInDays: number;
-  };
-}
+// Removed local Property interface definition
 
 export interface User {
   id: string;
@@ -149,7 +116,6 @@ export const mockProperties: Property[] = [
     views: 245,
     inquiries: 12,
     daysListed: 15,
-    area: 120,
   },
   {
     id: 'prop2',
@@ -180,7 +146,6 @@ export const mockProperties: Property[] = [
     views: 180,
     inquiries: 8,
     daysListed: 30,
-    area: 180,
     nextPayment: { amount: 1065, currency: 'JOD', dueInDays: 3 },
   },
   {
@@ -211,7 +176,6 @@ export const mockProperties: Property[] = [
     views: 320,
     inquiries: 15,
     daysListed: 7,
-    area: 300,
   },
   {
     id: 'prop4',
@@ -241,7 +205,6 @@ export const mockProperties: Property[] = [
     views: 95,
     inquiries: 5,
     daysListed: 3,
-    area: 120,
   },
   {
     id: 'prop5',
@@ -271,7 +234,6 @@ export const mockProperties: Property[] = [
     views: 210,
     inquiries: 12,
     daysListed: 20,
-    area: 300,
   },
   {
     id: 'prop6',
@@ -301,7 +263,6 @@ export const mockProperties: Property[] = [
     views: 150,
     inquiries: 8,
     daysListed: 5,
-    area: 80,
   },
   {
     id: 'prop7',
@@ -332,7 +293,6 @@ export const mockProperties: Property[] = [
     views: 280,
     inquiries: 15,
     daysListed: 45,
-    area: 200,
     nextPayment: { amount: 1200, currency: 'JOD', dueInDays: 8 },
   },
   {
@@ -363,7 +323,6 @@ export const mockProperties: Property[] = [
     views: 350,
     inquiries: 20,
     daysListed: 2,
-    area: 250,
   },
 ];
 

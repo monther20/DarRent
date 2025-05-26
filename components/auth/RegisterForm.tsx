@@ -16,7 +16,8 @@ type UserRole = 'renter' | 'landlord';
 
 export function RegisterForm() {
   const [role, setRole] = useState<UserRole>('landlord');
-  const [fullName, setFullName] = useState('');
+  const [fullName, setFullName] = useState(''); // Maps to full_name_en
+  const [fullNameAr, setFullNameAr] = useState(''); // Maps to full_name_ar
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
@@ -28,53 +29,104 @@ export function RegisterForm() {
   // Landlord specific fields
   const [companyName, setCompanyName] = useState('');
   const [licenseNumber, setLicenseNumber] = useState('');
+  const [bankAccountDetails, setBankAccountDetails] = useState('');
+  const [propertyAddress, setPropertyAddress] = useState(''); // New landlord field
 
   // Renter specific fields
-  const [employmentStatus, setEmploymentStatus] = useState('');
-  const [income, setIncome] = useState('');
+  const [preferredLocationEn, setPreferredLocationEn] = useState('');
+  const [preferredLocationAr, setPreferredLocationAr] = useState('');
+  const [budget, setBudget] = useState(''); // Will be parsed to float
+  const [desiredMoveInDate, setDesiredMoveInDate] = useState(''); // New renter field
 
-  const { signUp } = useAuth();
+  // Call useAuth() at the top level of the functional component
+  const auth = useAuth();
 
-  const validateEmail = (email: string) => email.includes('@') && email.includes('.');
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (password: string) => password.length >= 6;
   const canSubmit =
     fullName.trim() &&
+    fullNameAr.trim() && // Added validation for fullNameAr
     validateEmail(email) &&
     phoneNumber.trim() &&
     validatePassword(password) &&
     password === confirmPassword &&
-    agree;
+    agree &&
+    // Updated validation for role-specific fields (assuming new fields are optional for now)
+    // If bankAccountDetails for landlord or budget for renter are mandatory, add .trim() here
+    (role === 'renter' ? preferredLocationEn.trim() && budget.trim() : true) &&
+    (role === 'landlord' ? bankAccountDetails.trim() : true);
+
 
   const handleSubmit = async () => {
     try {
       setError(null);
-      if (!canSubmit) return;
+      if (!canSubmit) {
+        setError("Please fill all required fields correctly and agree to the terms.");
+        return;
+      }
       setLoading(true);
-      const metadata = {
-        full_name: fullName,
-        phone_number: phoneNumber,
+
+      const userData: any = {
+        email,
+        password,
+        // name: fullName, // 'name' was for the old AuthContext, using specific names now
+        fullNameEn: fullName,
+        fullNameAr: fullNameAr,
+        phone: phoneNumber,
         role,
-        ...(role === 'landlord' && {
-          company_name: companyName,
-          license_number: licenseNumber,
-        }),
-        ...(role === 'renter' && {
-          employment_status: employmentStatus,
-          income: parseFloat(income),
-        }),
       };
-      const { error } = await signUp(email, password, metadata);
-      if (error) throw error;
-      router.replace('/auth/login');
+
+      if (role === 'landlord') {
+        userData.companyName = companyName;
+        userData.licenseNumber = licenseNumber;
+        userData.bankAccountDetails = bankAccountDetails;
+        userData.propertyAddress = propertyAddress; // Add new landlord field
+      } else if (role === 'renter') {
+        userData.preferredLocationEn = preferredLocationEn;
+        userData.preferredLocationAr = preferredLocationAr;
+        userData.budget = budget ? parseFloat(budget) : undefined; // Handle empty budget string
+        userData.desiredMoveInDate = desiredMoveInDate; // Add new renter field
+      }
+
+      // The actual call to Supabase Auth and then to the Edge Function will be handled by `register` in AuthContext
+
+      // Get the auth object ONCE for this submission attempt from the top-level 'auth' const
+      const authForSubmit = auth;
+      console.log('Auth object for this submit call:', JSON.stringify(authForSubmit, null, 2));
+
+      // Check if register exists on this specific authForSubmit object
+      if (!authForSubmit || typeof authForSubmit.register !== 'function') {
+        // Log the object again if the check fails, to be absolutely sure what was checked
+        console.error("Register function is undefined on authForSubmit!", authForSubmit);
+        setError("Registration service is currently unavailable. Please try again later or contact support.");
+        setLoading(false);
+        return; // Stop execution
+      }
+
+      // Call register from the authForSubmit object
+      const { success, error: registrationError, user } = await authForSubmit.register(userData);
+
+      if (registrationError) {
+        const message = registrationError.message || "An unknown error occurred during registration.";
+        setError(message);
+        setLoading(false);
+        return;
+      }
+
+      if (success) {
+        // Navigation might depend on whether email confirmation is required
+        // For now, assuming direct login or navigation to a "check your email" page
+        router.replace('/(tabs)'); // Or a more appropriate post-registration page
+      }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'An unexpected error occurred.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.contentContainer}>
       {/* Role Selector */}
       <Text style={styles.label}>I am a...</Text>
       <View style={styles.roleSelectorRow}>
@@ -120,6 +172,13 @@ export function RegisterForm() {
         value={fullName}
         onChangeText={setFullName}
       />
+      <Text style={styles.label}>Full Name (Arabic)</Text>
+      <TextInput
+        placeholder="Full Name (Arabic)"
+        value={fullNameAr}
+        onChangeText={setFullNameAr}
+        style={[styles.input, { textAlign: 'right' }]} // For RTL
+      />
       <Text style={styles.label}>Email</Text>
       <TextInput
         style={styles.input}
@@ -140,7 +199,7 @@ export function RegisterForm() {
       <Text style={styles.label}>Password</Text>
       <TextInput
         style={styles.input}
-        placeholder="Password"
+        placeholder="Password (min. 6 characters)"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -154,6 +213,78 @@ export function RegisterForm() {
         secureTextEntry
       />
 
+      {/* Role Specific Fields */}
+      {role === 'renter' && (
+        <>
+          <Text style={styles.sectionTitle}>Renter Details</Text>
+          <Text style={styles.label}>Preferred Location (English)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="e.g., Downtown, Suburbs"
+            value={preferredLocationEn}
+            onChangeText={setPreferredLocationEn}
+          />
+          <Text style={styles.label}>Preferred Location (Arabic)</Text>
+          <TextInput
+            placeholder="e.g., وسط المدينة, الضواحي"
+            value={preferredLocationAr}
+            onChangeText={setPreferredLocationAr}
+            style={[styles.input, { textAlign: 'right' }]}
+          />
+          <Text style={styles.label}>Monthly Budget (Numeric)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="e.g., 1500"
+            value={budget}
+            onChangeText={setBudget}
+            keyboardType="numeric"
+          />
+          <Text style={styles.label}>Desired Move-in Date (Optional)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="YYYY-MM-DD"
+            value={desiredMoveInDate}
+            onChangeText={setDesiredMoveInDate}
+            // For a better UX, consider using a DateTimePicker component here
+            // e.g., @react-native-community/datetimepicker
+          />
+        </>
+      )}
+
+      {role === 'landlord' && (
+        <>
+          <Text style={styles.sectionTitle}>Landlord Details</Text>
+          <Text style={styles.label}>Company Name (Optional)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Your Company LLC"
+            value={companyName}
+            onChangeText={setCompanyName}
+          />
+          <Text style={styles.label}>Real Estate License Number (Optional)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="License Number"
+            value={licenseNumber}
+            onChangeText={setLicenseNumber}
+          />
+          <Text style={styles.label}>Bank Account Details (for payouts)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="IBAN or Account Number"
+            value={bankAccountDetails}
+            onChangeText={setBankAccountDetails}
+          />
+          <Text style={styles.label}>Primary Property Address (Optional)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="e.g., 123 Main St, City, Country"
+            value={propertyAddress}
+            onChangeText={setPropertyAddress}
+          />
+        </>
+      )}
+
       {/* Terms and Conditions */}
       <View style={styles.termsRow}>
         <Checkbox
@@ -163,7 +294,7 @@ export function RegisterForm() {
           style={styles.checkbox}
         />
         <Text style={styles.termsText}>
-          I agree to the
+          I agree to the{' '}
           <Text
             style={styles.termsLink}
             onPress={() => Linking.openURL('https://your-terms-url.com')}
@@ -191,6 +322,9 @@ export function RegisterForm() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: { // Added for ScrollView content padding
+    paddingBottom: 30, // Ensure button is not hidden by keyboard or tab bar
   },
   label: {
     fontSize: 14,
@@ -281,5 +415,15 @@ const styles = StyleSheet.create({
     color: '#ff3b30',
     marginBottom: 15,
     textAlign: 'center',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#34568B',
+    marginTop: 20,
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    paddingBottom: 5,
   },
 });

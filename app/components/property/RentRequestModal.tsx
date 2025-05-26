@@ -15,7 +15,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 interface RentRequestModalProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (months: number) => void;
+  onSubmit: (months: number, message?: string) => void;
   propertyPrice: number;
   propertyCurrency: string;
   isRTL: boolean;
@@ -31,6 +31,7 @@ export const RentRequestModal: React.FC<RentRequestModalProps> = ({
 }) => {
   const { t } = useTranslation(['propertyDetails', 'common']);
   const [months, setMonths] = useState('6');
+  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
   const handleMonthsChange = (value: string) => {
@@ -56,7 +57,7 @@ export const RentRequestModal: React.FC<RentRequestModalProps> = ({
     }
 
     // Submit
-    onSubmit(monthsNum);
+    onSubmit(monthsNum, message.trim());
   };
 
   const totalAmount = parseInt(months, 10) * propertyPrice || 0;
@@ -65,7 +66,7 @@ export const RentRequestModal: React.FC<RentRequestModalProps> = ({
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
-          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+          <TouchableWithoutFeedback onPress={(e: any) => e.stopPropagation()}>
             <View style={[styles.modal, isRTL && styles.modalRTL]}>
               <View style={[styles.header, isRTL && styles.headerRTL]}>
                 <Text style={styles.title}>{t('rentRequestTitle', { ns: 'propertyDetails' })}</Text>
@@ -109,6 +110,16 @@ export const RentRequestModal: React.FC<RentRequestModalProps> = ({
                     {totalAmount} {propertyCurrency}
                   </Text>
                 </View>
+
+                <Text style={styles.label}>{t('optionalMessageLabel', { ns: 'propertyDetails' })}</Text>
+                <TextInput
+                  style={[styles.textArea, isRTL && styles.inputRTL]}
+                  value={message}
+                  onChangeText={setMessage}
+                  placeholder={t('optionalMessagePlaceholder', { ns: 'propertyDetails' })}
+                  multiline
+                  numberOfLines={3}
+                />
 
                 <Text style={styles.note}>{t('rentRequestNote', { ns: 'propertyDetails' })}</Text>
               </View>
@@ -205,6 +216,17 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontSize: 16,
     color: '#666',
+  },
+  textArea: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    textAlignVertical: 'top', // For multiline
+    marginBottom: 16,
+    minHeight: 80, // Adjust as needed
   },
   errorText: {
     color: '#F44336',

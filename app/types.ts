@@ -31,13 +31,14 @@ export interface Property {
   };
   images: string[];
   videos?: string[];
-  status: 'available' | 'unavailable' | 'rented';
+  status: PropertyStatus;
   rules?: string[];
   createdAt: string;
   updatedAt: string;
   reviewStatus?: PropertyReviewStatus;
 }
 
+export type PropertyStatus = 'available' | 'unavailable' | 'rented' | 'pending_verification' | 'rejected';
 export type RenterReviewStatus = 'unreviewed' | 'reviewed';
 export type PropertyReviewStatus = 'unreviewed' | 'reviewed';
 
@@ -73,6 +74,7 @@ export interface RentRequest {
   months: number;
   status: 'pending' | 'accepted' | 'rejected' | 'completed';
   responseDate?: string;
+  message?: string;
 }
 
 export interface Stats {
@@ -101,6 +103,28 @@ export interface RenterReview {
     text: string;
     createdAt: string;
   };
+}
+
+export interface TimeSlot {
+  id: string;
+  startTime: string; // ISO 8601 format
+  endTime: string;   // ISO 8601 format
+  isBooked: boolean;
+}
+
+export interface ViewingRequest {
+  id: string;
+  propertyId: string;
+  renterId: string;
+  landlordId: string;
+  requestedDates: string[]; // Array of ISO 8601 date strings for initial request
+  preferredTimeSlots: { date: string, timeSlotId: string }[]; // Specific date and slot chosen
+  notes?: string;
+  status: 'pending' | 'confirmed' | 'rejected' | 'cancelled' | 'completed';
+  requestDate: string; // ISO 8601 format
+  responseDate?: string; // ISO 8601 format
+  rejectionReason?: string;
+  cancellationReason?: string;
 }
 
 export interface PropertyReview {

@@ -8,9 +8,11 @@ import { mockApi } from '../services/mockApi';
 import { Property } from '../types';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext'; // Corrected path
 
 export default function PropertiesScreen() {
   const { t } = useTranslation(['common', 'properties']);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [properties, setProperties] = useState<Property[]>([]);
   const [viewingRequests, setViewingRequests] = useState<number>(0);
@@ -20,16 +22,24 @@ export default function PropertiesScreen() {
     loadProperties();
     loadViewingRequests();
     loadVideoVerificationRequests();
-  }, []);
+  }, [user]); // Add user as a dependency
 
   const loadProperties = async () => {
     setLoading(true);
     try {
-      // TODO: Replace 'user1' with actual logged-in user ID
-      const data = await mockApi.getLandlordProperties('user1');
-      setProperties(data);
+      if (user && user.id) {
+        const data = await mockApi.getLandlordProperties(user.id);
+        setProperties(data);
+      } else {
+        console.error('User not logged in or user ID not available');
+        setProperties([]); // Clear properties or handle as an error state
+        // Optionally, show an alert or a message to the user
+        Alert.alert(t('common:error'), t('properties:errorLoadingPropertiesNotLoggedIn'));
+      }
     } catch (error) {
       console.error('Error loading properties:', error);
+      Alert.alert(t('common:error'), t('properties:errorLoadingProperties'));
+      setProperties([]); // Clear properties on error
     } finally {
       setLoading(false);
     }

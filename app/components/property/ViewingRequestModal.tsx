@@ -8,7 +8,7 @@ type ViewingRequestModalProps = {
   propertyId: string;
   propertyTitle: string;
   onClose: () => void;
-  onSubmit: (dates: string[], notes: string) => void;
+  onSubmit: (preferredSlots: { date: string, timeSlotId: string }[], notes: string) => void;
 };
 
 export const ViewingRequestModal = ({

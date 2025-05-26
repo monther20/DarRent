@@ -13,7 +13,7 @@ import { RentRequestModal } from '@/app/components/property/RentRequestModal';
 import { ViewingRequestModal } from '@/app/components/property/ViewingRequestModal';
 import { Loader } from '@/app/components/animations';
 import { PropertyReviewCard } from '@/app/components/reviews/PropertyReviewCard';
-import type { Property, PropertyReview } from '@/types';
+import type { Property, PropertyReview } from '../types';
 import ImageViewing from 'react-native-image-viewing';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -135,7 +135,7 @@ export default function PropertyDetails() {
     setShowViewingRequestModal(true);
   };
 
-  const handleSubmitRentRequest = async (months: number) => {
+  const handleSubmitRentRequest = async (months: number, message?: string) => {
     setShowRentRequestModal(false);
 
     try {
@@ -143,10 +143,9 @@ export default function PropertyDetails() {
       const newRequest = await mockApi.sendRentRequest({
         renterId: user?.id as string,
         propertyId: property?.id as string,
-        landlordId: property?.ownerId as string,
         months: months,
-        requestDate: new Date().toISOString(),
-        status: 'pending',
+        message: message, // Add the message here
+        // requestDate and status are set by the API, so not needed here
       });
 
       // Directly navigate to contract review for testing
@@ -171,36 +170,44 @@ export default function PropertyDetails() {
     }
   };
 
-  const handleSubmitViewingRequest = async (dates: string[], notes: string) => {
+  const handleSubmitViewingRequest = async (
+    preferredSlots: { date: string, timeSlotId: string }[],
+    notes: string
+  ) => {
     setShowViewingRequestModal(false);
 
-    try {
-      // In a real implementation, this would send the request to the backend
-      // For now, we're just showing a success message
-      
-      // Mock API call to send viewing request
-      // TODO: Implement actual API call once backend is ready
-      // await mockApi.sendViewingRequest({
-      //   renterId: user?.id as string,
-      //   propertyId: property?.id as string,
-      //   landlordId: property?.ownerId as string,
-      //   preferredDates: dates,
-      //   notes: notes,
-      //   status: 'pending',
-      //   createdAt: new Date().toISOString(),
-      // });
+    if (!user || !property) {
+      // Alert.alert(t('error', { ns: 'common' }), t('errorSendingViewingRequest', { ns: 'viewings' }));
+      console.warn(t('error', { ns: 'common' }) + ": User or property not found for viewing request.");
+      return;
+    }
 
-      Alert.alert(
-        t('success', { ns: 'common' }), 
-        t('viewingRequestSent', { ns: 'viewings' }),
-        [{ text: t('ok', { ns: 'common' }) }]
-      );
+    try {
+      const requestData = {
+        propertyId: property.id,
+        renterId: user.id, // Added renterId here
+        // landlordId will be set by the API based on property.ownerId
+        requestedDates: [...new Set(preferredSlots.map(slot => slot.date))], // Unique dates
+        preferredTimeSlots: preferredSlots,
+        notes: notes,
+      };
+      
+      // user.id is already in requestData, property.ownerId is the landlordId for the API method
+      await mockApi.createViewingRequest(requestData, user.id, property.ownerId);
+
+      // Alert.alert(
+      //   t('success', { ns: 'common' }),
+      //   t('viewingRequestSent', { ns: 'viewings' }),
+      //   [{ text: t('ok', { ns: 'common' }) }]
+      // );
+      console.log(t('success', { ns: 'common' }) + ": " + t('viewingRequestSent', { ns: 'viewings' })); // Temporary console log
     } catch (error) {
       console.error('Error sending viewing request:', error);
-      Alert.alert(
-        t('error', { ns: 'common' }),
-        t('errorSendingViewingRequest', { ns: 'viewings' }),
-      );
+      // Alert.alert(
+      //   t('error', { ns: 'common' }),
+      //   t('errorSendingViewingRequest', { ns: 'viewings' }),
+      // );
+      console.warn(t('error', { ns: 'common' }) + ": " + t('errorSendingViewingRequest', { ns: 'viewings' })); // Temporary console warning
     }
   };
 
