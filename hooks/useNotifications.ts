@@ -10,14 +10,18 @@ export function useNotifications() {
     registerForPushNotifications();
 
     // This listener is fired whenever a notification is received while the app is foregrounded
-    notificationListener.current = Notifications.addNotificationReceivedListener((notification: Notifications.Notification) => {
-      console.log('Notification received:', notification);
-    });
+    notificationListener.current = Notifications.addNotificationReceivedListener(
+      (notification: Notifications.Notification) => {
+        console.log('Notification received:', notification);
+      },
+    );
 
     // This listener is fired whenever a user taps on or interacts with a notification
-    responseListener.current = Notifications.addNotificationResponseReceivedListener((response: Notifications.NotificationResponse) => {
-      console.log('Notification response:', response);
-    });
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(
+      (response: Notifications.NotificationResponse) => {
+        console.log('Notification response:', response);
+      },
+    );
 
     return () => {
       if (notificationListener.current) {
@@ -43,12 +47,12 @@ export function useNotifications() {
 
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
-    
+
     if (existingStatus !== 'granted') {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    
+
     if (finalStatus !== 'granted') {
       console.log('Failed to get push token for push notification!');
       return;
@@ -65,8 +69,8 @@ export function useNotifications() {
   }
 
   return {
-    registerForPushNotifications
+    registerForPushNotifications,
   };
 }
 
-export default useNotifications; 
+export default useNotifications;

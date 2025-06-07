@@ -1,0 +1,451 @@
+{
+  "tables": {
+    "profiles": {
+      "columns": {
+        "id": {
+          "type": "string",
+          "primaryKey": true,
+          "description": "Unique identifier for the profile (UUID)"
+        },
+        "user_id": {
+          "type": "string",
+          "unique": true,
+          "description": "Foreign key to auth.users.id (Supabase specific)"
+        },
+        "username": {
+          "type": "string",
+          "nullable": true,
+          "description": "User's display name"
+        },
+        "created_at": {
+          "type": "timestamp",
+          "defaultValue": "now()",
+          "description": "Timestamp of when the profile was created"
+        }
+      },
+      "indexes": [
+        {
+          "columns": ["user_id"],
+          "type": "btree",
+          "unique": true
+        }
+      ]
+    },
+    "chats": {
+      "columns": {
+        "id": {
+          "type": "string",
+          "primaryKey": true,
+          "description": "Unique identifier for the chat (UUID)"
+        },
+        "created_at": {
+          "type": "timestamp",
+          "defaultValue": "now()",
+          "description": "Timestamp of when the chat was created"
+        }
+      },
+      "indexes": [
+        {
+          "columns": ["created_at"],
+          "type": "btree"
+        }
+      ]
+    },
+    "messages": {
+      "columns": {
+        "id": {
+          "type": "string",
+          "primaryKey": true,
+          "description": "Unique identifier for the message (UUID)"
+        },
+        "chat_id": {
+          "type": "string",
+          "description": "Foreign key to chats.id"
+        },
+        "sender_id": {
+          "type": "string",
+          "description": "Foreign key to profiles.id"
+        },
+        "content": {
+          "type": "text",
+          "description": "Content of the message"
+        },
+        "created_at": {
+          "type": "timestamp",
+          "defaultValue": "now()",
+          "description": "Timestamp of when the message was sent"
+        }
+      },
+      "indexes": [
+        {
+          "columns": ["chat_id"],
+          "type": "btree"
+        },
+        {
+          "columns": ["sender_id"],
+          "type": "btree"
+        },
+        {
+          "columns": ["created_at"],
+          "type": "btree"
+        }
+      ]
+    },
+    "maintenance_requests": {
+      "columns": {
+        "id": {
+          "type": "string",
+          "primaryKey": true,
+          "description": "Unique identifier for the maintenance request"
+        },
+        "renter_id": {
+          "type": "string",
+          "description": "ID of the renter who created the request"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the maintenance request"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the maintenance issue"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "in_progress", "completed", "cancelled"],
+          "description": "Current status of the maintenance request"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "emergency"],
+          "description": "Priority level of the maintenance request"
+        },
+        "created_at": {
+          "type": "timestamp",
+          "description": "When the request was created"
+        },
+        "updated_at": {
+          "type": "timestamp",
+          "description": "When the request was last updated"
+        },
+        "completed_at": {
+          "type": "timestamp",
+          "nullable": true,
+          "description": "When the request was completed (if applicable)"
+        },
+        "property_id": {
+          "type": "string",
+          "description": "ID of the property where maintenance is needed"
+        },
+        "location": {
+          "type": "string",
+          "description": "Specific location within the property"
+        }
+      },
+      "indexes": [
+        {
+          "columns": ["renter_id"],
+          "type": "btree"
+        },
+        {
+          "columns": ["status"],
+          "type": "btree"
+        },
+        {
+          "columns": ["created_at"],
+          "type": "btree"
+        }
+      ]
+    },
+    "maintenance_attachments": {
+      "columns": {
+        "id": {
+          "type": "string",
+          "primaryKey": true,
+          "description": "Unique identifier for the attachment"
+        },
+        "request_id": {
+          "type": "string",
+          "description": "ID of the maintenance request this attachment belongs to"
+        },
+        "file_url": {
+          "type": "string",
+          "description": "URL to the attached file"
+        },
+        "file_type": {
+          "type": "string",
+          "description": "Type of the attached file (image, document, etc.)"
+        },
+        "created_at": {
+          "type": "timestamp",
+          "description": "When the attachment was added"
+        }
+      },
+      "indexes": [
+        {
+          "columns": ["request_id"],
+          "type": "btree"
+        }
+      ]
+    },
+    "maintenance_comments": {
+      "columns": {
+        "id": {
+          "type": "string",
+          "primaryKey": true,
+          "description": "Unique identifier for the comment"
+        },
+        "request_id": {
+          "type": "string",
+          "description": "ID of the maintenance request this comment belongs to"
+        },
+        "user_id": {
+          "type": "string",
+          "description": "ID of the user who made the comment"
+        },
+        "user_type": {
+          "type": "string",
+          "enum": ["renter", "landlord", "maintenance_staff"],
+          "description": "Type of user who made the comment"
+        },
+        "comment": {
+          "type": "string",
+          "description": "The comment text"
+        },
+        "created_at": {
+          "type": "timestamp",
+          "description": "When the comment was created"
+        }
+      },
+      "indexes": [
+        {
+          "columns": ["request_id"],
+          "type": "btree"
+        },
+        {
+          "columns": ["user_id"],
+          "type": "btree"
+        }
+      ]
+    },
+    "maintenance_status_history": {
+      "columns": {
+        "id": {
+          "type": "string",
+          "primaryKey": true,
+          "description": "Unique identifier for the status change"
+        },
+        "request_id": {
+          "type": "string",
+          "description": "ID of the maintenance request"
+        },
+        "previous_status": {
+          "type": "string",
+          "description": "Previous status of the request"
+        },
+        "new_status": {
+          "type": "string",
+          "description": "New status of the request"
+        },
+        "changed_by": {
+          "type": "string",
+          "description": "ID of the user who changed the status"
+        },
+        "changed_at": {
+          "type": "timestamp",
+          "description": "When the status was changed"
+        },
+        "notes": {
+          "type": "string",
+          "nullable": true,
+          "description": "Optional notes about the status change"
+        }
+      },
+      "indexes": [
+        {
+          "columns": ["request_id"],
+          "type": "btree"
+        },
+        {
+          "columns": ["changed_at"],
+          "type": "btree"
+        }
+      ]
+    },
+    "contracts": {
+      "columns": {
+        "id": {
+          "type": "string",
+          "primaryKey": true,
+          "description": "Unique identifier for the contract (UUID)"
+        },
+        "property_id": {
+          "type": "string",
+          "description": "ID of the associated property (UUID)"
+        },
+        "renter_id": {
+          "type": "string",
+          "description": "ID of the renter (UUID, references users table)"
+        },
+        "landlord_id": {
+          "type": "string",
+          "description": "ID of the landlord (UUID, references users table)"
+        },
+        "contract_document_url": {
+          "type": "string",
+          "nullable": true,
+          "description": "URL to the contract document (e.g., PDF)"
+        },
+        "contract_terms": {
+          "type": "text",
+          "nullable": true,
+          "description": "Full text of the contract if not using a document URL"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "pending_renter_signature", "pending_landlord_signature", "active", "terminated", "expired", "disputed"],
+          "description": "Current status of the contract"
+        },
+        "start_date": {
+          "type": "date",
+          "nullable": true,
+          "description": "Effective start date of the contract"
+        },
+        "end_date": {
+          "type": "date",
+          "nullable": true,
+          "description": "End date of the contract"
+        },
+        "rent_amount": {
+          "type": "decimal",
+          "nullable": true,
+          "description": "Rent amount"
+        },
+        "payment_frequency": {
+          "type": "string",
+          "enum": ["monthly", "quarterly", "annually"],
+          "nullable": true,
+          "description": "Frequency of rent payment"
+        },
+        "created_at": {
+          "type": "timestamp",
+          "description": "When the contract record was created"
+        },
+        "updated_at": {
+          "type": "timestamp",
+          "description": "When the contract record was last updated"
+        },
+        "renter_signature_data": {
+          "type": "text",
+          "nullable": true,
+          "description": "Signature data for the renter (e.g., Base64 image, SVG, or points array)"
+        },
+        "renter_signed_by_user_id": {
+          "type": "string",
+          "nullable": true,
+          "description": "User ID of the renter who signed (UUID, references users table)"
+        },
+        "renter_signature_timestamp": {
+          "type": "timestamp",
+          "nullable": true,
+          "description": "Timestamp of when the renter signed"
+        },
+        "renter_signature_ip_address": {
+          "type": "string",
+          "nullable": true,
+          "description": "IP address of the renter at the time of signing"
+        },
+        "renter_signature_user_agent": {
+          "type": "string",
+          "nullable": true,
+          "description": "User agent of the renter's device at the time of signing"
+        },
+        "landlord_signature_data": {
+          "type": "text",
+          "nullable": true,
+          "description": "Signature data for the landlord"
+        },
+        "landlord_signed_by_user_id": {
+          "type": "string",
+          "nullable": true,
+          "description": "User ID of the landlord who signed (UUID, references users table)"
+        },
+        "landlord_signature_timestamp": {
+          "type": "timestamp",
+          "nullable": true,
+          "description": "Timestamp of when the landlord signed"
+        },
+        "landlord_signature_ip_address": {
+          "type": "string",
+          "nullable": true,
+          "description": "IP address of the landlord at the time of signing"
+        },
+        "landlord_signature_user_agent": {
+          "type": "string",
+          "nullable": true,
+          "description": "User agent of the landlord's device at the time of signing"
+        }
+      },
+      "indexes": [
+        {
+          "columns": ["property_id"],
+          "type": "btree"
+        },
+        {
+          "columns": ["renter_id"],
+          "type": "btree"
+        },
+        {
+          "columns": ["landlord_id"],
+          "type": "btree"
+        },
+        {
+          "columns": ["status"],
+          "type": "btree"
+        },
+        {
+          "columns": ["renter_signed_by_user_id"],
+          "type": "btree"
+        },
+        {
+          "columns": ["landlord_signed_by_user_id"],
+          "type": "btree"
+        }
+      ]
+    }
+  },
+  "relationships": [
+    {
+      "from": "messages",
+      "to": "chats",
+      "type": "many-to-one",
+      "on": "chat_id",
+      "references": "id"
+    },
+    {
+      "from": "messages",
+      "to": "profiles",
+      "type": "many-to-one",
+      "on": "sender_id",
+      "references": "id"
+    },
+    {
+      "from": "maintenance_attachments",
+      "to": "maintenance_requests",
+      "type": "many-to-one",
+      "on": "request_id"
+    },
+    {
+      "from": "maintenance_comments",
+      "to": "maintenance_requests",
+      "type": "many-to-one",
+      "on": "request_id"
+    },
+    {
+      "from": "maintenance_status_history",
+      "to": "maintenance_requests",
+      "type": "many-to-one",
+      "on": "request_id"
+    }
+  ]
+}

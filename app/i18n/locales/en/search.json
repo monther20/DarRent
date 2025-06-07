@@ -1,0 +1,17 @@
+{
+  "title": "Find Your Home",
+  "searchByLocation": "Search by location...",
+  "price": "Price",
+  "type": "Type",
+  "rooms": "Rooms",
+  "propertiesFound": "Properties Found",
+  "lowToHigh": "Low to High",
+  "highToLow": "High to Low",
+  "ok": "OK",
+  "reset": "Reset",
+  "property": {
+    "apartment": "Apartment",
+    "villa": "Villa",
+    "studio": "Studio"
+  }
+}

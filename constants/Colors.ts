@@ -4,7 +4,7 @@
  */
 
 const tintColorLight = '#34568B'; // Primary blue
-const tintColorDark = '#E67E22';   // Orange accent
+const tintColorDark = '#E67E22'; // Orange accent
 
 export default {
   light: {

@@ -9,12 +9,13 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 
 // Custom header for settings
 function SettingsHeader({ primary }: { primary: string }) {
+  const { t } = useTranslation(['settings']);
   return (
-    <View style={[styles.header, { backgroundColor: primary }]}> 
+    <View style={[styles.header, { backgroundColor: primary }]}>
       <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
         <MaterialIcons name="arrow-back" size={26} color="#fff" />
       </TouchableOpacity>
-      <ThemedText style={styles.headerTitle}>Settings</ThemedText>
+      <ThemedText style={styles.headerTitle}>{t('title')}</ThemedText>
       <View style={{ width: 40 }} />
     </View>
   );
@@ -44,8 +45,8 @@ type SettingToggleProps = {
 };
 
 export default function LandlordSettingsScreen() {
-  const { t } = useTranslation();
-  const { logout } = useAuth();
+  const { t } = useTranslation(['settings', 'common']);
+  const { signOut } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -59,16 +60,16 @@ export default function LandlordSettingsScreen() {
   const text = useThemeColor({}, 'text');
   const grey = useThemeColor({}, 'grey');
 
-  const SettingItem = ({ 
-    title, 
-    value, 
-    onPress, 
-    icon, 
+  const SettingItem = ({
+    title,
+    value,
+    onPress,
+    icon,
     showArrow = true,
     primary,
     text,
     grey,
-    border
+    border,
   }: SettingItemProps) => (
     <TouchableOpacity
       onPress={onPress}
@@ -81,28 +82,22 @@ export default function LandlordSettingsScreen() {
       </View>
       <View style={styles.settingItemRight}>
         {value && <ThemedText style={[styles.settingValue, { color: grey }]}>{value}</ThemedText>}
-        {showArrow && (
-          <MaterialIcons 
-            name="chevron-right" 
-            size={22} 
-            color={primary} 
-          />
-        )}
+        {showArrow && <MaterialIcons name="chevron-right" size={22} color={primary} />}
       </View>
     </TouchableOpacity>
   );
 
-  const SettingToggle = ({ 
-    title, 
-    value, 
-    onValueChange, 
+  const SettingToggle = ({
+    title,
+    value,
+    onValueChange,
     icon,
     primary,
     text,
     border,
-    background
+    background,
   }: SettingToggleProps) => (
-    <View style={[styles.settingItem, { borderBottomColor: border }]}> 
+    <View style={[styles.settingItem, { borderBottomColor: border }]}>
       <View style={styles.settingItemLeft}>
         <MaterialIcons name={icon} size={22} color={primary} />
         <ThemedText style={[styles.settingText, { color: text }]}>{title}</ThemedText>
@@ -118,22 +113,26 @@ export default function LandlordSettingsScreen() {
 
   const handleLogout = async () => {
     try {
-      await logout();
-      router.replace('/auth/welcome');
+      await signOut();
+      setTimeout(() => {
+        router.replace('/auth/welcome');
+      }, 0);
     } catch (error) {
       console.error('Logout error:', error);
     }
   };
 
   return (
-    <View style={[styles.root, { backgroundColor: background }]}> 
+    <View style={[styles.root, { backgroundColor: background }]}>
       <SettingsHeader primary={primary} />
       <ScrollView style={styles.scrollContent}>
         {/* Account Settings */}
-        <View style={[styles.sectionCard, { backgroundColor: card, shadowColor: primary }]}> 
-          <ThemedText style={[styles.sectionTitle, { color: primary }]}>Account Settings</ThemedText>
+        <View style={[styles.sectionCard, { backgroundColor: card, shadowColor: primary }]}>
+          <ThemedText style={[styles.sectionTitle, { color: primary }]}>
+            {t('account')}
+          </ThemedText>
           <SettingItem
-            title="Profile"
+            title={t('profile')}
             icon="person"
             onPress={() => router.push('/settings/profile')}
             primary={primary}
@@ -142,7 +141,7 @@ export default function LandlordSettingsScreen() {
             border={border}
           />
           <SettingItem
-            title="Security"
+            title={t('security')}
             icon="security"
             onPress={() => router.push('/settings/security')}
             primary={primary}
@@ -151,7 +150,7 @@ export default function LandlordSettingsScreen() {
             border={border}
           />
           <SettingItem
-            title="Payment Methods"
+            title={t('paymentMethods')}
             icon="payment"
             onPress={() => router.push('/settings/payment')}
             primary={primary}
@@ -162,10 +161,10 @@ export default function LandlordSettingsScreen() {
         </View>
 
         {/* Notifications */}
-        <View style={[styles.sectionCard, { backgroundColor: card, shadowColor: primary }]}> 
-          <ThemedText style={[styles.sectionTitle, { color: primary }]}>Notifications</ThemedText>
+        <View style={[styles.sectionCard, { backgroundColor: card, shadowColor: primary }]}>
+          <ThemedText style={[styles.sectionTitle, { color: primary }]}>{t('notifications')}</ThemedText>
           <SettingToggle
-            title="Push Notifications"
+            title={t('pushNotifications')}
             value={pushNotifications}
             onValueChange={setPushNotifications}
             icon="notifications"
@@ -175,7 +174,7 @@ export default function LandlordSettingsScreen() {
             background={background}
           />
           <SettingToggle
-            title="Email Notifications"
+            title={t('emailNotifications')}
             value={emailNotifications}
             onValueChange={setEmailNotifications}
             icon="email"
@@ -187,11 +186,11 @@ export default function LandlordSettingsScreen() {
         </View>
 
         {/* Preferences */}
-        <View style={[styles.sectionCard, { backgroundColor: card, shadowColor: primary }]}> 
-          <ThemedText style={[styles.sectionTitle, { color: primary }]}>Preferences</ThemedText>
+        <View style={[styles.sectionCard, { backgroundColor: card, shadowColor: primary }]}>
+          <ThemedText style={[styles.sectionTitle, { color: primary }]}>{t('preferences')}</ThemedText>
           <SettingItem
-            title="Language"
-            value="English"
+            title={t('language')}
+            value={t('english')}
             icon="language"
             onPress={() => router.push('/settings/language')}
             primary={primary}
@@ -200,7 +199,7 @@ export default function LandlordSettingsScreen() {
             border={border}
           />
           <SettingToggle
-            title="Dark Mode"
+            title={t('darkMode')}
             value={darkMode}
             onValueChange={setDarkMode}
             icon="dark-mode"
@@ -212,10 +211,10 @@ export default function LandlordSettingsScreen() {
         </View>
 
         {/* Support */}
-        <View style={[styles.sectionCard, { backgroundColor: card, shadowColor: primary }]}> 
-          <ThemedText style={[styles.sectionTitle, { color: primary }]}>Support</ThemedText>
+        <View style={[styles.sectionCard, { backgroundColor: card, shadowColor: primary }]}>
+          <ThemedText style={[styles.sectionTitle, { color: primary }]}>{t('support')}</ThemedText>
           <SettingItem
-            title="Help Center"
+            title={t('helpCenter')}
             icon="help"
             onPress={() => router.push('/help')}
             primary={primary}
@@ -224,7 +223,7 @@ export default function LandlordSettingsScreen() {
             border={border}
           />
           <SettingItem
-            title="Contact Support"
+            title={t('contactSupport')}
             icon="contact-support"
             onPress={() => router.push('/contact-support')}
             primary={primary}
@@ -233,7 +232,7 @@ export default function LandlordSettingsScreen() {
             border={border}
           />
           <SettingItem
-            title="Terms and Conditions"
+            title={t('termsAndConditions')}
             icon="description"
             onPress={() => router.push('/terms')}
             primary={primary}
@@ -242,7 +241,7 @@ export default function LandlordSettingsScreen() {
             border={border}
           />
           <SettingItem
-            title="Privacy Policy"
+            title={t('privacyPolicy')}
             icon="privacy-tip"
             onPress={() => router.push('/privacy')}
             primary={primary}
@@ -253,10 +252,10 @@ export default function LandlordSettingsScreen() {
         </View>
 
         {/* App Info */}
-        <View style={[styles.sectionCard, { backgroundColor: card, shadowColor: primary }]}> 
-          <ThemedText style={[styles.sectionTitle, { color: primary }]}>About</ThemedText>
+        <View style={[styles.sectionCard, { backgroundColor: card, shadowColor: primary }]}>
+          <ThemedText style={[styles.sectionTitle, { color: primary }]}>{t('about')}</ThemedText>
           <SettingItem
-            title="Version"
+            title={t('version')}
             value="1.0.0"
             icon="info"
             showArrow={false}
@@ -269,12 +268,12 @@ export default function LandlordSettingsScreen() {
         </View>
 
         {/* Logout Button */}
-        <TouchableOpacity 
-          style={[styles.logoutButton, { backgroundColor: error, shadowColor: error }]}
+        <TouchableOpacity
+          style={[styles.logoutButton, { backgroundColor: error }]}
           onPress={handleLogout}
-          activeOpacity={0.85}
+          activeOpacity={0.8}
         >
-          <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
+          <ThemedText style={styles.logoutText}>{t('common.logout')}</ThemedText>
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -363,10 +362,10 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  logoutButtonText: {
+  logoutText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.5,
   },
-}); 
+});

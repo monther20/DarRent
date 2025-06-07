@@ -1,5 +1,11 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# SQL
+SQL/
+
+# markdown
+markdown/
+
 # dependencies
 /node_modules
 /.pnp

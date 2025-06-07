@@ -44,7 +44,7 @@ declare module 'react-native' {
     trackColor?: { false: string; true: string };
     thumbColor?: string;
   }
-  
+
   export const View: React.ComponentType<ViewProps>;
   export const Text: React.ComponentType<TextProps>;
   export const Image: React.ComponentType<ImageProps>;
@@ -57,4 +57,4 @@ declare module 'react-native' {
   export const StyleSheet: {
     create: <T extends Record<string, any>>(styles: T) => T;
   };
-} 
+}

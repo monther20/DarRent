@@ -12,4 +12,4 @@ export function formatDate(dateString: string): string {
     month: 'long',
     day: 'numeric',
   });
-} 
+}

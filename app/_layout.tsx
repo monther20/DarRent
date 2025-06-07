@@ -5,8 +5,8 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { I18nextProvider } from 'react-i18next';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import i18n from '../localization/i18n';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import i18n from './i18n/i18n';
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
@@ -67,63 +67,77 @@ function RootLayoutNav() {
         headerTitleStyle: {
           fontWeight: '600',
         },
+        headerShown: false,
       }}
     >
       {!user ? (
-        <Stack.Screen 
-          name="auth" 
+        <Stack.Screen
+          name="auth"
           options={{
-            headerShown: false
+            headerShown: false,
           }}
         />
-      ) : user.role === 'landlord' ? (
-        <Stack.Screen 
+      ) : user.user_metadata.role === 'landlord' ? (
+        <Stack.Screen
           name="(landlord-tabs)"
           options={{
-            headerShown: false
+            headerShown: false,
           }}
         />
       ) : (
-        <Stack.Screen 
-          name="(renter-tabs)"
-          options={{
-            headerShown: false
-          }}
-        />
+        <>
+          <Stack.Screen
+            name="(renter-tabs)"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="(renter-tabs)/ContractReview"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="(renter-tabs)/ContractSignature"
+            options={{
+              headerShown: false,
+            }}
+          />
+        </>
       )}
-      <Stack.Screen 
-        name="modal" 
-        options={{ 
-          presentation: 'modal',
-          headerShown: true
-        }} 
-      />
-      <Stack.Screen 
-        name="chat/[id]"
+      <Stack.Screen
+        name="modal"
         options={{
-          headerShown: true
+          presentation: 'modal',
+          headerShown: true,
         }}
       />
-      <Stack.Screen 
+      <Stack.Screen
+        name="chat/[id]"
+        options={{
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
         name="settings"
         options={{
           headerShown: true,
-          title: 'Settings'
+          title: 'Settings',
         }}
       />
-      <Stack.Screen 
+      <Stack.Screen
         name="help"
         options={{
-          headerShown: false
+          headerShown: false,
         }}
       />
-      <Stack.Screen 
+      <Stack.Screen
         name="terms"
         options={{
-          headerShown: false
+          headerShown: false,
         }}
       />
     </Stack>
   );
 }
-

@@ -4,11 +4,11 @@ import { StatusBar } from 'expo-status-bar';
 import { ThemedText } from '@/components/ThemedText';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import { changeLanguage } from '../../localization/i18n';
+import { changeLanguage } from '../i18n/i18n';
 import { Link } from 'expo-router';
 
 export default function WelcomeScreen() {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['auth', 'common']);
   const [selectedLanguage, setSelectedLanguage] = useState(i18n.language || 'en');
 
   const handleLanguageChange = async (lang: string) => {
@@ -23,53 +23,47 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-      
+
       <View style={styles.content}>
         {/* Logo and Header */}
         <View style={styles.headerContainer}>
-          <Image 
-            source={require('@/assets/images/logo.png')} 
+          <Image
+            source={require('@/assets/images/logo.png')}
             style={styles.logo}
             resizeMode="contain"
           />
-          <ThemedText style={styles.title}>
-            Welcome to DarRent
-          </ThemedText>
-          <ThemedText style={styles.subtitle}>
-            Find your perfect home in Jordan
-          </ThemedText>
+          <ThemedText style={styles.title}>Welcome to DarRent</ThemedText>
+          <ThemedText style={styles.subtitle}>Find your perfect home in Jordan</ThemedText>
         </View>
 
         {/* Language Toggle */}
         <View style={styles.languageToggleContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
               styles.languageOption,
               selectedLanguage === 'en' && styles.activeLanguage,
-              { borderTopLeftRadius: 20, borderBottomLeftRadius: 20 }
+              { borderTopLeftRadius: 20, borderBottomLeftRadius: 20 },
             ]}
             onPress={() => handleLanguageChange('en')}
           >
-            <ThemedText style={[
-              styles.languageText,
-              selectedLanguage === 'en' && styles.activeLanguageText
-            ]}>
+            <ThemedText
+              style={[styles.languageText, selectedLanguage === 'en' && styles.activeLanguageText]}
+            >
               EN
             </ThemedText>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
               styles.languageOption,
               selectedLanguage === 'ar' && styles.activeLanguage,
-              { borderTopRightRadius: 20, borderBottomRightRadius: 20 }
+              { borderTopRightRadius: 20, borderBottomRightRadius: 20 },
             ]}
             onPress={() => handleLanguageChange('ar')}
           >
-            <ThemedText style={[
-              styles.languageText,
-              selectedLanguage === 'ar' && styles.activeLanguageText
-            ]}>
+            <ThemedText
+              style={[styles.languageText, selectedLanguage === 'ar' && styles.activeLanguageText]}
+            >
               عربي
             </ThemedText>
           </TouchableOpacity>
@@ -77,22 +71,12 @@ export default function WelcomeScreen() {
 
         {/* Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.getStartedButton}
-            onPress={handleGetStarted}
-          >
-            <ThemedText style={styles.getStartedButtonText}>
-              Get Started
-            </ThemedText>
+          <TouchableOpacity style={styles.getStartedButton} onPress={handleGetStarted}>
+            <ThemedText style={styles.getStartedButtonText}>Get Started</ThemedText>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => router.push('/auth/login')}
-          >
-            <ThemedText style={styles.loginButtonText}>
-              Login
-            </ThemedText>
+          <TouchableOpacity style={styles.loginButton} onPress={() => router.push('/auth/login')}>
+            <ThemedText style={styles.loginButtonText}>Login</ThemedText>
           </TouchableOpacity>
         </View>
       </View>
@@ -101,7 +85,9 @@ export default function WelcomeScreen() {
       <View style={styles.footer}>
         <ThemedText style={styles.footerText}>
           By continuing, you agree to our{' '}
-          <Link href="/terms" style={styles.link}>Terms of Service And Privacy Policy</Link>
+          <Link href="/terms" style={styles.link}>
+            Terms of Service And Privacy Policy
+          </Link>
         </ThemedText>
       </View>
     </View>
@@ -213,4 +199,4 @@ const styles = StyleSheet.create({
     color: '#E67E22',
     textDecorationLine: 'none',
   },
-}); 
+});

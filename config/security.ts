@@ -47,4 +47,4 @@ class SecurityConfig {
   }
 }
 
-export const securityConfig = SecurityConfig.getInstance(); 
+export const securityConfig = SecurityConfig.getInstance();

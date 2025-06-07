@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next';
 
 export default function AuthLayout() {
   const { t } = useTranslation();
-  
+
   return (
     <Stack
       screenOptions={{
         headerShown: false,
+        contentStyle: { backgroundColor: '#fff' },
       }}
     >
       <Stack.Screen
@@ -50,4 +51,4 @@ export default function AuthLayout() {
       />
     </Stack>
   );
-} 
+}

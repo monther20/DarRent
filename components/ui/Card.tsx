@@ -74,9 +74,7 @@ export function Card(props: CardProps) {
           <Text style={styles.detailText}>{details.area}m²</Text>
         </View>
       )}
-      {details.status && (
-        <Text style={styles.detailText}>{details.status}</Text>
-      )}
+      {details.status && <Text style={styles.detailText}>{details.status}</Text>}
     </View>
   );
 
@@ -144,9 +142,8 @@ export function Card(props: CardProps) {
     }
   };
 
-  const containerStyle = props.variant === 'landlord-property' 
-    ? styles.landlordContainer 
-    : styles.container;
+  const containerStyle =
+    props.variant === 'landlord-property' ? styles.landlordContainer : styles.container;
 
   return (
     <TouchableOpacity style={containerStyle} onPress={handlePress}>
@@ -256,4 +253,4 @@ const styles = StyleSheet.create({
   warningText: {
     color: '#92400E',
   },
-}); 
+});

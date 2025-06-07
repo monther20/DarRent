@@ -5,12 +5,12 @@ import {
   ScrollView as RNScrollView,
   TouchableOpacity as RNTouchableOpacity,
   Image as RNImage,
-  ActivityIndicator as RNActivityIndicator
+  ActivityIndicator as RNActivityIndicator,
 } from 'react-native';
 
 export const View = RNView;
-export const Text = RNText; 
+export const Text = RNText;
 export const ScrollView = RNScrollView;
 export const TouchableOpacity = RNTouchableOpacity;
 export const Image = RNImage;
-export const ActivityIndicator = RNActivityIndicator; 
+export const ActivityIndicator = RNActivityIndicator;

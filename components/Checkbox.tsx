@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import { TouchableOpacity, StyleSheet, View } from 'react-native'; // Added View
 import { Ionicons } from '@expo/vector-icons';
 
 interface CheckboxProps {
@@ -9,12 +9,11 @@ interface CheckboxProps {
 
 export default function Checkbox({ checked, onPress }: CheckboxProps) {
   return (
-    <TouchableOpacity
-      style={[styles.checkbox, checked && styles.checked]}
-      onPress={onPress}
-    >
+    <TouchableOpacity testID="checkbox-touchable" style={[styles.checkbox, checked && styles.checked]} onPress={onPress}>
       {checked && (
-        <Ionicons name="checkmark" size={16} color="white" />
+        <View testID="checkmark-icon-container">
+          <Ionicons name="checkmark" size={16} color="white" />
+        </View>
       )}
     </TouchableOpacity>
   );
@@ -34,4 +33,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#34568B',
     borderColor: '#34568B',
   },
-}); 
+});

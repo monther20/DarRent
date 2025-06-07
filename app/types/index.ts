@@ -85,4 +85,30 @@ export interface Stats {
   activeLeases: number;
   expiringSoon: number;
   averageRating: number;
-} 
+}
+
+export interface MaintenanceRequest {
+  id: string;
+  propertyId: string;
+  renterId: string;
+  title: string;
+  description: string;
+  status: 'pending' | 'scheduled' | 'completed' | 'cancelled';
+  createdAt: string;
+  scheduledDate?: string;
+  completedDate?: string;
+}
+
+export interface RentRequest {
+  id: string;
+  propertyId: string;
+  renterId: string;
+  requestDate: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  months: number;
+  startDate: string;
+  message?: string;
+  responseDate?: string | null;
+  contractId?: string;
+}
+// Re-saving to attempt to clear TS server cache

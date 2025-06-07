@@ -61,16 +61,16 @@ export function BottomNavBar({ userType }: BottomNavBarProps) {
       path: '/(renter-tabs)/search',
     },
     {
-      name: 'My Rental',
-      icon: 'business-outline',
-      activeIcon: 'business',
-      path: '/(renter-tabs)/rental',
+      name: 'Payments',
+      icon: 'card-outline',
+      activeIcon: 'card',
+      path: '/(renter-tabs)/payments',
     },
     {
-      name: 'Settings',
-      icon: 'settings-outline',
-      activeIcon: 'settings',
-      path: '/(renter-tabs)/settings',
+      name: 'Maintenance',
+      icon: 'build-outline',
+      activeIcon: 'build',
+      path: '/(renter-tabs)/maintenance',
     },
   ];
 
@@ -89,22 +89,13 @@ export function BottomNavBar({ userType }: BottomNavBarProps) {
       {tabs.map((tab) => {
         const isActive = isTabActive(tab.path);
         return (
-          <TouchableOpacity
-            key={tab.name}
-            style={styles.tab}
-            onPress={() => router.push(tab.path)}
-          >
+          <TouchableOpacity key={tab.name} style={styles.tab} onPress={() => router.push(tab.path)}>
             <Ionicons
               name={isActive ? tab.activeIcon : tab.icon}
               size={24}
               color={isActive ? '#E67E22' : 'white'}
             />
-            <Text style={[
-              styles.label,
-              isActive && styles.activeLabel
-            ]}>
-              {tab.name}
-            </Text>
+            <Text style={[styles.label, isActive && styles.activeLabel]}>{tab.name}</Text>
           </TouchableOpacity>
         );
       })}
@@ -133,4 +124,4 @@ const styles = StyleSheet.create({
   activeLabel: {
     color: '#E67E22',
   },
-}); 
+});

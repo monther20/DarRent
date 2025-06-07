@@ -9,55 +9,46 @@ import { ThemedButton } from '@/components/ThemedButton';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function RenterSettingsScreen() {
-  const { t } = useTranslation();
-  const { user, logout } = useAuth();
+  const { t } = useTranslation(['settings', 'common']);
+  const { user, signOut } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
 
-  const SettingItem = ({ 
-    title, 
-    value, 
-    onPress, 
-    icon, 
-    showArrow = true 
-  }: { 
-    title: string; 
-    value?: string; 
-    onPress: () => void; 
+  const SettingItem = ({
+    title,
+    value,
+    onPress,
+    icon,
+    showArrow = true,
+  }: {
+    title: string;
+    value?: string;
+    onPress: () => void;
     icon: keyof typeof MaterialIcons.glyphMap;
     showArrow?: boolean;
   }) => (
-    <TouchableOpacity
-      onPress={onPress}
-      style={styles.settingItem}
-    >
+    <TouchableOpacity onPress={onPress} style={styles.settingItem}>
       <View style={styles.settingItemLeft}>
         <MaterialIcons name={icon} size={24} style={styles.settingIcon} />
         <ThemedText style={styles.settingText}>{title}</ThemedText>
       </View>
       <View style={styles.settingItemRight}>
         {value && <ThemedText style={styles.settingValue}>{value}</ThemedText>}
-        {showArrow && (
-          <MaterialIcons 
-            name="chevron-right" 
-            size={24} 
-            style={styles.settingArrow} 
-          />
-        )}
+        {showArrow && <MaterialIcons name="chevron-right" size={24} style={styles.settingArrow} />}
       </View>
     </TouchableOpacity>
   );
 
-  const SettingToggle = ({ 
-    title, 
-    value, 
-    onValueChange, 
-    icon 
-  }: { 
-    title: string; 
-    value: boolean; 
-    onValueChange: (value: boolean) => void; 
+  const SettingToggle = ({
+    title,
+    value,
+    onValueChange,
+    icon,
+  }: {
+    title: string;
+    value: boolean;
+    onValueChange: (value: boolean) => void;
     icon: keyof typeof MaterialIcons.glyphMap;
   }) => (
     <View style={styles.settingItem}>
@@ -76,7 +67,7 @@ export default function RenterSettingsScreen() {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
       router.replace('/auth/welcome');
     } catch (error) {
       console.error('Logout error:', error);
@@ -88,19 +79,19 @@ export default function RenterSettingsScreen() {
       <ScrollView>
         {/* Account Settings */}
         <ThemedView style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>{t('settings.account')}</ThemedText>
+          <ThemedText style={styles.sectionTitle}>{t('account')}</ThemedText>
           <SettingItem
-            title={t('settings.profile')}
+            title={t('profile')}
             icon="person"
             onPress={() => router.push('/settings/profile')}
           />
           <SettingItem
-            title={t('settings.security')}
+            title={t('security')}
             icon="security"
             onPress={() => router.push('/settings/security')}
           />
           <SettingItem
-            title={t('settings.paymentMethods')}
+            title={t('paymentMethods')}
             icon="payment"
             onPress={() => router.push('/settings/payment')}
           />
@@ -108,15 +99,15 @@ export default function RenterSettingsScreen() {
 
         {/* Notifications */}
         <ThemedView style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>{t('settings.notifications')}</ThemedText>
+          <ThemedText style={styles.sectionTitle}>{t('notifications')}</ThemedText>
           <SettingToggle
-            title={t('settings.pushNotifications')}
+            title={t('pushNotifications')}
             value={pushNotifications}
             onValueChange={setPushNotifications}
             icon="notifications"
           />
           <SettingToggle
-            title={t('settings.emailNotifications')}
+            title={t('emailNotifications')}
             value={emailNotifications}
             onValueChange={setEmailNotifications}
             icon="email"
@@ -125,15 +116,15 @@ export default function RenterSettingsScreen() {
 
         {/* Preferences */}
         <ThemedView style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>{t('settings.preferences')}</ThemedText>
+          <ThemedText style={styles.sectionTitle}>{t('preferences')}</ThemedText>
           <SettingItem
-            title={t('settings.language')}
-            value={t('settings.english')}
+            title={t('language')}
+            value={t('english')}
             icon="language"
             onPress={() => router.push('/settings/language')}
           />
           <SettingToggle
-            title={t('settings.darkMode')}
+            title={t('darkMode')}
             value={darkMode}
             onValueChange={setDarkMode}
             icon="dark-mode"
@@ -142,24 +133,24 @@ export default function RenterSettingsScreen() {
 
         {/* Support */}
         <ThemedView style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>{t('settings.support')}</ThemedText>
+          <ThemedText style={styles.sectionTitle}>{t('support')}</ThemedText>
           <SettingItem
-            title={t('settings.helpCenter')}
+            title={t('helpCenter')}
             icon="help"
             onPress={() => router.push('/help')}
           />
           <SettingItem
-            title={t('settings.contactSupport')}
+            title={t('contactSupport')}
             icon="contact-support"
             onPress={() => router.push('/contact-support')}
           />
           <SettingItem
-            title={t('settings.termsAndConditions')}
+            title={t('termsAndConditions')}
             icon="description"
             onPress={() => router.push('/terms')}
           />
           <SettingItem
-            title={t('settings.privacyPolicy')}
+            title={t('privacyPolicy')}
             icon="privacy-tip"
             onPress={() => router.push('/privacy')}
           />
@@ -167,9 +158,9 @@ export default function RenterSettingsScreen() {
 
         {/* App Info */}
         <ThemedView style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>{t('settings.about')}</ThemedText>
+          <ThemedText style={styles.sectionTitle}>{t('about')}</ThemedText>
           <SettingItem
-            title={t('settings.version')}
+            title={t('version')}
             value="1.0.0"
             icon="info"
             showArrow={false}
@@ -246,4 +237,4 @@ const styles = StyleSheet.create({
   logoutButton: {
     margin: 16,
   },
-}); 
+});

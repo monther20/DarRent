@@ -68,15 +68,10 @@ export default function NotificationSettingsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <MaterialCommunityIcons name="arrow-left" size={24} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          Notification Settings
-        </Text>
+        <Text style={styles.headerTitle}>Notification Settings</Text>
       </View>
 
       <ScrollView style={styles.scrollView}>
@@ -85,24 +80,17 @@ export default function NotificationSettingsScreen() {
           <Text style={styles.sectionTitle}>Push Notifications</Text>
           <View style={styles.card}>
             {notificationSettings.map((setting) => (
-              <View
-                key={setting.id}
-                style={styles.settingItem}
-              >
+              <View key={setting.id} style={styles.settingItem}>
                 <View style={styles.settingContent}>
                   <Text style={styles.settingTitle}>{setting.title}</Text>
-                  <Text style={styles.settingDescription}>
-                    {setting.description}
-                  </Text>
+                  <Text style={styles.settingDescription}>{setting.description}</Text>
                 </View>
                 <Switch
                   value={settings[setting.key] ?? setting.defaultValue}
                   onValueChange={() => toggleSetting(setting.key)}
                   trackColor={{ false: '#D1D5DB', true: '#93C5FD' }}
                   thumbColor={
-                    settings[setting.key] ?? setting.defaultValue
-                      ? '#2563EB'
-                      : '#F3F4F6'
+                    (settings[setting.key] ?? setting.defaultValue) ? '#2563EB' : '#F3F4F6'
                   }
                 />
               </View>
@@ -117,17 +105,13 @@ export default function NotificationSettingsScreen() {
             <View style={styles.settingItem}>
               <View style={styles.settingContent}>
                 <Text style={styles.settingTitle}>Email Notifications</Text>
-                <Text style={styles.settingDescription}>
-                  Receive notifications via email
-                </Text>
+                <Text style={styles.settingDescription}>Receive notifications via email</Text>
               </View>
               <Switch
                 value={settings.email_notifications ?? true}
                 onValueChange={() => toggleSetting('email_notifications')}
                 trackColor={{ false: '#D1D5DB', true: '#93C5FD' }}
-                thumbColor={
-                  settings.email_notifications ?? true ? '#2563EB' : '#F3F4F6'
-                }
+                thumbColor={(settings.email_notifications ?? true) ? '#2563EB' : '#F3F4F6'}
               />
             </View>
           </View>
@@ -135,9 +119,7 @@ export default function NotificationSettingsScreen() {
 
         {/* Notification Frequency */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            Notification Frequency
-          </Text>
+          <Text style={styles.sectionTitle}>Notification Frequency</Text>
           <View style={styles.card}>
             <TouchableOpacity
               style={styles.frequencyItem}
@@ -149,11 +131,7 @@ export default function NotificationSettingsScreen() {
                   Customize how often you receive notifications
                 </Text>
               </View>
-              <MaterialCommunityIcons
-                name="chevron-right"
-                size={24}
-                color="#6B7280"
-              />
+              <MaterialCommunityIcons name="chevron-right" size={24} color="#6B7280" />
             </TouchableOpacity>
           </View>
         </View>
@@ -230,4 +208,4 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
   },
-}); 
+});

@@ -24,13 +24,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   }, [colorScheme]);
 
   const toggleTheme = () => {
-    setIsDarkMode(prev => !prev);
+    setIsDarkMode((prev) => !prev);
   };
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>{children}</ThemeContext.Provider>
   );
 };
 
@@ -42,4 +40,4 @@ export const useTheme = () => {
   return context;
 };
 
-export default ThemeProvider; 
+export default ThemeProvider;

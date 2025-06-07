@@ -1,13 +1,14 @@
 import { Redirect } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { View, ActivityIndicator } from 'react-native';
+import './i18n/i18n';
 
 export default function Index() {
   try {
     console.log('Initializing app...');
     const { isLoggedIn, user } = useAuth();
     console.log('Auth state:', { isLoggedIn, user });
-    
+
     // Redirect based on authentication status and user role
     if (isLoggedIn) {
       console.log('User is logged in');
@@ -22,15 +23,17 @@ export default function Index() {
     } else {
       console.log('User is not logged in, redirecting to welcome');
     }
-    
+
     return <Redirect href="/auth/welcome" />;
   } catch (error) {
     // If AuthProvider is not available yet, show a loading indicator
     console.error('Error in Index component:', error);
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <View
+        style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}
+      >
         <ActivityIndicator size="large" color="#34568B" />
       </View>
     );
   }
-} 
+}

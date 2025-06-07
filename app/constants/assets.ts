@@ -12,7 +12,9 @@ export const ASSETS = {
     villa: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?fit=crop&w=800&h=500',
   },
   placeholders: {
-    propertyDefault: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?fit=crop&w=800&h=500',
-    avatarDefault: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?fit=crop&w=200&h=200',
+    propertyDefault:
+      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?fit=crop&w=800&h=500',
+    avatarDefault:
+      'https://images.unsplash.com/photo-1633332755192-727a05c4013d?fit=crop&w=200&h=200',
   },
-}; 
+};

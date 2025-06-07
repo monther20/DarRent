@@ -39,13 +39,7 @@ const LanguageScreen = () => {
               ({lang.name})
             </Text>
           </View>
-          {language === lang.code && (
-            <MaterialIcons
-              name="check"
-              size={24}
-              color="#3B82F6"
-            />
-          )}
+          {language === lang.code && <MaterialIcons name="check" size={24} color="#3B82F6" />}
         </TouchableOpacity>
       ))}
     </View>
@@ -92,4 +86,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LanguageScreen; 
+export default LanguageScreen;

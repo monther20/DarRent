@@ -81,8 +81,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <SettingsContext.Provider 
-      value={{ 
+    <SettingsContext.Provider
+      value={{
         ...settings,
         setTheme,
         setLanguage,
@@ -103,4 +103,4 @@ export function useSettings() {
   return context;
 }
 
-export default SettingsProvider; 
+export default SettingsProvider;

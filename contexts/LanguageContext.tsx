@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { changeLanguage } from '../app/i18n/i18n'; // Updated import path
 
 type Language = 'en' | 'ar';
 
@@ -35,6 +36,8 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
         const savedLanguage = await AsyncStorage.getItem('language');
         if (savedLanguage === 'en' || savedLanguage === 'ar') {
           setLanguageState(savedLanguage);
+          // Apply the saved language to i18n
+          changeLanguage(savedLanguage);
         }
       } catch (error) {
         console.error('Error loading language preference:', error);
@@ -42,7 +45,7 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
         setIsLoading(false);
       }
     };
-    
+
     loadLanguage();
   }, []);
 
@@ -50,6 +53,10 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
     try {
       await AsyncStorage.setItem('language', lang);
       setLanguageState(lang);
+
+      // Update i18n language when app language changes
+      changeLanguage(lang);
+      console.log(`Language changed to: ${lang}`);
     } catch (error) {
       console.error('Error saving language preference:', error);
     }
@@ -62,4 +69,4 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
   );
 };
 
-export default LanguageProvider; 
+export default LanguageProvider;

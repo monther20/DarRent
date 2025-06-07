@@ -14,7 +14,7 @@ interface MenuProps {
 }
 
 export function Menu({ visible, onClose }: MenuProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['menu']);
   const router = useRouter();
   const { language } = useLanguage();
   const { user, logout } = useAuth();
@@ -22,38 +22,38 @@ export function Menu({ visible, onClose }: MenuProps) {
 
   const menuItems = [
     {
-      title: t('menu.messages'),
+      title: t('messages'),
       icon: 'comments',
       route: '/chat',
     },
     {
-      title: t('menu.profile'),
+      title: t('profile'),
       icon: 'user',
       route: '/settings/profile',
     },
     {
-      title: t('menu.settings'),
+      title: t('settings'),
       icon: 'cog',
       route: '/settings',
     },
     {
-      title: t('menu.language'),
+      title: t('language'),
       icon: 'language',
       route: '/settings/language',
     },
     {
-      title: t('menu.theme'),
+      title: t('theme'),
       icon: 'paint-brush',
       route: '/settings/theme',
     },
     {
-      title: t('menu.signOut'),
+      title: t('signOut'),
       icon: 'sign-out',
       onPress: logout,
     },
   ];
 
-  const handlePress = (item: typeof menuItems[0]) => {
+  const handlePress = (item: (typeof menuItems)[0]) => {
     if (item.onPress) {
       item.onPress();
     } else {
@@ -63,15 +63,11 @@ export function Menu({ visible, onClose }: MenuProps) {
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={[styles.menuContainer, isRTL ? styles.menuRTL : styles.menuLTR]}>
           <View style={styles.header}>
-            <Text style={styles.headerText}>{t('menu.title')}</Text>
+            <Text style={styles.headerText}>{t('title')}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <FontAwesome name="times" size={24} color={Colors.light.text} />
             </TouchableOpacity>
@@ -81,7 +77,8 @@ export function Menu({ visible, onClose }: MenuProps) {
               <TouchableOpacity
                 key={index}
                 style={styles.menuItem}
-                onPress={() => handlePress(item)}>
+                onPress={() => handlePress(item)}
+              >
                 <FontAwesome name={item.icon as any} size={20} color={Colors.light.text} />
                 <Text style={styles.menuItemText}>{item.title}</Text>
               </TouchableOpacity>
@@ -146,4 +143,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.light.text,
   },
-}); 
+});

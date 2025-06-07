@@ -11,9 +11,7 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <ScreenHeader
-        title={`Hello, ${user?.fullName}`}
-      />
+      <ScreenHeader title={`Hello, ${user?.fullName}`} />
 
       {/* Welcome Card */}
       <View style={styles.welcomeCard}>
@@ -21,7 +19,7 @@ export default function DashboardScreen() {
           <ThemedText style={styles.welcomeTitle}>Welcome Back!</ThemedText>
           <ThemedText style={styles.welcomeSubtitle}>Manage your properties efficiently</ThemedText>
         </View>
-        <Image 
+        <Image
           source={require('@/assets/images/dashboard-illustration.png')}
           style={styles.welcomeImage}
         />
@@ -64,14 +62,14 @@ export default function DashboardScreen() {
       <View style={styles.section}>
         <ThemedText style={styles.sectionTitle}>Quick Actions</ThemedText>
         <View style={styles.quickActions}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.actionButton}
             onPress={() => router.push('/add-property')}
           >
             <MaterialIcons name="add-circle" size={24} color="white" />
             <ThemedText style={styles.actionButtonText}>Add Property</ThemedText>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.actionButton}
             onPress={() => router.push('/applications')}
           >
@@ -235,4 +233,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     flex: 1,
   },
-}); 
+});

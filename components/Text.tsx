@@ -7,10 +7,7 @@ interface Props extends TextProps {
 
 export function Text({ variant = 'default', style, children, ...props }: Props) {
   return (
-    <RNText
-      style={[styles[variant], style]}
-      {...props}
-    >
+    <RNText style={[styles[variant], style]} {...props}>
       {children}
     </RNText>
   );
@@ -35,4 +32,4 @@ const styles = StyleSheet.create({
     color: '#6B7280', // text-gray-500
     fontSize: 14,
   },
-}); 
+});

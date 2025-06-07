@@ -40,9 +40,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const isDark = theme === 'system'
-    ? systemColorScheme === 'dark'
-    : theme === 'dark';
+  const isDark = theme === 'system' ? systemColorScheme === 'dark' : theme === 'dark';
 
   return (
     <ThemeContext.Provider
@@ -65,4 +63,4 @@ export const useTheme = () => {
   return context;
 };
 
-export default ThemeContext; 
+export default ThemeContext;

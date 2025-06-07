@@ -6,7 +6,7 @@ import * as Device from 'expo-device';
 
 export default function ModalScreen() {
   const isIOS = Device.osName === 'iOS';
-  
+
   return (
     <ThemedView style={styles.container}>
       <ThemedText style={styles.title}>Modal</ThemedText>
@@ -34,4 +34,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginHorizontal: 20,
   },
-}); 
+});

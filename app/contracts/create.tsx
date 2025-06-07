@@ -1,26 +1,327 @@
-import React, { useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
-// @ts-ignore
-import { Alert, Platform } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
+  Alert,
+} from 'react-native';
+import { useLocalSearchParams, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { router } from 'expo-router';
-import api from '@/services/api';
-import { Property, User } from '@/services/mockData';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { mockApi } from '../services/mockApi';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { StatusBar } from 'expo-status-bar';
-import { Picker } from '@react-native-picker/picker';
-import { RoleGuard } from '@/components/RoleGuard';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Loader, SuccessAnimation } from '@/app/components/animations';
 
-// Add type declarations to fix TypeScript errors
-declare module 'react-native' {
-  interface TextInputProps {
-    keyboardType?: string;
+export default function CreateContract() {
+  const { t } = useTranslation(['common', 'rental', 'property', 'propertyDetails', 'contracts']);
+  const params = useLocalSearchParams();
+  const { propertyId, renterId, requestId, months } = params;
+  const { user } = useAuth();
+  const { language } = useLanguage();
+  const isRTL = language === 'ar';
+
+  const [property, setProperty] = useState<any>(null);
+  const [renter, setRenter] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Contract form data
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() + (months ? parseInt(months as string, 10) : 6));
+    return date;
+  });
+  const [securityDeposit, setSecurityDeposit] = useState('');
+  const [additionalTerms, setAdditionalTerms] = useState('');
+
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      try {
+        if (propertyId) {
+          const propertyData = await mockApi.getPropertyById(propertyId as string);
+          setProperty(propertyData);
+        }
+
+        if (renterId) {
+          const renterData = await mockApi.getUserById(renterId as string);
+          setRenter(renterData);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        Alert.alert(t('error', { ns: 'common' }), t('errorLoadingData', { ns: 'propertyDetails' }));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [propertyId, renterId, t]);
+
+  const onStartDateChange = (event: any, selectedDate?: Date) => {
+    setShowStartDatePicker(false);
+    if (selectedDate) {
+      setStartDate(selectedDate);
+
+      // If end date is earlier than new start date, update end date
+      if (endDate < selectedDate) {
+        const newEndDate = new Date(selectedDate);
+        newEndDate.setMonth(newEndDate.getMonth() + (months ? parseInt(months as string, 10) : 6));
+        setEndDate(newEndDate);
+      }
+    }
+  };
+
+  const onEndDateChange = (event: any, selectedDate?: Date) => {
+    setShowEndDatePicker(false);
+    if (selectedDate) {
+      setEndDate(selectedDate);
+    }
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString(language, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const handleSubmit = async () => {
+    // Validation
+    if (!startDate || !endDate || !securityDeposit) {
+      Alert.alert(t('error', { ns: 'common' }), t('fillAllFields', { ns: 'propertyDetails' }));
+      return;
+    }
+
+    if (endDate <= startDate) {
+      Alert.alert(
+        t('error', { ns: 'common' }),
+        t('endDateMustBeAfterStartDate', { ns: 'contracts' }),
+      );
+      return;
+    }
+
+    const depositAmount = parseFloat(securityDeposit);
+    if (isNaN(depositAmount) || depositAmount <= 0) {
+      Alert.alert(t('error', { ns: 'common' }), t('invalidSecurityDeposit', { ns: 'contracts' }));
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Create the contract
+      const contract = await mockApi.createContract({
+        propertyId: propertyId as string,
+        renterId: renterId as string,
+        landlordId: user?.id as string,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        securityDeposit: depositAmount,
+        rentAmount: property.price,
+        currency: property.currency,
+        additionalTerms: additionalTerms,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      });
+
+      // If this contract is created from a rent request, update the request
+      if (requestId) {
+        await mockApi.updateRentRequest(requestId as string, {
+          status: 'accepted',
+          contractId: contract.id,
+          responseDate: new Date().toISOString(),
+        });
+      }
+
+      setShowSuccess(true);
+
+      // Navigate after showing success animation
+      setTimeout(() => {
+        if (requestId) {
+          router.replace('/rental-requests');
+        } else {
+          router.replace('/contracts');
+        }
+      }, 2500);
+    } catch (error) {
+      console.error('Error creating contract:', error);
+      Alert.alert(t('error', { ns: 'common' }), t('errorCreatingContract', { ns: 'contracts' }));
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <Loader size={120} />
+      </SafeAreaView>
+    );
   }
-  
-  interface TouchableOpacityProps {
-    disabled?: boolean;
+
+  if (showSuccess) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <SuccessAnimation message={t('contractCreated', { ns: 'contracts' })} size={150} />
+      </SafeAreaView>
+    );
   }
+
+  if (!property || !renter) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.errorText}>{t('errorLoadingData', { ns: 'propertyDetails' })}</Text>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        style={[styles.scrollView, isRTL && styles.rtlContainer]}
+        contentContainerStyle={styles.contentContainer}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={[styles.backButton, isRTL ? styles.backButtonRTL : styles.backButtonLTR]}
+            onPress={() => router.back()}
+          >
+            <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{t('createContract', { ns: 'contracts' })}</Text>
+        </View>
+
+        {/* Property Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('propertyDetails', { ns: 'contracts' })}</Text>
+          <View style={styles.detailCard}>
+            <Text style={styles.propertyTitle}>{property.title}</Text>
+            <Text style={styles.propertyDetail}>
+              {property.location.area}, {property.location.city}
+            </Text>
+            <View style={styles.propertyFeatures}>
+              <Text style={styles.propertyDetail}>
+                {property.features.bedrooms} {t('bed', { ns: 'property' })} •
+                {property.features.bathrooms} {t('bath', { ns: 'property' })} •
+                {property.features.size} m²
+              </Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.pricingDetail}>
+              <Text style={styles.detailLabel}>{t('rentAmount', { ns: 'contracts' })}</Text>
+              <Text style={styles.detailValue}>
+                {property.price} {property.currency}/{t('month', { ns: 'common' })}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Renter Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('renterInfo', { ns: 'propertyDetails' })}</Text>
+          <View style={styles.detailCard}>
+            <Text style={styles.renterName}>{renter.fullName}</Text>
+            <Text style={styles.renterDetail}>{renter.email}</Text>
+            <Text style={styles.renterDetail}>{renter.phoneNumber}</Text>
+          </View>
+        </View>
+
+        {/* Contract Details Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('contractDetails', { ns: 'contracts' })}</Text>
+          <View style={styles.formCard}>
+            {/* Start Date Field */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>{t('startDate', { ns: 'contracts' })}</Text>
+              <TouchableOpacity
+                style={styles.dateInput}
+                onPress={() => setShowStartDatePicker(true)}
+              >
+                <Text style={styles.dateText}>{formatDate(startDate)}</Text>
+                <Ionicons name="calendar-outline" size={20} color="#666" />
+              </TouchableOpacity>
+              {showStartDatePicker && (
+                <DateTimePicker
+                  value={startDate}
+                  mode="date"
+                  display="default"
+                  onChange={onStartDateChange}
+                  minimumDate={new Date()}
+                />
+              )}
+            </View>
+
+            {/* End Date Field */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>{t('endDate', { ns: 'contracts' })}</Text>
+              <TouchableOpacity style={styles.dateInput} onPress={() => setShowEndDatePicker(true)}>
+                <Text style={styles.dateText}>{formatDate(endDate)}</Text>
+                <Ionicons name="calendar-outline" size={20} color="#666" />
+              </TouchableOpacity>
+              {showEndDatePicker && (
+                <DateTimePicker
+                  value={endDate}
+                  mode="date"
+                  display="default"
+                  onChange={onEndDateChange}
+                  minimumDate={new Date(startDate.getTime() + 86400000)} // min is one day after start date
+                />
+              )}
+            </View>
+
+            {/* Security Deposit Field */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>{t('securityDeposit', { ns: 'contracts' })}</Text>
+              <View style={styles.currencyInput}>
+                <TextInput
+                  style={styles.depositInput}
+                  value={securityDeposit}
+                  onChangeText={setSecurityDeposit}
+                  keyboardType="numeric"
+                  placeholder={t('enterAmount', { ns: 'contracts' })}
+                />
+                <Text style={styles.currencyText}>{property.currency}</Text>
+              </View>
+            </View>
+
+            {/* Additional Terms Field */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>{t('additionalTerms', { ns: 'contracts' })}</Text>
+              <TextInput
+                style={styles.termsInput}
+                value={additionalTerms}
+                onChangeText={setAdditionalTerms}
+                multiline={true}
+                numberOfLines={4}
+                placeholder={t('additionalTermsPlaceholder', { ns: 'contracts' })}
+                textAlignVertical="top"
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Submit Button */}
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} disabled={submitting}>
+          {submitting ? (
+            <Loader size={24} />
+          ) : (
+            <Text style={styles.submitButtonText}>{t('createContract', { ns: 'contracts' })}</Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -28,27 +329,70 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F7FA',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F7FA',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  rtlContainer: {
+    direction: 'rtl',
+  },
+  contentContainer: {
+    paddingBottom: 40,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 50,
+  },
   header: {
     backgroundColor: '#34568B',
-    padding: 16,
-    paddingTop: 40,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
-    marginTop: 8,
+    paddingTop: 16,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    position: 'relative',
   },
   backButton: {
-    marginBottom: 8,
+    position: 'absolute',
+    top: 16,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
   },
-  backButtonText: {
-    color: 'white',
+  backButtonLTR: {
+    left: 16,
   },
-  card: {
-    backgroundColor: 'white',
-    margin: 16,
-    borderRadius: 8,
+  backButtonRTL: {
+    right: 16,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  section: {
+    marginTop: 16,
+    paddingHorizontal: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#34568B',
+  },
+  detailCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -56,330 +400,126 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-    color: '#2C3E50',
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    color: '#7F8C8D',
+  propertyTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
     marginBottom: 8,
   },
-  input: {
-    backgroundColor: '#F5F7FA',
-    padding: 12,
-    borderRadius: 8,
-    color: '#2C3E50',
-    fontSize: 16,
+  propertyDetail: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
   },
-  pickerContainer: {
-    backgroundColor: '#F5F7FA',
-    borderRadius: 8,
-    marginBottom: 16,
+  propertyFeatures: {
+    marginTop: 8,
   },
-  datePickerButton: {
-    backgroundColor: '#F5F7FA',
-    padding: 12,
-    borderRadius: 8,
+  divider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 12,
+  },
+  pricingDetail: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  dateText: {
-    color: '#2C3E50',
-    fontSize: 16,
+  detailLabel: {
+    fontSize: 14,
+    color: '#666',
   },
-  button: {
-    backgroundColor: '#34568B',
+  detailValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#34568B',
+  },
+  renterName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  renterDetail: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  formCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
     padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  buttonText: {
-    color: 'white',
+  formField: {
+    marginBottom: 16,
+  },
+  formLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 8,
   },
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
+  dateInput: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  dateText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  currencyInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+  },
+  depositInput: {
+    flex: 1,
+    fontSize: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  currencyText: {
+    fontSize: 16,
+    color: '#666',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#f0f0f0',
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+  termsInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    minHeight: 100,
+  },
+  submitButton: {
+    backgroundColor: '#34568B',
+    borderRadius: 8,
+    paddingVertical: 14,
+    marginHorizontal: 16,
+    marginTop: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
   },
 });
-
-export default function CreateContractScreen() {
-  const { t } = useTranslation();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [renters, setRenters] = useState<User[]>([]);
-  const [selectedProperty, setSelectedProperty] = useState<string>('');
-  const [selectedRenter, setSelectedRenter] = useState<string>('');
-  const [startDate, setStartDate] = useState<Date>(new Date());
-  const [endDate, setEndDate] = useState<Date>((() => {
-    const date = new Date();
-    date.setFullYear(date.getFullYear() + 1);
-    return date;
-  })());
-  const [securityDeposit, setSecurityDeposit] = useState<string>('');
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [propertiesData, rentersData] = await Promise.all([
-          api.properties.getByOwner((await api.users.getCurrentUser()).id),
-          api.users.getRenters(),
-        ]);
-        
-        // Filter to only available properties
-        const availableProperties = propertiesData.filter(p => p.status === 'available');
-        setProperties(availableProperties);
-        setRenters(rentersData);
-        
-        if (availableProperties.length > 0) {
-          setSelectedProperty(availableProperties[0].id);
-          setSecurityDeposit(availableProperties[0].price.toString());
-        }
-        
-        if (rentersData.length > 0) {
-          setSelectedRenter(rentersData[0].id);
-        }
-      } catch (error) {
-        console.error('Error loading data:', error);
-        Alert.alert(t('contracts.error'), t('contracts.errorLoadingData'));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [t]);
-
-  const handlePropertyChange = (propertyId: string) => {
-    setSelectedProperty(propertyId);
-    const property = properties.find(p => p.id === propertyId);
-    if (property) {
-      setSecurityDeposit(property.price.toString());
-    }
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const handleCreateContract = async () => {
-    if (!selectedProperty || !selectedRenter || !startDate || !endDate || !securityDeposit) {
-      Alert.alert(t('contracts.error'), t('contracts.fillAllFields'));
-      return;
-    }
-
-    if (startDate >= endDate) {
-      Alert.alert(t('contracts.error'), t('contracts.endDateMustBeAfterStartDate'));
-      return;
-    }
-
-    if (parseFloat(securityDeposit) <= 0) {
-      Alert.alert(t('contracts.error'), t('contracts.invalidSecurityDeposit'));
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      const result = await api.contracts.createContract({
-        propertyId: selectedProperty,
-        renterId: selectedRenter,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        status: 'pending',
-        securityDeposit: parseFloat(securityDeposit),
-        documents: {
-          signed: false
-        }
-      });
-
-      Alert.alert(
-        t('contracts.success'),
-        t('contracts.contractCreated'),
-        [
-          {
-            text: t('common.ok'),
-            onPress: () => router.push('/contracts'),
-          },
-        ]
-      );
-    } catch (error) {
-      console.error('Error creating contract:', error);
-      Alert.alert(t('contracts.error'), t('contracts.errorCreatingContract'));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#34568B" />
-      </View>
-    );
-  }
-
-  if (properties.length === 0) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 20 }]}>
-        <ThemedText style={{ textAlign: 'center', marginBottom: 16 }} children={t('contracts.noPropertiesAvailable')} />
-        <TouchableOpacity 
-          style={styles.button}
-          onPress={() => router.push('/properties')}
-        >
-          <ThemedText style={styles.buttonText} children={t('contracts.goToProperties')} />
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  return (
-    <RoleGuard allowedRoles={['landlord']} children={
-      <>
-        <StatusBar style="light" />
-        <ScrollView style={styles.container}>
-          <View style={styles.header}>
-            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-              <ThemedText style={styles.backButtonText} children={`← ${t('common.back')}`} />
-            </TouchableOpacity>
-            <ThemedText style={styles.headerTitle} children={t('contracts.createNew')} />
-          </View>
-
-          <View style={styles.card}>
-            <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle} children={t('contracts.propertyDetails')} />
-              
-              <View style={styles.inputContainer}>
-                <ThemedText style={styles.label} children={t('contracts.selectProperty')} />
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={selectedProperty}
-                    onValueChange={(itemValue) => handlePropertyChange(itemValue)}
-                  >
-                    {properties.map((property) => (
-                      <Picker.Item 
-                        label={`${property.title} - ${property.price} ${property.currency}/month`} 
-                        value={property.id} 
-                      />
-                    ))}
-                  </Picker>
-                </View>
-              </View>
-
-              <View style={styles.inputContainer}>
-                <ThemedText style={styles.label} children={t('contracts.selectRenter')} />
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={selectedRenter}
-                    onValueChange={(itemValue) => setSelectedRenter(itemValue)}
-                  >
-                    {renters.map((renter) => (
-                      <Picker.Item 
-                        label={renter.fullName} 
-                        value={renter.id} 
-                      />
-                    ))}
-                  </Picker>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle} children={t('contracts.contractTerms')} />
-              
-              <View style={styles.inputContainer}>
-                <ThemedText style={styles.label} children={t('contracts.startDate')} />
-                <TouchableOpacity 
-                  style={styles.datePickerButton}
-                  onPress={() => setShowStartDatePicker(true)}
-                >
-                  <ThemedText style={styles.dateText} children={formatDate(startDate)} />
-                </TouchableOpacity>
-                {showStartDatePicker && (
-                  <DateTimePicker
-                    value={startDate}
-                    mode="date"
-                    display="default"
-                    onChange={(event, selectedDate) => {
-                      setShowStartDatePicker(Platform.OS === 'ios');
-                      if (selectedDate) {
-                        setStartDate(selectedDate);
-                      }
-                    }}
-                    minimumDate={new Date()}
-                  />
-                )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <ThemedText style={styles.label} children={t('contracts.endDate')} />
-                <TouchableOpacity 
-                  style={styles.datePickerButton}
-                  onPress={() => setShowEndDatePicker(true)}
-                >
-                  <ThemedText style={styles.dateText} children={formatDate(endDate)} />
-                </TouchableOpacity>
-                {showEndDatePicker && (
-                  <DateTimePicker
-                    value={endDate}
-                    mode="date"
-                    display="default"
-                    onChange={(event, selectedDate) => {
-                      setShowEndDatePicker(Platform.OS === 'ios');
-                      if (selectedDate) {
-                        setEndDate(selectedDate);
-                      }
-                    }}
-                    minimumDate={new Date(startDate.getTime() + 86400000)} // 1 day after start date
-                  />
-                )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <ThemedText style={styles.label} children={t('contracts.securityDeposit')} />
-                <TextInput
-                  style={styles.input}
-                  value={securityDeposit}
-                  onChangeText={setSecurityDeposit}
-                  keyboardType={"numeric" as any}
-                  placeholder={t('contracts.enterAmount')}
-                />
-              </View>
-            </View>
-
-            <TouchableOpacity 
-              style={styles.button}
-              onPress={handleCreateContract}
-              disabled={submitting as any}
-            >
-              {submitting ? (
-                <ActivityIndicator color="white" size="small" />
-              ) : (
-                <ThemedText style={styles.buttonText} children={t('contracts.createContract')} />
-              )}
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </>
-    } />
-  );
-} 

@@ -14,22 +14,15 @@ type ThemedIconProps = {
   style?: any;
 };
 
-export function ThemedIcon({ 
-  name, 
-  size = 24, 
-  lightColor, 
-  darkColor, 
+export function ThemedIcon({
+  name,
+  size = 24,
+  lightColor,
+  darkColor,
   colorName = 'text',
-  style 
+  style,
 }: ThemedIconProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, colorName);
 
-  return (
-    <MaterialIcons
-      name={name}
-      size={size}
-      color={color}
-      style={style}
-    />
-  );
-} 
+  return <MaterialIcons name={name} size={size} color={color} style={style} />;
+}

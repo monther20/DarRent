@@ -1,33 +1,86 @@
-import React from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, ScrollView, StyleSheet } from 'react-native';
 import { Text } from '@/components/Text';
-import Colors from '@/constants/Colors';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { ScreenHeader } from '@/components/ScreenHeader';
+import { MaintenanceCard } from '@/app/components/maintenance/MaintenanceCard';
+import { useTranslation } from 'react-i18next';
+import { mockApi } from '@/app/services/mockApi';
+import { MaintenanceRequest } from '@/services/mockData';
+import { useRouter } from 'expo-router';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function MaintenanceScreen() {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const [activeRequests, setActiveRequests] = useState<MaintenanceRequest[]>([]);
+  const [pastRequests, setPastRequests] = useState<MaintenanceRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const renterId = 'user3'; // This should come from your auth context
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const [active, past] = await Promise.all([
+          mockApi.getActiveMaintenanceRequests(renterId),
+          mockApi.getPastMaintenanceRequests(renterId),
+        ]);
+        setActiveRequests(active);
+        setPastRequests(past);
+      } catch (error) {
+        console.error('Error fetching maintenance requests:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequests();
+  }, [renterId]);
+
+  const handleRequestPress = (id: string) => {
+    router.push(`/maintenance/${id}`);
+  };
+
+  const handleCreateRequest = () => {
+    router.push('/maintenance/new');
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ScreenHeader title={t('title')} />
+        <View style={styles.loadingContainer}>
+          <Text>{t('loading', { ns: 'common' })}</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Maintenance</Text>
-        <TouchableOpacity style={styles.addButton}>
-          <FontAwesome name="plus" size={20} color="#fff" />
-          <Text style={styles.addButtonText}>New Request</Text>
-        </TouchableOpacity>
-      </View>
+      <ScreenHeader title={t('title')} />
 
       <View style={styles.content}>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Active Requests</Text>
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>No active maintenance requests</Text>
-          </View>
+        <TouchableOpacity style={styles.createButton} onPress={handleCreateRequest}>
+          <Ionicons name="add-circle-outline" size={24} color="white" />
+          <Text style={styles.createButtonText}>{t('createRequest')}</Text>
+        </TouchableOpacity>
+
+        <View style={styles.marginTop}>
+          <MaintenanceCard
+            title={t('activeRequests')}
+            requests={activeRequests}
+            onPress={handleRequestPress}
+          />
         </View>
 
-        <View style={[styles.card, styles.marginTop]}>
-          <Text style={styles.cardTitle}>Past Requests</Text>
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>No past maintenance requests</Text>
-          </View>
+        <View style={styles.marginTop}>
+          <MaintenanceCard
+            title={t('pastRequests')}
+            requests={pastRequests}
+            onPress={handleRequestPress}
+          />
         </View>
       </View>
     </ScrollView>
@@ -39,37 +92,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F7FA',
   },
-  header: {
-    backgroundColor: Colors.light.primary,
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.light.secondary,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  addButtonText: {
-    color: '#fff',
-    marginLeft: 8,
-  },
   content: {
     padding: 16,
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
+  marginTop: {
+    marginTop: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  createButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4CAF50',
+    paddingVertical: 16,
+    borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -79,21 +119,10 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  marginTop: {
-    marginTop: 16,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-    color: Colors.light.text,
-  },
-  emptyState: {
-    alignItems: 'center',
-    padding: 32,
-  },
-  emptyStateText: {
+  createButtonText: {
+    color: 'white',
+    marginLeft: 8,
     fontSize: 16,
-    color: Colors.light.grey,
+    fontWeight: '600',
   },
-}); 
+});
