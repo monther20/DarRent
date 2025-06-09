@@ -1,23 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-// import { supabase } from '../lib/supabase';
-import { Session, User } from '@supabase/supabase-js';
-import { mockAuth } from '../services/mockAuth.service';
-import { mockUsers } from '../services/mockData';
-
-// Extend the User type to include role
-interface ExtendedUser extends User {
-  role?: 'landlord' | 'renter' | 'unknown';
-}
-
-type AuthContextType = {
-  user: ExtendedUser | null;
-  session: Session | null;
-  isLoading: boolean;
-  isLoggedIn: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, metadata: any) => Promise<{ error: any }>;
-  signOut: () => Promise<void>;
-};
+import { supabase } from '../lib/supabase';
+import { Session, AuthError } from '@supabase/supabase-js';
+import { ExtendedUser, AuthContextType } from '../types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -26,38 +10,98 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Get initial session
-    mockAuth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session);
-      setSession(session);
+  // Fetch user profile data using the custom function
+  const fetchUserProfile = async (userId: string, userEmail: string): Promise<ExtendedUser | null> => {
+    try {
+      // Use the custom function to get complete user profile with role data
+      const { data: profileData, error } = await supabase.rpc('get_user_profile', {
+        user_uuid: userId
+      });
 
-      const userEmail = session?.user?.email;
-      if (session?.user && userEmail) {
-        // Find the user in mock data to get their role
-        const mockUser = mockUsers.find((u) => u.email.toLowerCase() === userEmail.toLowerCase());
-        if (mockUser) {
-          console.log('Found user in mock data during init:', mockUser.fullName, mockUser.role);
-          // Create an extended user with role
-          const extendedUser = {
-            ...session.user,
-            role: mockUser.role,
-          } as ExtendedUser;
-          setUser(extendedUser);
-        } else {
-          setUser(session.user as ExtendedUser);
-        }
-      } else {
-        setUser(null);
+      if (error) {
+        console.warn('Profile not found, user may be newly created:', error.message);
+        // Fallback to auth metadata
+        const { data: { user } } = await supabase.auth.getUser();
+        const role = user?.user_metadata?.role || 'unknown';
+
+        return {
+          id: userId,
+          email: userEmail,
+          role: role,
+        } as ExtendedUser;
       }
 
-      setIsLoading(false);
-    });
+      if (!profileData) {
+        console.warn('No profile data returned');
+        return {
+          id: userId,
+          email: userEmail,
+          role: 'unknown',
+        } as ExtendedUser;
+      }
 
-    // Since we're using mock auth, we don't need real-time auth state changes
-    // but we'll keep the structure similar for easy switching back later
+      // Extract user data from the response
+      const userData = profileData.user;
+      const userRole = profileData.role;
+
+      return {
+        id: userId,
+        email: userEmail,
+        role: userRole,
+        full_name: userData.full_name_en,
+        phone: userData.phone,
+        profile_picture: userData.profile_picture,
+        // Include role-specific data
+        roleData: profileData.role_data,
+      } as ExtendedUser;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      return null;
+    }
+  };
+
+  // Handle auth state changes
+  const handleAuthStateChange = async (event: string, session: Session | null) => {
+    console.log('Auth state changed:', event, session?.user?.email);
+
+    setSession(session);
+
+    if (session?.user) {
+      const extendedUser = await fetchUserProfile(session.user.id, session.user.email || '');
+      setUser(extendedUser);
+    } else {
+      setUser(null);
+    }
+
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    // Get initial session
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error('Error getting initial session:', error);
+          setIsLoading(false);
+          return;
+        }
+
+        await handleAuthStateChange('INITIAL_SESSION', session);
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
+
     return () => {
-      // No cleanup needed for mock
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -65,14 +109,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Attempting to sign in with:', { email });
 
-      const { data, error } = await mockAuth.signIn(email, password);
-
-      console.log('Mock auth sign in response:', {
-        data: {
-          user: data?.user,
-          session: data?.session,
-        },
-        error,
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.toLowerCase().trim(),
+        password,
       });
 
       if (error) {
@@ -80,26 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error };
       }
 
-      // Update local state
-      setSession(data.session);
-
-      // Add additional user data from mock users
-      if (data.user) {
-        const mockUser = mockUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
-        if (mockUser) {
-          console.log('Found matching mock user:', mockUser.fullName, mockUser.role);
-          // Augment the user object with role information
-          const extendedUser = {
-            ...data.user,
-            role: mockUser.role,
-            fullName: mockUser.fullName,
-          } as ExtendedUser;
-          setUser(extendedUser);
-        } else {
-          setUser(data.user as ExtendedUser);
-        }
-      }
-
+      console.log('Successfully signed in:', data.user?.email);
       return { error: null };
     } catch (error: any) {
       console.error('Sign in error:', error);
@@ -109,45 +129,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, metadata: any) => {
     try {
-      console.log('Attempting to sign up with:', { email, metadata });
+      console.log('Attempting to sign up with:', {
+        email,
+        metadata: JSON.stringify(metadata, null, 2),
+        supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL?.substring(0, 20) + '...',
+        hasAnonKey: !!process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+      });
 
-      // For mock purposes, we'll just sign in since we don't handle registration
-      // In a real implementation, you'd add the user to your mock data
-      const { data, error } = await mockAuth.signIn(email, password);
+      // Validate environment variables
+      if (!process.env.EXPO_PUBLIC_SUPABASE_URL) {
+        throw new Error('EXPO_PUBLIC_SUPABASE_URL is not configured');
+      }
+      if (!process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY) {
+        throw new Error('EXPO_PUBLIC_SUPABASE_ANON_KEY is not configured');
+      }
 
-      console.log('Mock sign up response:', {
-        data: {
-          user: data?.user,
-          session: data?.session,
+      // Clean up metadata to ensure it's JSON serializable
+      const cleanMetadata = {
+        full_name: metadata.full_name,
+        role: metadata.role,
+        phone: metadata.phone,
+        fullNameAr: metadata.fullNameAr,
+        ...(metadata.role === 'landlord' && {
+          companyName: metadata.companyName,
+          licenseNumber: metadata.licenseNumber,
+          bankAccountDetails: metadata.bankAccountDetails,
+          propertyAddress: metadata.propertyAddress,
+        }),
+        ...(metadata.role === 'renter' && {
+          preferredLocationEn: metadata.preferredLocationEn,
+          preferredLocationAr: metadata.preferredLocationAr,
+          budget: metadata.budget,
+          desiredMoveInDate: metadata.desiredMoveInDate,
+        }),
+      };
+
+      console.log('Cleaned metadata:', JSON.stringify(cleanMetadata, null, 2));
+
+      const { data, error } = await supabase.auth.signUp({
+        email: email.toLowerCase().trim(),
+        password,
+        options: {
+          data: cleanMetadata,
         },
-        error,
       });
 
       if (error) {
         console.error('Sign up error:', error);
+        console.error('Error details:', {
+          name: error.name,
+          message: error.message,
+          status: error.status || 'unknown',
+        });
         return { error };
       }
 
-      // Update local state
-      setSession(data.session);
+      // User profile creation is handled by Supabase trigger function
+      // The trigger automatically inserts into public.users table using raw_user_meta_data
+      console.log('User profile will be created automatically by Supabase trigger');
 
-      // Add additional user data from mock users
-      if (data.user) {
-        const mockUser = mockUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
-        if (mockUser) {
-          console.log('Found matching mock user:', mockUser.fullName, mockUser.role);
-          // Augment the user object with role information
-          const extendedUser = {
-            ...data.user,
-            role: mockUser.role,
-            fullName: mockUser.fullName,
-          } as ExtendedUser;
-          setUser(extendedUser);
-        } else {
-          setUser(data.user as ExtendedUser);
-        }
-      }
-
+      console.log('Successfully signed up:', data.user?.email);
       return { error: null };
     } catch (error: any) {
       console.error('Sign up error:', error);
@@ -159,16 +200,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Attempting to sign out');
 
-      const { error } = await mockAuth.signOut();
-      if (error) throw error;
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error('Sign out error:', error);
+        return { error };
+      }
 
       console.log('Successfully signed out');
-
-      // Clear local state
-      setSession(null);
-      setUser(null);
-    } catch (error) {
+      return { error: null };
+    } catch (error: any) {
       console.error('Error signing out:', error);
+      return { error };
+    }
+  };
+
+  const refreshSession = async () => {
+    try {
+      const { data, error } = await supabase.auth.refreshSession();
+
+      if (error) {
+        console.error('Error refreshing session:', error);
+        return;
+      }
+
+      console.log('Session refreshed successfully');
+    } catch (error) {
+      console.error('Error refreshing session:', error);
     }
   };
 
@@ -180,6 +238,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signUp,
     signOut,
+    refreshSession,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

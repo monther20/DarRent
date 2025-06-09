@@ -88,23 +88,43 @@ export function RegisterForm() {
         userData.desiredMoveInDate = desiredMoveInDate; // Add new renter field
       }
 
-      // The actual call to Supabase Auth and then to the Edge Function will be handled by `register` in AuthContext
+      // Call signUp from AuthContext with the correct parameters
+      const { signUp } = auth;
 
-      // Get the auth object ONCE for this submission attempt from the top-level 'auth' const
-      const authForSubmit = auth;
-      console.log('Auth object for this submit call:', JSON.stringify(authForSubmit, null, 2));
-
-      // Check if register exists on this specific authForSubmit object
-      if (!authForSubmit || typeof authForSubmit.register !== 'function') {
-        // Log the object again if the check fails, to be absolutely sure what was checked
-        console.error("Register function is undefined on authForSubmit!", authForSubmit);
+      if (!signUp || typeof signUp !== 'function') {
+        console.error("SignUp function is undefined on auth context!", auth);
         setError("Registration service is currently unavailable. Please try again later or contact support.");
         setLoading(false);
-        return; // Stop execution
+        return;
       }
 
-      // Call register from the authForSubmit object
-      const { success, error: registrationError, user } = await authForSubmit.register(userData);
+      // Create metadata object that matches your database structure
+      const metadata = {
+        // Main user data for users table
+        full_name_en: fullName,
+        full_name_ar: fullNameAr,
+        phone: phoneNumber,
+        role: role,
+
+        // Role-specific data
+        ...(role === 'landlord' && {
+          // Landlord-specific data for landlords table
+          bank_account: bankAccountDetails,
+          company_name: companyName,
+          license_number: licenseNumber,
+          property_address: propertyAddress,
+        }),
+        ...(role === 'renter' && {
+          // Renter-specific data for renters table
+          preferred_location_en: preferredLocationEn,
+          preferred_location_ar: preferredLocationAr,
+          budget: budget ? parseFloat(budget) : null,
+          desired_move_in_date: desiredMoveInDate,
+        }),
+      };
+
+      // Call signUp from AuthContext
+      const { error: registrationError } = await signUp(email, password, metadata);
 
       if (registrationError) {
         const message = registrationError.message || "An unknown error occurred during registration.";
@@ -113,10 +133,12 @@ export function RegisterForm() {
         return;
       }
 
-      if (success) {
-        // Navigation might depend on whether email confirmation is required
-        // For now, assuming direct login or navigation to a "check your email" page
-        router.replace('/(tabs)'); // Or a more appropriate post-registration page
+      // Registration successful - user will be redirected by AuthContext state changes
+      // For now, redirect to appropriate screen based on role
+      if (role === 'landlord') {
+        router.replace('/(landlord-tabs)');
+      } else {
+        router.replace('/(renter-tabs)');
       }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred.');
@@ -245,8 +267,8 @@ export function RegisterForm() {
             placeholder="YYYY-MM-DD"
             value={desiredMoveInDate}
             onChangeText={setDesiredMoveInDate}
-            // For a better UX, consider using a DateTimePicker component here
-            // e.g., @react-native-community/datetimepicker
+          // For a better UX, consider using a DateTimePicker component here
+          // e.g., @react-native-community/datetimepicker
           />
         </>
       )}

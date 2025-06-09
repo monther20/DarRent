@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { mockUsers } from '../services/mockData';
+import { authService } from '../services/auth.service';
 
 export function useMockUserData() {
   const { user, session } = useAuth();
@@ -20,30 +20,38 @@ export function useMockUserData() {
 
       try {
         console.log('Fetching user data for', user.email);
-        // In a real app, we would fetch this from an API
-        // For now, we'll use our mock data
-        const mockUser = mockUsers.find((u) => u.id === user.id || u.email === user.email);
 
-        if (mockUser) {
-          console.log('Found user in mock data:', mockUser.role, mockUser.fullName);
-          setUserRole(mockUser.role);
-          setUserData(mockUser);
+        // Fetch user profile from Supabase profiles table
+        const { data: profile, error } = await authService.getUserProfile(user.id);
+
+        if (profile) {
+          console.log('Found user profile:', profile.role, profile.full_name);
+          setUserRole(profile.role || 'unknown');
+          setUserData(profile);
         } else {
-          // Check localStorage for a saved dynamic role
-          let dynamicRole: 'landlord' | 'renter' | 'unknown' = 'unknown';
+          // Check for saved role in localStorage as fallback for development
+          let dynamicRole: 'landlord' | 'renter' | 'unknown' = user.role || 'unknown';
+
           if (typeof localStorage !== 'undefined' && user.email) {
             const savedRole = localStorage.getItem(`userRole:${user.email}`);
             if (savedRole === 'landlord' || savedRole === 'renter') {
               dynamicRole = savedRole;
             }
           }
-          console.log('User not found in mock data, using dynamic role:', dynamicRole);
+
+          console.log('User profile not found, using fallback role:', dynamicRole);
           setUserRole(dynamicRole);
-          setUserData({ ...user, role: dynamicRole });
+          setUserData({
+            id: user.id,
+            email: user.email,
+            full_name: user.full_name,
+            role: dynamicRole
+          });
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
         setUserRole('unknown');
+        setUserData(null);
       } finally {
         setIsLoading(false);
       }

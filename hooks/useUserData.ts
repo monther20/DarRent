@@ -7,7 +7,7 @@ import {
   UserRole,
 } from '../services/api.service';
 import { useAuth } from '../contexts/AuthContext';
-import { mockUsers } from '../services/mockData';
+import { authService } from '../services/auth.service';
 
 export function useUserData() {
   const { user, session } = useAuth();
@@ -25,20 +25,36 @@ export function useUserData() {
       }
 
       try {
-        // In a real app, we would fetch this from an API
-        // For now, we'll use our mock data
-        const mockUser = mockUsers.find((u) => u.id === user.id || u.email === user.email);
+        // Fetch user profile from Supabase profiles table
+        const { data: profile, error } = await authService.getUserProfile(user.id);
 
-        if (mockUser) {
-          setUserRole(mockUser.role);
-          setUserData(mockUser);
+        if (error) {
+          console.warn('Profile not found, user may need to complete profile setup:', error);
+          // Use basic user info from auth
+          setUserRole(user.role || 'unknown');
+          setUserData({
+            id: user.id,
+            email: user.email,
+            full_name: user.full_name,
+            role: user.role || 'unknown',
+          });
+        } else if (profile) {
+          setUserRole(profile.role || 'unknown');
+          setUserData(profile);
         } else {
-          // If user exists in auth but not in our data, default to unknown
-          setUserRole('unknown');
+          // Fallback to user auth data
+          setUserRole(user.role || 'unknown');
+          setUserData({
+            id: user.id,
+            email: user.email,
+            full_name: user.full_name,
+            role: user.role || 'unknown',
+          });
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
         setUserRole('unknown');
+        setUserData(null);
       } finally {
         setIsLoading(false);
       }
@@ -49,29 +65,28 @@ export function useUserData() {
 
   // Update user basic info
   const updateUserInfo = async (updates: {
-    full_name_en?: string;
-    full_name_ar?: string;
+    full_name?: string;
     phone?: string;
     profile_picture?: string;
   }) => {
     try {
       setIsLoading(true);
-      const { data, error } = await ApiService.updateUserInfo(updates);
+
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Update user profile using auth service
+      const { data, error } = await authService.updateUserProfile(user.id, updates);
 
       if (error) throw error;
 
-      // Refresh complete profile after update
-      const { data: updatedProfile, error: profileError } =
-        await ApiService.getCompleteUserProfile();
+      // Update local state
+      setUserData((prev: any) => ({ ...prev, ...updates }));
 
-      if (profileError) throw profileError;
-
-      setUserData(updatedProfile);
       return { data, error: null };
     } catch (err: any) {
       console.error('Error updating user info:', err);
-      setUserData(null);
-      setUserRole('unknown');
       return { data: null, error: err };
     } finally {
       setIsLoading(false);
@@ -82,23 +97,28 @@ export function useUserData() {
   const updateLandlordProfile = async (updates: Partial<LandlordProfile>) => {
     try {
       setIsLoading(true);
-      const { data, error } = await ApiService.updateLandlordProfile(updates);
+
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Update role to landlord and other profile data
+      const profileUpdates = {
+        ...updates,
+        role: 'landlord' as const,
+      };
+
+      const { data, error } = await authService.updateUserProfile(user.id, profileUpdates);
 
       if (error) throw error;
 
-      // Refresh complete profile after update
-      const { data: updatedProfile, error: profileError } =
-        await ApiService.getCompleteUserProfile();
-
-      if (profileError) throw profileError;
-
+      // Update local state
       setUserRole('landlord');
-      setUserData(updatedProfile);
+      setUserData((prev: any) => ({ ...prev, ...profileUpdates }));
+
       return { data, error: null };
     } catch (err: any) {
       console.error('Error updating landlord profile:', err);
-      setUserData(null);
-      setUserRole('unknown');
       return { data: null, error: err };
     } finally {
       setIsLoading(false);
@@ -109,23 +129,28 @@ export function useUserData() {
   const updateRenterProfile = async (updates: Partial<RenterProfile>) => {
     try {
       setIsLoading(true);
-      const { data, error } = await ApiService.updateRenterProfile(updates);
+
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Update role to renter and other profile data
+      const profileUpdates = {
+        ...updates,
+        role: 'renter' as const,
+      };
+
+      const { data, error } = await authService.updateUserProfile(user.id, profileUpdates);
 
       if (error) throw error;
 
-      // Refresh complete profile after update
-      const { data: updatedProfile, error: profileError } =
-        await ApiService.getCompleteUserProfile();
-
-      if (profileError) throw profileError;
-
+      // Update local state
       setUserRole('renter');
-      setUserData(updatedProfile);
+      setUserData((prev: any) => ({ ...prev, ...profileUpdates }));
+
       return { data, error: null };
     } catch (err: any) {
       console.error('Error updating renter profile:', err);
-      setUserData(null);
-      setUserRole('unknown');
       return { data: null, error: err };
     } finally {
       setIsLoading(false);
